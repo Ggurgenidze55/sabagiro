@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = { title: 'Users — Admin' };
 
 export default async function AdminUsersPage() {

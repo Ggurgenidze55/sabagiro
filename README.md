@@ -67,7 +67,7 @@ npm run dev
 
 3. [vercel.com/new](https://vercel.com/new) → Import that repo.
 4. Framework: **Next.js** (auto-detected). Root directory: `.` (repo root).
-5. Add **Environment Variables** (from `.env.example`):
+5. Add **Environment Variables** (see **[docs/VERCEL.md](docs/VERCEL.md)** — `DATABASE_URL` is **required at build time**):
    - `DATABASE_URL` — Railway/Neon Postgres
    - `AUTH_SECRET`
    - `APP_URL` + `NEXT_PUBLIC_APP_URL` — your Vercel URL
