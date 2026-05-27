@@ -1,13 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
-import { formatGel } from '@/lib/products';
+import { formatGel, getProduct } from '@/lib/products';
 
 export function CartView() {
+  const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setLines(readCart());
@@ -25,6 +29,41 @@ export function CartView() {
   function clearCart() {
     writeCart([]);
     setLines([]);
+  }
+
+  async function checkout() {
+    setError('');
+    setCheckingOut(true);
+    const ticketItems = lines
+      .filter((line) => getProduct(line.slug)?.type === 'ticket')
+      .map((line) => ({ slug: line.slug, qty: line.qty }));
+
+    if (ticketItems.length === 0) {
+      setError('Only event tickets can be purchased here. Remove merch or add tickets.');
+      setCheckingOut(false);
+      return;
+    }
+
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: ticketItems }),
+    });
+    const data = await res.json();
+    setCheckingOut(false);
+
+    if (res.status === 401) {
+      router.push('/login?next=/cart');
+      return;
+    }
+    if (!res.ok) {
+      setError(data.error || 'Checkout failed');
+      return;
+    }
+
+    clearCart();
+    router.push('/account');
+    router.refresh();
   }
 
   const total = cartTotal(lines);
@@ -82,8 +121,8 @@ export function CartView() {
       </table>
       <div className="cart-actions">
         <p className="cart-total">Total {formatGel(total)}</p>
-        <button type="button" className="btn" disabled title="Connect payment provider in production">
-          CHECKOUT (SOON)
+        <button type="button" className="btn" onClick={checkout} disabled={checkingOut}>
+          {checkingOut ? 'PROCESSING…' : 'BUY TICKETS'}
         </button>
         <button type="button" className="btn btn--ghost" onClick={clearCart}>
           Clear
@@ -92,8 +131,9 @@ export function CartView() {
           Continue shopping
         </Link>
       </div>
+      {error ? <p className="form-error" style={{ marginTop: '1rem' }}>{error}</p> : null}
       <p className="page-lead" style={{ marginTop: '1.5rem' }}>
-        Checkout will connect to your payment provider (e.g. LariPay, Stripe). Configure in .env when ready.
+        Log in to complete purchase. QR ticket is emailed and shown in your account.
       </p>
     </>
   );

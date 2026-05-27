@@ -35,6 +35,12 @@ export function SiteChrome({ children, current }: SiteChromeProps) {
                 Cart
               </Link>
             </li>
+            <li>
+              <Link href="/account">Account</Link>
+            </li>
+            <li>
+              <Link href="/login">Log in</Link>
+            </li>
           </ul>
         </nav>
       </header>

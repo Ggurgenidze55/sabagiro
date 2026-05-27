@@ -6,22 +6,39 @@ Standalone site for **Sabagiro** underground club — homepage, shop (tickets + 
 
 ## Stack
 
-- Next.js 14 (App Router)
-- Static homepage (`public/index.html` — brutalist fullscreen)
-- `/shop` — product catalog
-- `/cart` — browser localStorage cart (checkout placeholder)
+- Next.js 14 (App Router) + PostgreSQL (Prisma)
+- Static homepage (`public/index.html`)
+- **User:** register, buy tickets, QR in account + email, profile/settings
+- **Admin:** users, sold tickets, manual ticket + QR generation
+- **Scan:** `/scan/{token}` — shows holder name, ID, email, phone
+
+## Setup (first time)
+
+```bash
+cd ~/Desktop/sabagiro
+cp .env.example .env.local
+# Edit DATABASE_URL + AUTH_SECRET + APP_URL
+npm install
+npm run db:push
+npm run seed:admin
+npm run dev
+```
+
+| URL | Role |
+|-----|------|
+| `/` | Homepage |
+| `/shop` `/cart` | Tickets |
+| `/register` `/login` | Auth |
+| `/account` | User dashboard + QR tickets |
+| `/account/settings` | Email, phone, password |
+| `/admin` | Admin dashboard |
+| `/scan/...` | QR scan (door) |
 
 ## Local dev
 
 ```bash
-cd ~/Desktop/sabagiro
-npm install
 npm run dev
 ```
-
-- Home: http://localhost:3000/
-- Shop: http://localhost:3000/shop
-- Cart: http://localhost:3000/cart
 
 ## Deploy on Vercel (recommended)
 
@@ -39,9 +56,17 @@ npm run dev
 
 3. [vercel.com/new](https://vercel.com/new) → Import that repo.
 4. Framework: **Next.js** (auto-detected). Root directory: `.` (repo root).
-5. Deploy. No env vars required for the current version.
+5. Add **Environment Variables** (from `.env.example`):
+   - `DATABASE_URL` — Railway/Neon Postgres
+   - `AUTH_SECRET`
+   - `APP_URL` + `NEXT_PUBLIC_APP_URL` — your Vercel URL
+   - `RESEND_API_KEY` + `EMAIL_FROM` (optional, for ticket emails)
+6. Deploy, then run locally once against production DB:
+   ```bash
+   npm run seed:admin
+   ```
 
-Optional alias: `sabagiro.vercel.app` or your custom domain.
+Optional alias: custom domain.
 
 ## Deploy on Railway (optional)
 
@@ -59,12 +84,15 @@ Optional alias: `sabagiro.vercel.app` or your custom domain.
 | `public/club/sabagiro-location.png` | Location image |
 | `lib/products.ts` | Shop catalog (edit prices/events here) |
 
-## Payment (next step)
+## Ticket flow
 
-Cart **CHECKOUT** is a placeholder. To go live:
+1. User registers (name, surname, 11-digit personal ID, email, phone).
+2. Adds tickets in `/shop` → **BUY TICKETS** in cart (must be logged in).
+3. QR is created with holder data, shown in `/account`, emailed if Resend is set.
+4. Admin can generate tickets at `/admin/generate` with the same fields + instant QR.
+5. Scanning QR opens `/scan/{token}` with full holder details.
 
-1. Connect LariPay, Stripe, or BOG from `.env.example` variables.
-2. Implement `app/api/checkout/route.ts` and wire `CartView` button.
+Payment gateway (LariPay/Stripe) can be added later; checkout currently issues tickets directly.
 
 ## LariPay / Fintech Pay
 

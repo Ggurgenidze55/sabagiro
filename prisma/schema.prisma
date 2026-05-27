@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+}
+
+enum TicketSource {
+  PURCHASE
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String
+  passwordHash String
+  firstName    String
+  lastName     String
+  personalId   String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  tickets      Ticket[]
+}
+
+model Ticket {
+  id               String       @id @default(cuid())
+  qrToken          String       @unique
+  userId           String
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productSlug      String
+  productName      String
+  eventDate        String?
+  priceGel         Int
+  holderFirstName  String
+  holderLastName   String
+  holderPersonalId String
+  holderEmail      String
+  holderPhone      String
+  status           TicketStatus @default(VALID)
+  source           TicketSource
+  scannedAt        DateTime?
+  createdAt        DateTime     @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
