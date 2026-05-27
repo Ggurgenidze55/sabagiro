@@ -2,16 +2,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { SiteChrome } from '@/components/SiteChrome';
-import { formatGel, getProduct, listProducts } from '@/lib/products';
+import { formatGel, getProduct } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = { params: { slug: string } };
-
-export async function generateStaticParams() {
-  const products = await listProducts();
-  return products.map((p) => ({ slug: p.slug }));
-}
 
 export async function generateMetadata({ params }: PageProps) {
   const product = await getProduct(params.slug);
