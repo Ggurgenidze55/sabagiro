@@ -25,7 +25,7 @@ export async function createTicketForUser(opts: {
   source: TicketSource;
   holder?: Holder;
 }) {
-  const product = getProduct(opts.productSlug);
+  const product = await getProduct(opts.productSlug);
   if (!product || product.type !== 'ticket') {
     throw new Error('INVALID_PRODUCT');
   }

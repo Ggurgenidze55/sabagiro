@@ -1,15 +1,25 @@
 'use client';
 
-import { useState } from 'react';
-import { products } from '@/lib/products';
+import { useEffect, useState } from 'react';
 import { scanUrl } from '@/lib/qr';
 
-const ticketProducts = products.filter((p) => p.type === 'ticket');
+type EventOption = { slug: string; title: string };
 
 export function AdminGenerateForm() {
+  const [events, setEvents] = useState<EventOption[]>([]);
   const [error, setError] = useState('');
   const [result, setResult] = useState<{ qrToken: string; productName: string } | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/events')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.events) {
+          setEvents(d.events.map((e: { slug: string; title: string }) => ({ slug: e.slug, title: e.title })));
+        }
+      });
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,12 +47,16 @@ export function AdminGenerateForm() {
       <form className="form-stack" onSubmit={onSubmit}>
         <label className="form-field">
           <span>Event ticket</span>
-          <select name="productSlug" required defaultValue={ticketProducts[0]?.slug}>
-            {ticketProducts.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {p.name}
-              </option>
-            ))}
+          <select name="productSlug" required defaultValue={events[0]?.slug}>
+            {events.length === 0 ? (
+              <option value="">No events — create one in Events</option>
+            ) : (
+              events.map((p) => (
+                <option key={p.slug} value={p.slug}>
+                  {p.title}
+                </option>
+              ))
+            )}
           </select>
         </label>
         <label className="form-field">
@@ -66,7 +80,7 @@ export function AdminGenerateForm() {
           <input name="phone" required />
         </label>
         {error ? <p className="form-error">{error}</p> : null}
-        <button type="submit" className="btn">
+        <button type="submit" className="btn" disabled={events.length === 0}>
           GENERATE TICKET + QR
         </button>
       </form>

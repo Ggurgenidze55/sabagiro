@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     const tickets = [];
     for (const item of items) {
-      const product = getProduct(item.slug);
+      const product = await getProduct(item.slug);
       if (!product || product.type !== 'ticket') continue;
       for (let i = 0; i < item.qty; i++) {
         const ticket = await createTicketForUser({

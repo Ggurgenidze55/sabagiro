@@ -4,6 +4,7 @@ export type CartLine = {
   priceGel: number;
   qty: number;
   accent: string;
+  type: 'ticket' | 'merch';
 };
 
 export const CART_STORAGE_KEY = 'sabagiro-cart-v1';

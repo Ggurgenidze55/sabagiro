@@ -21,6 +21,7 @@ cp .env.example .env.local
 npm install
 npm run db:push
 npm run seed:admin
+npm run seed:events
 npm run dev
 ```
 
@@ -32,6 +33,7 @@ npm run dev
 | `/account` | User dashboard + QR tickets |
 | `/account/settings` | Email, phone, password |
 | `/admin` | Admin dashboard |
+| `/admin/events` | Create / manage homepage events |
 | `/scan/...` | QR scan (door) |
 
 ## Local dev

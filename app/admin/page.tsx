@@ -29,7 +29,10 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
       <div className="cart-actions" style={{ marginTop: '2rem' }}>
-        <Link href="/admin/generate" className="btn">
+        <Link href="/admin/events" className="btn">
+          MANAGE EVENTS
+        </Link>
+        <Link href="/admin/generate" className="btn btn--ghost">
           GENERATE TICKET
         </Link>
         <Link href="/admin/tickets" className="btn btn--ghost">

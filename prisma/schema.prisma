@@ -37,6 +37,31 @@ model User {
   tickets      Ticket[]
 }
 
+model ClubEvent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  lineup      String   @default("")
+  tag         String   @default("")
+  dayLabel    String
+  dateLabel   String
+  eventDate   String?
+  accent      String   @default("#c8ff00")
+  priceGel    Int      @default(45)
+  isFeatured  Boolean  @default(false)
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, sortOrder])
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+}
+
 model Ticket {
   id               String       @id @default(cuid())
   qrToken          String       @unique

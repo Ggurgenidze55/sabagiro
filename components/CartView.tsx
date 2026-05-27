@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
-import { formatGel, getProduct } from '@/lib/products';
+import { formatGel } from '@/lib/products';
 
 export function CartView() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export function CartView() {
     setError('');
     setCheckingOut(true);
     const ticketItems = lines
-      .filter((line) => getProduct(line.slug)?.type === 'ticket')
+      .filter((line) => line.type === 'ticket')
       .map((line) => ({ slug: line.slug, qty: line.qty }));
 
     if (ticketItems.length === 0) {

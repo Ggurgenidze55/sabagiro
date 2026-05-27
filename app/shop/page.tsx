@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { SiteChrome } from '@/components/SiteChrome';
-import { formatGel, products } from '@/lib/products';
+import { formatGel, listProducts } from '@/lib/products';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Shop — Sabagiro',
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await listProducts();
+
   return (
     <SiteChrome current="shop">
       <h1 className="page-title">SHOP</h1>

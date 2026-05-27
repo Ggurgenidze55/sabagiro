@@ -507,3 +507,41 @@ a {
   color: var(--concrete-light);
   margin-top: 0.15rem;
 }
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.form-stack--inline {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  max-width: 100%;
+}
+
+.admin-events__section {
+  margin-bottom: 2.5rem;
+}
+
+.table-sub {
+  opacity: 0.45;
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}

@@ -315,6 +315,15 @@
         background: rgba(176, 168, 154, 0.35);
       }
 
+      .events-loading,
+      .events-empty {
+        padding: 1.25rem 0.9rem;
+        font-size: 0.58rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        opacity: 0.45;
+      }
+
       .events-list > li {
         list-style: none;
       }
@@ -629,98 +638,11 @@
         <section class="events-panel" id="events" aria-labelledby="events-heading">
           <div class="events-header">
             <h2 class="events-label" id="events-heading">Upcoming events</h2>
-            <span class="events-season">Summer 2025</span>
+            <span class="events-season" id="events-season">Summer 2025</span>
           </div>
 
-          <ul class="events-list">
-            <li>
-              <a
-                href="/shop/concrete-opening-31-may"
-                class="event-item event-item--next hoverable"
-                style="--ev-accent: #c8ff00"
-              >
-                <div class="event-date">
-                  <span class="event-day">SAT</span>
-                  <span class="event-num">31 MAY</span>
-                </div>
-                <div>
-                  <p class="event-title">CONCRETE OPENING</p>
-                  <p class="event-lineup">NDRX · KIAI · LOCAL CREW</p>
-                  <p class="event-tag">Upper deck · Main room</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
-            <li>
-              <a href="/shop/skyline-ritual-07-jun" class="event-item hoverable" style="--ev-accent: #00f0ff">
-                <div class="event-date">
-                  <span class="event-day">FRI</span>
-                  <span class="event-num">07 JUN</span>
-                </div>
-                <div>
-                  <p class="event-title">SKYLINE RITUAL</p>
-                  <p class="event-lineup">VOID ECHO · MARTA K</p>
-                  <p class="event-tag">Spiral stairs · Live</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
-            <li>
-              <a href="/shop/forest-echo-14-jun" class="event-item hoverable" style="--ev-accent: #ff0044">
-                <div class="event-date">
-                  <span class="event-day">SAT</span>
-                  <span class="event-num">14 JUN</span>
-                </div>
-                <div>
-                  <p class="event-title">FOREST ECHO</p>
-                  <p class="event-lineup">DARK MATTER · ZURAB LIVE</p>
-                  <p class="event-tag">Open air · All night</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
-            <li>
-              <a href="/shop/guest-night-21-jun" class="event-item hoverable" style="--ev-accent: #f5ffe8">
-                <div class="event-date">
-                  <span class="event-day">FRI</span>
-                  <span class="event-num">21 JUN</span>
-                </div>
-                <div>
-                  <p class="event-title">GUEST NIGHT</p>
-                  <p class="event-lineup">INTL B2B · SURPRISE SET</p>
-                  <p class="event-tag">Warehouse · Special</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
-            <li>
-              <a href="/shop/acid-dawn-28-jun" class="event-item hoverable" style="--ev-accent: #cc00ff">
-                <div class="event-date">
-                  <span class="event-day">SAT</span>
-                  <span class="event-num">28 JUN</span>
-                </div>
-                <div>
-                  <p class="event-title">ACID DAWN</p>
-                  <p class="event-lineup">TBILISI ALLIANCE</p>
-                  <p class="event-tag">Sunrise session · Terrace</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
-            <li>
-              <a href="/shop/raw-frequency-04-jul" class="event-item hoverable" style="--ev-accent: #ff9900">
-                <div class="event-date">
-                  <span class="event-day">FRI</span>
-                  <span class="event-num">04 JUL</span>
-                </div>
-                <div>
-                  <p class="event-title">RAW FREQUENCY</p>
-                  <p class="event-lineup">INDUSTRIAL LINEUP TBA</p>
-                  <p class="event-tag">Basement · Heavy</p>
-                </div>
-                <span class="event-arrow" aria-hidden="true">→</span>
-              </a>
-            </li>
+          <ul class="events-list" id="events-list">
+            <li class="events-loading">Loading events…</li>
           </ul>
 
           <div class="events-actions">
@@ -740,6 +662,78 @@
       </footer>
     </div>
 
+    <script>
+      (function loadUpcomingEvents() {
+        function esc(s) {
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        function bindHoverables() {
+          var cursor = document.getElementById('cursor');
+          if (!cursor) return;
+          document.querySelectorAll('.hoverable').forEach(function (el) {
+            el.addEventListener('mouseenter', function () {
+              cursor.classList.add('hover');
+            });
+            el.addEventListener('mouseleave', function () {
+              cursor.classList.remove('hover');
+            });
+          });
+        }
+
+        fetch('/api/events')
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (data) {
+            var seasonEl = document.getElementById('events-season');
+            if (seasonEl && data.season) seasonEl.textContent = data.season;
+
+            var list = document.getElementById('events-list');
+            if (!list) return;
+
+            if (!data.events || data.events.length === 0) {
+              list.innerHTML = '<li class="events-empty">No upcoming events</li>';
+              return;
+            }
+
+            list.innerHTML = data.events
+              .map(function (ev) {
+                var cls = 'event-item hoverable' + (ev.isFeatured ? ' event-item--next' : '');
+                return (
+                  '<li><a href="' +
+                  esc(ev.shopUrl) +
+                  '" class="' +
+                  cls +
+                  '" style="--ev-accent: ' +
+                  esc(ev.accent) +
+                  '">' +
+                  '<div class="event-date"><span class="event-day">' +
+                  esc(ev.dayLabel) +
+                  '</span><span class="event-num">' +
+                  esc(ev.dateLabel) +
+                  '</span></div>' +
+                  '<div><p class="event-title">' +
+                  esc(ev.title) +
+                  '</p>' +
+                  (ev.lineup ? '<p class="event-lineup">' + esc(ev.lineup) + '</p>' : '') +
+                  (ev.tag ? '<p class="event-tag">' + esc(ev.tag) + '</p>' : '') +
+                  '</div><span class="event-arrow" aria-hidden="true">→</span></a></li>'
+                );
+              })
+              .join('');
+
+            bindHoverables();
+          })
+          .catch(function () {
+            var list = document.getElementById('events-list');
+            if (list) list.innerHTML = '<li class="events-empty">Could not load events</li>';
+          });
+      })();
+    </script>
     <script>
       (function () {
         var cursor = document.getElementById('cursor');

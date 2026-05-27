@@ -26,6 +26,7 @@ export function AddToCartButton({ product, label = 'ADD TO CART' }: AddToCartBut
         priceGel: product.priceGel,
         qty: 1,
         accent: product.accent,
+        type: product.type,
       });
     }
     writeCart(lines);

@@ -41,6 +41,21 @@ export const adminGenerateSchema = z.object({
   productSlug: z.string().min(1),
 });
 
+export const clubEventSchema = z.object({
+  title: z.string().trim().min(2).max(120),
+  slug: z.string().trim().min(2).max(100).optional(),
+  lineup: z.string().trim().max(300).optional(),
+  tag: z.string().trim().max(200).optional(),
+  dayLabel: z.string().trim().min(2).max(12),
+  dateLabel: z.string().trim().min(2).max(24),
+  eventDate: z.string().trim().optional(),
+  accent: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/),
+  priceGel: z.coerce.number().int().min(0).max(10000),
+  isFeatured: z.boolean().optional(),
+  published: z.boolean().optional(),
+  sortOrder: z.coerce.number().int().optional(),
+});
+
 export const checkoutSchema = z.object({
   items: z
     .array(

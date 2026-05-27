@@ -2,22 +2,25 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { SiteChrome } from '@/components/SiteChrome';
-import { formatGel, getProduct, products } from '@/lib/products';
+import { formatGel, getProduct, listProducts } from '@/lib/products';
+
+export const dynamic = 'force-dynamic';
 
 type PageProps = { params: { slug: string } };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await listProducts();
   return products.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: PageProps) {
-  const product = getProduct(params.slug);
+export async function generateMetadata({ params }: PageProps) {
+  const product = await getProduct(params.slug);
   if (!product) return { title: 'Not found — Sabagiro' };
   return { title: `${product.name} — Sabagiro Shop` };
 }
 
-export default function ProductPage({ params }: PageProps) {
-  const product = getProduct(params.slug);
+export default async function ProductPage({ params }: PageProps) {
+  const product = await getProduct(params.slug);
   if (!product) notFound();
 
   return (
