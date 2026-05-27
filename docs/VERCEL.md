@@ -1,5 +1,16 @@
 # Vercel deploy — required environment variables
 
+## Correct site URL
+
+Use **https://sabagiro.vercel.app** for login, shop, admin, and account.
+
+- `laripay.vercel.app` is the **LariPay** app — `/login`, `/shop`, `/account` return **404** there.
+- `sabagiro-club.vercel.app` is not deployed unless you create that Vercel project.
+
+Local dev: `cd ~/Desktop/sabagiro && npm run dev` → **http://localhost:3001** (port 3001 avoids LariPay on 3000).
+
+---
+
 Build failed with `Environment variable not found: DATABASE_URL` means these are **not set in Vercel**.
 
 ## Fix (Project → Settings → Environment Variables)

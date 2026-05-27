@@ -13,10 +13,7 @@ export default async function AccountSettingsPage() {
   if (!user) redirect('/login?next=/account/settings');
 
   return (
-    <SiteChrome>
-      <Link href="/account" className="back-link">
-        ← Account
-      </Link>
+    <SiteChrome current="account">
       <h1 className="page-title">SETTINGS</h1>
       <p className="page-lead">Update email, phone, password</p>
       <ProfileSettings user={user} />

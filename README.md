@@ -29,10 +29,12 @@ npm run dev
 
 | Role | Email | Password | Panel |
 |------|--------|----------|--------|
-| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` | [/admin](http://localhost:3000/admin) |
-| User | `user@sabagiro.test` | `SabagiroUser2026!` | [/account](http://localhost:3000/account) |
+| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` | [/admin](http://localhost:3001/admin) |
+| User | `user@sabagiro.test` | `SabagiroUser2026!` | [/account](http://localhost:3001/account) |
 
-Login: http://localhost:3000/login
+Login: http://localhost:3001/login (port **3001** — avoid clash with LariPay on 3000)
+
+**Production (live):** https://sabagiro.vercel.app/login — do **not** use `laripay.vercel.app` for Sabagiro routes.
 
 | URL | Role |
 |-----|------|

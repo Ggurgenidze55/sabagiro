@@ -18,7 +18,8 @@ export function AdminGenerateForm() {
         if (d.events) {
           setEvents(d.events.map((e: { slug: string; title: string }) => ({ slug: e.slug, title: e.title })));
         }
-      });
+      })
+      .catch(() => setError('Could not load events'));
   }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -80,7 +81,7 @@ export function AdminGenerateForm() {
           <input name="phone" required />
         </label>
         {error ? <p className="form-error">{error}</p> : null}
-        <button type="submit" className="btn" disabled={events.length === 0}>
+        <button type="submit" className="btn" disabled={events.length === 0 || !events[0]?.slug}>
           GENERATE TICKET + QR
         </button>
       </form>

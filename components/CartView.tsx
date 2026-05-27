@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
 import { formatGel } from '@/lib/products';
 
@@ -18,6 +18,10 @@ export function CartView() {
     setReady(true);
   }, []);
 
+  const ticketLines = useMemo(() => lines.filter((line) => line.type === 'ticket'), [lines]);
+  const merchLines = useMemo(() => lines.filter((line) => line.type === 'merch'), [lines]);
+  const ticketTotal = useMemo(() => cartTotal(ticketLines), [ticketLines]);
+
   function updateQty(slug: string, delta: number) {
     const next = readCart()
       .map((line) => (line.slug === slug ? { ...line, qty: line.qty + delta } : line))
@@ -31,42 +35,50 @@ export function CartView() {
     setLines([]);
   }
 
+  function removeMerch() {
+    const next = readCart().filter((line) => line.type !== 'merch');
+    writeCart(next);
+    setLines(next);
+  }
+
   async function checkout() {
     setError('');
     setCheckingOut(true);
-    const ticketItems = lines
-      .filter((line) => line.type === 'ticket')
-      .map((line) => ({ slug: line.slug, qty: line.qty }));
+
+    const ticketItems = ticketLines.map((line) => ({ slug: line.slug, qty: line.qty }));
 
     if (ticketItems.length === 0) {
-      setError('Only event tickets can be purchased here. Remove merch or add tickets.');
+      setError('Add at least one event ticket to checkout.');
       setCheckingOut(false);
       return;
     }
 
-    const res = await fetch('/api/checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: ticketItems }),
-    });
-    const data = await res.json();
-    setCheckingOut(false);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: ticketItems }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setCheckingOut(false);
 
-    if (res.status === 401) {
-      router.push('/login?next=/cart');
-      return;
-    }
-    if (!res.ok) {
-      setError(data.error || 'Checkout failed');
-      return;
-    }
+      if (res.status === 401) {
+        router.push('/login?next=/cart');
+        return;
+      }
+      if (!res.ok) {
+        setError(data.error || 'Checkout failed');
+        return;
+      }
 
-    clearCart();
-    router.push('/account');
-    router.refresh();
+      clearCart();
+      router.push('/account');
+      router.refresh();
+    } catch {
+      setCheckingOut(false);
+      setError('Network error — try again');
+    }
   }
-
-  const total = cartTotal(lines);
 
   if (!ready) {
     return <p className="cart-empty">Loading cart…</p>;
@@ -87,6 +99,18 @@ export function CartView() {
 
   return (
     <>
+      {merchLines.length > 0 ? (
+        <div className="notice-banner" role="status">
+          <p>
+            Merch cannot be purchased online yet — remove merch items or collect at the club. Only
+            event tickets are sold here.
+          </p>
+          <button type="button" className="btn btn--ghost" onClick={removeMerch}>
+            Remove merch
+          </button>
+        </div>
+      ) : null}
+
       <table className="cart-table">
         <thead>
           <tr>
@@ -99,7 +123,14 @@ export function CartView() {
         <tbody>
           {lines.map((line) => (
             <tr key={line.slug}>
-              <td style={{ color: line.accent }}>{line.name}</td>
+              <td style={{ color: line.accent }}>
+                {line.name}
+                {line.type === 'merch' ? (
+                  <span className="table-sub" style={{ display: 'block' }}>
+                    Merch · not for online checkout
+                  </span>
+                ) : null}
+              </td>
               <td>
                 <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, -1)}>
                   −
@@ -120,8 +151,18 @@ export function CartView() {
         </tbody>
       </table>
       <div className="cart-actions">
-        <p className="cart-total">Total {formatGel(total)}</p>
-        <button type="button" className="btn" onClick={checkout} disabled={checkingOut}>
+        <p className="cart-total">
+          Tickets total {formatGel(ticketTotal)}
+          {merchLines.length > 0 ? (
+            <span className="cart-total__note"> · Merch not included in checkout</span>
+          ) : null}
+        </p>
+        <button
+          type="button"
+          className="btn"
+          onClick={checkout}
+          disabled={checkingOut || ticketLines.length === 0}
+        >
           {checkingOut ? 'PROCESSING…' : 'BUY TICKETS'}
         </button>
         <button type="button" className="btn btn--ghost" onClick={clearCart}>
@@ -131,7 +172,11 @@ export function CartView() {
           Continue shopping
         </Link>
       </div>
-      {error ? <p className="form-error" style={{ marginTop: '1rem' }}>{error}</p> : null}
+      {error ? (
+        <p className="form-error" style={{ marginTop: '1rem' }}>
+          {error}
+        </p>
+      ) : null}
       <p className="page-lead" style={{ marginTop: '1.5rem' }}>
         Log in to complete purchase. QR ticket is emailed and shown in your account.
       </p>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { hashPassword, setSessionCookie, toSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { zodErrorMessage } from '@/lib/zod-error';
 import { registerSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
@@ -26,7 +27,6 @@ export async function POST(request: Request) {
     await setSessionCookie(toSessionUser(user));
     return NextResponse.json({ ok: true });
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'Invalid request';
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ error: zodErrorMessage(e) }, { status: 400 });
   }
 }

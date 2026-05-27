@@ -41,14 +41,23 @@ export function AdminEventsPanel() {
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
-    const [evRes, seasonRes] = await Promise.all([
-      fetch('/api/admin/events'),
-      fetch('/api/admin/events/season'),
-    ]);
-    const evData = await evRes.json();
-    const seasonData = await seasonRes.json();
-    if (evRes.ok) setEvents(evData.events);
-    if (seasonRes.ok) setSeason(seasonData.season);
+    setError('');
+    try {
+      const [evRes, seasonRes] = await Promise.all([
+        fetch('/api/admin/events'),
+        fetch('/api/admin/events/season'),
+      ]);
+      const evData = await evRes.json().catch(() => ({}));
+      const seasonData = await seasonRes.json().catch(() => ({}));
+      if (!evRes.ok) {
+        setError(evData.error || 'Could not load events');
+        return;
+      }
+      if (evRes.ok) setEvents(evData.events ?? []);
+      if (seasonRes.ok) setSeason(seasonData.season ?? season);
+    } catch {
+      setError('Network error loading events');
+    }
   }, []);
 
   useEffect(() => {
@@ -57,12 +66,23 @@ export function AdminEventsPanel() {
 
   async function saveSeason(e: React.FormEvent) {
     e.preventDefault();
-    await fetch('/api/admin/events/season', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ season }),
-    });
-    setMsg('Season label updated on homepage');
+    setError('');
+    setMsg('');
+    try {
+      const res = await fetch('/api/admin/events/season', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ season }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || 'Failed to update season');
+        return;
+      }
+      setMsg('Season label updated on homepage');
+    } catch {
+      setError('Network error');
+    }
   }
 
   async function createEvent(e: React.FormEvent) {

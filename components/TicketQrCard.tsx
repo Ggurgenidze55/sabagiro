@@ -13,15 +13,35 @@ type TicketQrCardProps = {
 export function TicketQrCard({ ticketId, productName, status, holderName, personalId }: TicketQrCardProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError('');
+
     fetch(`/api/tickets/${ticketId}/qr`)
-      .then((r) => r.json())
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error || 'Failed to load QR');
+        return d;
+      })
       .then((d) => {
+        if (cancelled) return;
         if (d.dataUrl) setDataUrl(d.dataUrl);
         if (d.qrToken) setQrToken(d.qrToken);
       })
-      .catch(() => {});
+      .catch((e) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load QR');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [ticketId]);
 
   return (
@@ -35,8 +55,10 @@ export function TicketQrCard({ ticketId, productName, status, holderName, person
       </p>
       {dataUrl ? (
         <img src={dataUrl} alt="Ticket QR code" className="ticket-card__qr" width={200} height={200} />
-      ) : (
+      ) : loading ? (
         <p className="ticket-card__loading">Loading QR…</p>
+      ) : (
+        <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
       )}
       {qrToken ? (
         <a href={`/scan/${qrToken}`} className="ticket-card__link" target="_blank" rel="noopener noreferrer">

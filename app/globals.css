@@ -90,12 +90,30 @@ a {
 }
 
 .site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 1rem clamp(1rem, 4vw, 2.5rem);
   border-top: 1px solid rgba(176, 168, 154, 0.1);
   font-size: 0.58rem;
   letter-spacing: 0.22em;
   opacity: 0.45;
   text-transform: uppercase;
+}
+
+.site-footer__link {
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(176, 168, 154, 0.55);
+  opacity: 1;
+}
+
+.site-footer__link:hover {
+  color: var(--acid);
 }
 
 .page-title {
@@ -584,4 +602,127 @@ a {
   opacity: 0.45;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.site-nav__action .btn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.5rem;
+}
+
+.account-subnav {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+}
+
+.account-subnav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  list-style: none;
+  padding-bottom: 0.75rem;
+}
+
+.account-subnav a {
+  font-size: 0.58rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(176, 168, 154, 0.55);
+}
+
+.account-subnav a:hover,
+.account-subnav a[aria-current='page'] {
+  color: var(--acid);
+}
+
+.notice-banner {
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed rgba(200, 255, 0, 0.35);
+  background: rgba(200, 255, 0, 0.04);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+.notice-banner--inline {
+  margin-top: 0.75rem;
+  max-width: 28rem;
+}
+
+.notice-banner .btn {
+  margin-top: 0.75rem;
+}
+
+.cart-total__note {
+  display: block;
+  font-size: 0.5rem;
+  opacity: 0.5;
+  margin-top: 0.25rem;
+  letter-spacing: 0.12em;
+}
+
+.location-block {
+  display: grid;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .location-block {
+    grid-template-columns: 1.1fr 0.9fr;
+    align-items: start;
+  }
+}
+
+.location-map {
+  border: 1px solid rgba(176, 168, 154, 0.2);
+  background: rgba(10, 10, 10, 0.8);
+  overflow: hidden;
+}
+
+.location-map__img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.location-list {
+  list-style: none;
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.location-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(176, 168, 154, 0.1);
+  padding-bottom: 0.5rem;
+}
+
+.location-list__label {
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.45;
+}
+
+.scan-card__back {
+  margin-bottom: 0.75rem;
+}
+
+.scan-door-actions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(176, 168, 154, 0.15);
+}
+
+.scan-door-msg {
+  margin-top: 1rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
 }

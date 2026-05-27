@@ -14,6 +14,14 @@ export function AddToCartButton({ product, label = 'ADD TO CART' }: AddToCartBut
   const router = useRouter();
   const [added, setAdded] = useState(false);
 
+  if (product.type === 'merch') {
+    return (
+      <p className="notice-banner notice-banner--inline">
+        Merch is preview only — buy at the club. Online merch checkout coming soon.
+      </p>
+    );
+  }
+
   function handleClick() {
     const lines = readCart();
     const existing = lines.find((l) => l.slug === product.slug);

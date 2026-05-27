@@ -1,12 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getSessionUser } from '@/lib/auth';
+import { SiteNav } from '@/components/SiteNav';
 
 type SiteChromeProps = {
   children: React.ReactNode;
-  current?: 'shop' | 'cart';
+  current?: 'shop' | 'cart' | 'account';
 };
 
-export function SiteChrome({ children, current }: SiteChromeProps) {
+export async function SiteChrome({ children, current }: SiteChromeProps) {
+  const user = await getSessionUser();
+
   return (
     <div className="site-shell">
       <header className="site-header">
@@ -20,32 +24,15 @@ export function SiteChrome({ children, current }: SiteChromeProps) {
             priority
           />
         </Link>
-        <nav aria-label="Main">
-          <ul className="site-nav">
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li>
-              <Link href="/shop" aria-current={current === 'shop' ? 'page' : undefined}>
-                Shop
-              </Link>
-            </li>
-            <li>
-              <Link href="/cart" aria-current={current === 'cart' ? 'page' : undefined}>
-                Cart
-              </Link>
-            </li>
-            <li>
-              <Link href="/account">Account</Link>
-            </li>
-            <li>
-              <Link href="/login">Log in</Link>
-            </li>
-          </ul>
-        </nav>
+        <SiteNav user={user} current={current} />
       </header>
       <main className="site-main">{children}</main>
-      <footer className="site-footer">© Sabagiro · Tbilisi · GE</footer>
+      <footer className="site-footer">
+        <span>© Sabagiro · Tbilisi · GE</span>
+        <Link href="/location" className="site-footer__link">
+          Location
+        </Link>
+      </footer>
     </div>
   );
 }

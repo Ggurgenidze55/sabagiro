@@ -21,17 +21,21 @@ export function ProfileSettings({ user }: { user: User }) {
     setProfileError('');
     setProfileMsg('');
     const fd = new FormData(e.currentTarget);
-    const res = await fetch('/api/account/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.fromEntries(fd.entries())),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setProfileError(data.error || 'Failed');
-      return;
+    try {
+      const res = await fetch('/api/account/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(fd.entries())),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setProfileError(data.error || 'Failed');
+        return;
+      }
+      setProfileMsg('Profile updated');
+    } catch {
+      setProfileError('Network error');
     }
-    setProfileMsg('Profile updated');
   }
 
   async function savePassword(e: React.FormEvent<HTMLFormElement>) {
@@ -39,18 +43,22 @@ export function ProfileSettings({ user }: { user: User }) {
     setPassError('');
     setPassMsg('');
     const fd = new FormData(e.currentTarget);
-    const res = await fetch('/api/account/password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.fromEntries(fd.entries())),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setPassError(data.error || 'Failed');
-      return;
+    try {
+      const res = await fetch('/api/account/password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.fromEntries(fd.entries())),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setPassError(data.error || 'Failed');
+        return;
+      }
+      setPassMsg('Password changed');
+      e.currentTarget.reset();
+    } catch {
+      setPassError('Network error');
     }
-    setPassMsg('Password changed');
-    e.currentTarget.reset();
   }
 
   return (

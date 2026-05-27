@@ -9,7 +9,9 @@ type Mode = 'login' | 'register';
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const search = useSearchParams();
-  const next = search.get('next') || '/account';
+  const nextParam = search.get('next');
+  const next = nextParam || '/account';
+  const nextQuery = nextParam ? `?next=${encodeURIComponent(nextParam)}` : '';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -21,27 +23,33 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const payload = Object.fromEntries(fd.entries());
 
     const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    setLoading(false);
 
-    if (!res.ok) {
-      setError(data.error || 'Request failed');
-      return;
-    }
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      setLoading(false);
 
-    if (mode === 'login' && data.role === 'ADMIN' && next.startsWith('/account')) {
-      router.push('/admin');
+      if (!res.ok) {
+        setError(data.error || 'Request failed');
+        return;
+      }
+
+      if (mode === 'login' && data.role === 'ADMIN' && next.startsWith('/account')) {
+        router.push('/admin');
+        router.refresh();
+        return;
+      }
+
+      router.push(next);
       router.refresh();
-      return;
+    } catch {
+      setLoading(false);
+      setError('Network error — try again');
     }
-
-    router.push(next);
-    router.refresh();
   }
 
   return (
@@ -74,7 +82,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
       ) : null}
       <label className="form-field">
         <span>Password</span>
-        <input name="password" type="password" required minLength={8} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
+        <input
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+        />
       </label>
       {error ? <p className="form-error">{error}</p> : null}
       <button type="submit" className="btn" disabled={loading}>
@@ -83,11 +97,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <p className="form-foot">
         {mode === 'login' ? (
           <>
-            No account? <Link href="/register">Register</Link>
+            No account? <Link href={`/register${nextQuery}`}>Register</Link>
           </>
         ) : (
           <>
-            Have an account? <Link href="/login">Log in</Link>
+            Have an account? <Link href={`/login${nextQuery}`}>Log in</Link>
           </>
         )}
       </p>

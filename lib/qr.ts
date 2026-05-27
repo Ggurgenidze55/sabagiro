@@ -4,7 +4,7 @@ export function scanUrl(qrToken: string) {
   const base =
     process.env.NEXT_PUBLIC_APP_URL ||
     process.env.APP_URL ||
-    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+    (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001');
   return `${base.replace(/\/$/, '')}/scan/${qrToken}`;
 }
 

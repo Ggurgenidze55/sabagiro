@@ -1,4 +1,7 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ScanDoorActions } from '@/components/ScanDoorActions';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { qrDataUrl } from '@/lib/qr';
 
@@ -16,10 +19,15 @@ export default async function ScanPage({ params }: PageProps) {
   if (!ticket) notFound();
 
   const qrImage = await qrDataUrl(ticket.qrToken);
+  const user = await getSessionUser();
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div className="scan-page">
       <div className="scan-card">
+        <Link href="/" className="back-link scan-card__back">
+          ← Sabagiro
+        </Link>
         <p className="scan-card__label">SABAGIRO · TICKET CHECK</p>
         <h1 className="scan-card__event">{ticket.productName}</h1>
         <p className={`ticket-status ticket-status--${ticket.status.toLowerCase()}`}>{ticket.status}</p>
@@ -48,6 +56,8 @@ export default async function ScanPage({ params }: PageProps) {
         </dl>
 
         <img src={qrImage} alt="Ticket QR" className="ticket-card__qr" width={240} height={240} />
+
+        {isAdmin ? <ScanDoorActions qrToken={ticket.qrToken} status={ticket.status} /> : null}
       </div>
     </div>
   );

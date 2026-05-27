@@ -20,7 +20,7 @@ export default async function AccountPage() {
   });
 
   return (
-    <SiteChrome>
+    <SiteChrome current="account">
       <div className="dash-head">
         <div>
           <h1 className="page-title">MY ACCOUNT</h1>

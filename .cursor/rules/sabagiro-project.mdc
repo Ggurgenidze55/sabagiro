@@ -1,0 +1,52 @@
+---
+description: Sabagiro club site — primary project context (not LariPay)
+alwaysApply: true
+---
+
+# Sabagiro — Agent Context
+
+**This workspace is Sabagiro only.** Do not implement features in `Fintech Pay` / LariPay unless the user explicitly asks.
+
+## Project
+
+Standalone Next.js 14 club site — tickets, shop, account, admin, door scan.
+
+| | |
+|--|--|
+| **Path** | `~/Desktop/sabagiro` (repo root) |
+| **Production** | https://sabagiro.vercel.app |
+| **DB** | PostgreSQL on Railway (`DATABASE_URL`) |
+| **Dev** | `npm run dev` → http://localhost:**3001** (not 3000 — LariPay often uses 3000) |
+
+## Key routes
+
+- `/` — homepage (`public/index.html` via `app/route.ts`)
+- `/shop`, `/cart`, `/location`
+- `/login`, `/register`, `/account`, `/account/settings`
+- `/admin/*` — events, users, tickets, generate QR
+- `/scan/[token]` — door check; admin can mark USED
+
+## Setup
+
+```bash
+cp .env.local.example .env.local   # DATABASE_URL + AUTH_SECRET
+npm install
+npm run setup:db
+npm run dev
+```
+
+Test logins: `admin@sabagiro.test` / `SabagiroAdmin2026!`, `user@sabagiro.test` / `SabagiroUser2026!`
+
+## Style
+
+Brutalist dark UI: `#0a0a0a`, acid `#c8ff00`, `globals.css` + `SiteChrome`. Match existing patterns; ka + en copy when user writes in Georgian.
+
+## Pitfalls
+
+- Wrong host: `laripay.vercel.app` has no Sabagiro routes → 404
+- Merch: preview only; checkout is tickets only (no payment gateway yet)
+- Do not commit `.env.local` or secrets
+
+## Docs
+
+- `README.md`, `docs/VERCEL.md`, `docs/RAILWAY.md`

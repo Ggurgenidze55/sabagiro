@@ -20,8 +20,8 @@ Edit `.env.local`:
 ```env
 DATABASE_URL="postgresql://..."   # paste from Railway
 AUTH_SECRET="paste-long-random-string-min-32-chars"
-APP_URL="http://localhost:3000"
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+APP_URL="http://localhost:3001"
+NEXT_PUBLIC_APP_URL="http://localhost:3001"
 ```
 
 Generate secret:
@@ -45,9 +45,9 @@ Open:
 
 | URL | Login |
 |-----|--------|
-| http://localhost:3000/login | see test accounts below |
-| http://localhost:3000/account | user dashboard |
-| http://localhost:3000/admin | admin panel |
+| http://localhost:3001/login | see test accounts below |
+| http://localhost:3001/account | user dashboard |
+| http://localhost:3001/admin | admin panel |
 
 ## 4. Test accounts (after `npm run seed:test`)
 
