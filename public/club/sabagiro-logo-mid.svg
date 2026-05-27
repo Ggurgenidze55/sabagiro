@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sabagiro mark (mid layer)">
+  <path d="M120 14 L208 88 L32 88 Z" stroke="#5c5850" stroke-width="2.5" fill="none" />
+  <rect x="28" y="96" width="184" height="14" fill="#454038" />
+  <rect x="42" y="116" width="156" height="11" fill="#454038" />
+  <rect x="56" y="134" width="128" height="10" fill="#454038" />
+  <rect x="72" y="151" width="96" height="9" fill="#454038" />
+  <path d="M52 168 C52 138 78 118 120 118 C162 118 188 138 188 168" stroke="#5c5850" stroke-width="2" fill="none" />
+</svg>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sabagiro mark">
+  <defs>
+    <linearGradient id="sabagiro-mark-grad" x1="120" y1="0" x2="120" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ece6de" />
+      <stop offset="50%" stop-color="#b0a89a" />
+      <stop offset="100%" stop-color="#6e6860" />
+    </linearGradient>
+  </defs>
+  <path d="M120 14 L208 88 L32 88 Z" stroke="url(#sabagiro-mark-grad)" stroke-width="2.8" fill="rgba(176,168,154,0.06)" />
+  <line x1="32" y1="88" x2="208" y2="88" stroke="url(#sabagiro-mark-grad)" stroke-width="1.2" opacity="0.5" />
+  <rect x="28" y="96" width="184" height="14" fill="url(#sabagiro-mark-grad)" opacity="0.9" />
+  <rect x="42" y="116" width="156" height="11" fill="url(#sabagiro-mark-grad)" opacity="0.75" />
+  <rect x="56" y="134" width="128" height="10" fill="url(#sabagiro-mark-grad)" opacity="0.6" />
+  <rect x="72" y="151" width="96" height="9" fill="url(#sabagiro-mark-grad)" opacity="0.45" />
+  <path d="M52 168 C52 138 78 118 120 118 C162 118 188 138 188 168" stroke="url(#sabagiro-mark-grad)" stroke-width="2.2" fill="none" opacity="0.85" />
+  <path d="M120 118 L120 168" stroke="url(#sabagiro-mark-grad)" stroke-width="1" opacity="0.35" />
+</svg>

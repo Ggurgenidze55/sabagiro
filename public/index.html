@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sabagiro — Underground · Tbilisi</title>
+    <meta name="description" content="Sabagiro — brutalist underground club. Night. Concrete. Sound. Tbilisi, Georgia." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --black: #0a0a0a;
+        --concrete: #b0a89a;
+        --concrete-light: #d4ccc4;
+        --acid: #c8ff00;
+        --acid-hot: #e4ff1a;
+        --neon-cyan: #00f0ff;
+        --neon-magenta: #ff0044;
+        --neon-violet: #cc00ff;
+        --neon-orange: #ff9900;
+        --neon-white: #f5ffe8;
+        --font-display: 'Bebas Neue', sans-serif;
+        --font-mono: 'Share Tech Mono', monospace;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        background: var(--black);
+        color: var(--concrete);
+        font-family: var(--font-mono);
+        cursor: none;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .cursor {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        background: var(--concrete-light);
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        mix-blend-mode: difference;
+        transition: width 0.18s ease, height 0.18s ease, background 0.18s ease;
+      }
+
+      .cursor.hover {
+        width: 14px;
+        height: 14px;
+        background: var(--acid);
+      }
+
+      .page {
+        position: relative;
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      /* full-screen logo behind pixels */
+      .logo-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        overflow: hidden;
+        background: #0a0a0a;
+      }
+
+      .logo-mark-bg {
+        position: relative;
+        width: min(72vw, 68vh);
+        max-width: 520px;
+        aspect-ratio: 462 / 343;
+        transform: rotate(-1deg);
+        filter: drop-shadow(0 0 80px rgba(200, 255, 0, 0.08));
+      }
+
+      .logo-mark-bg img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none;
+      }
+
+      /* dark site: white logo, transparent background */
+      .logo-mark-bg__mark {
+        opacity: 0.94;
+      }
+
+      .pixel-canvas {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        opacity: 0.58;
+        pointer-events: none;
+        mix-blend-mode: plus-lighter;
+      }
+
+      .bg-fade {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background:
+          linear-gradient(105deg, rgba(10, 10, 10, 0.55) 0%, rgba(10, 10, 10, 0.02) 42%, rgba(10, 10, 10, 0.5) 100%),
+          radial-gradient(ellipse 90% 80% at 45% 50%, rgba(10, 10, 10, 0) 0%, rgba(10, 10, 10, 0.48) 78%);
+      }
+
+      .vignette {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.5);
+      }
+
+      .grain {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        opacity: 0.12;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      .scanlines {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        pointer-events: none;
+        opacity: 0.14;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(0, 0, 0, 0.08) 3px,
+          rgba(0, 0, 0, 0.08) 4px
+        );
+      }
+
+      .header {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem clamp(1rem, 4vw, 2.5rem);
+        border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+        backdrop-filter: blur(8px);
+        background: rgba(10, 10, 10, 0.35);
+      }
+
+      .nav {
+        display: flex;
+        gap: clamp(1rem, 3vw, 2rem);
+        list-style: none;
+        font-size: 0.62rem;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+      }
+
+      .nav a {
+        color: rgba(176, 168, 154, 0.85);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .nav a:hover {
+        color: var(--acid);
+      }
+
+      .nav-meta {
+        font-size: 0.58rem;
+        letter-spacing: 0.28em;
+        opacity: 0.4;
+        text-transform: uppercase;
+      }
+
+      .hero {
+        position: relative;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: clamp(1.25rem, 3vh, 2rem);
+        align-items: center;
+        padding: clamp(0.75rem, 2.5vw, 2rem) clamp(1rem, 4vw, 2.5rem);
+        min-height: 0;
+      }
+
+      @media (min-width: 900px) {
+        .hero {
+          grid-template-columns: 1.05fr minmax(300px, 440px);
+          gap: clamp(1.5rem, 4vw, 3rem);
+        }
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+      }
+
+      .brand-name {
+        font-family: var(--font-display);
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        letter-spacing: 0.45em;
+        color: rgba(212, 204, 196, 0.75);
+      }
+
+      .tagline {
+        margin-top: 0.35rem;
+        font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        color: rgba(176, 168, 154, 0.58);
+      }
+
+      .tagline em {
+        font-style: normal;
+        color: var(--acid);
+        text-shadow: 0 0 24px rgba(200, 255, 0, 0.45);
+      }
+
+      .hero-meta {
+        font-size: 0.55rem;
+        letter-spacing: 0.28em;
+        opacity: 0.38;
+        line-height: 1.9;
+        text-transform: uppercase;
+      }
+
+      .events-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+        max-height: 100%;
+      }
+
+      .events-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        gap: 1rem;
+      }
+
+      .events-label {
+        font-size: 0.58rem;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: rgba(176, 168, 154, 0.55);
+      }
+
+      .events-season {
+        font-size: 0.5rem;
+        letter-spacing: 0.25em;
+        opacity: 0.35;
+        text-transform: uppercase;
+      }
+
+      .events-list {
+        list-style: none;
+        border: 1px solid rgba(176, 168, 154, 0.2);
+        background: rgba(10, 10, 10, 0.72);
+        backdrop-filter: blur(10px);
+        box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.4);
+        max-height: min(52vh, 380px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(176, 168, 154, 0.3) transparent;
+      }
+
+      .events-list::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .events-list::-webkit-scrollbar-thumb {
+        background: rgba(176, 168, 154, 0.35);
+      }
+
+      .event-item {
+        --ev-accent: var(--concrete);
+        position: relative;
+        display: grid;
+        grid-template-columns: 54px 1fr auto;
+        gap: 0.65rem 0.85rem;
+        align-items: center;
+        padding: 0.75rem 0.9rem;
+        border-bottom: 1px solid rgba(176, 168, 154, 0.08);
+        transition: background 0.2s, transform 0.2s;
+        overflow: hidden;
+      }
+
+      .event-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--ev-accent);
+        opacity: 1;
+        box-shadow: 0 0 12px color-mix(in srgb, var(--ev-accent) 65%, transparent);
+      }
+
+      .event-item::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 48px;
+        height: 100%;
+        background: repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 3px,
+          color-mix(in srgb, var(--ev-accent) 25%, transparent) 3px,
+          color-mix(in srgb, var(--ev-accent) 25%, transparent) 4px
+        );
+        opacity: 0;
+        transition: opacity 0.25s;
+        pointer-events: none;
+      }
+
+      .event-item:last-child {
+        border-bottom: none;
+      }
+
+      .event-item.hoverable {
+        cursor: default;
+      }
+
+      .event-item:hover {
+        background: rgba(176, 168, 154, 0.05);
+        transform: translateX(3px);
+      }
+
+      .event-item:hover::after {
+        opacity: 1;
+      }
+
+      .event-item--next {
+        background: rgba(176, 168, 154, 0.04);
+      }
+
+      .event-date {
+        text-align: center;
+      }
+
+      .event-day {
+        display: block;
+        font-size: 0.5rem;
+        letter-spacing: 0.2em;
+        opacity: 0.45;
+      }
+
+      .event-num {
+        display: block;
+        font-size: 0.68rem;
+        font-weight: bold;
+        color: var(--ev-accent);
+        letter-spacing: 0.05em;
+      }
+
+      .event-title {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        letter-spacing: 0.1em;
+        color: var(--concrete-light);
+        line-height: 1.05;
+      }
+
+      .event-lineup {
+        font-size: 0.52rem;
+        letter-spacing: 0.12em;
+        opacity: 0.5;
+        margin-top: 0.25rem;
+      }
+
+      .event-tag {
+        font-size: 0.5rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--ev-accent) 70%, var(--concrete));
+        margin-top: 0.15rem;
+      }
+
+      .event-arrow {
+        font-size: 0.8rem;
+        opacity: 0.35;
+        transition: opacity 0.2s, color 0.2s;
+      }
+
+      .event-item:hover .event-arrow {
+        opacity: 1;
+        color: var(--ev-accent);
+      }
+
+      .events-actions {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .events-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.85rem 1.75rem 0.85rem 2rem;
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        letter-spacing: 0.32em;
+        text-decoration: none;
+        color: var(--black);
+        background: var(--acid);
+        border: 2px solid var(--acid);
+        transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+        box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.85), 0 0 28px rgba(200, 255, 0, 0.35);
+      }
+
+      .events-cta::after {
+        content: '';
+        width: 0.55em;
+        height: 0.55em;
+        flex-shrink: 0;
+        background: var(--black);
+      }
+
+      .events-cta:hover {
+        color: var(--black);
+        background: var(--acid-hot);
+        border-color: var(--acid-hot);
+        transform: translate(-2px, -2px);
+        box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.85), 0 0 42px rgba(228, 255, 26, 0.55);
+      }
+
+      .events-link {
+        font-size: 0.55rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(176, 168, 154, 0.45);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .events-link:hover {
+        color: var(--acid);
+      }
+
+      .footer {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+        border-top: 1px solid rgba(176, 168, 154, 0.1);
+        font-size: 0.58rem;
+        letter-spacing: 0.22em;
+        opacity: 0.42;
+        backdrop-filter: blur(4px);
+        background: rgba(10, 10, 10, 0.35);
+      }
+
+      .social {
+        display: flex;
+        gap: 1.5rem;
+        list-style: none;
+      }
+
+      .social a {
+        color: var(--concrete);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .social a:hover {
+        color: var(--acid);
+      }
+
+      @media (max-width: 899px) {
+        .hero {
+          overflow-y: auto;
+          align-content: start;
+        }
+
+        .events-list {
+          max-height: none;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .nav-meta {
+          display: none;
+        }
+
+        .tagline {
+          letter-spacing: 0.28em;
+        }
+
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .pixel-canvas {
+          display: none;
+        }
+
+        .logo-mark-bg__mark {
+          opacity: 0.98;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cursor" id="cursor" aria-hidden="true"></div>
+
+    <div class="page">
+      <div class="logo-bg" aria-hidden="true">
+        <div class="logo-mark-bg" role="img" aria-label="Sabagiro">
+          <img
+            class="logo-mark-bg__mark"
+            src="/club/sabagiro-logo-white.png"
+            alt=""
+            width="462"
+            height="343"
+            decoding="async"
+          />
+        </div>
+      </div>
+      <canvas class="pixel-canvas" id="pixels" aria-hidden="true"></canvas>
+      <div class="bg-fade" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <header class="header">
+        <nav aria-label="Main">
+          <ul class="nav">
+            <li><a href="#about" class="hoverable">About</a></li>
+            <li><a href="#events" class="hoverable">Events</a></li>
+            <li><a href="/shop" class="hoverable">Shop</a></li>
+            <li><a href="#contact" class="hoverable">Contact</a></li>
+          </ul>
+        </nav>
+        <span class="nav-meta">Tbilisi · GE</span>
+      </header>
+
+      <main class="hero">
+        <section class="brand" id="about" aria-label="Sabagiro">
+          <p class="brand-name">SABAGIRO</p>
+          <p class="tagline"><em>Night</em> · Concrete · Sound</p>
+
+          <p class="hero-meta">
+            Brutalist venue · Open air &amp; warehouse<br />
+            Doors 23:00 · Tbilisi, Georgia
+          </p>
+        </section>
+
+        <section class="events-panel" id="events" aria-labelledby="events-heading">
+          <div class="events-header">
+            <h2 class="events-label" id="events-heading">Upcoming events</h2>
+            <span class="events-season">Summer 2025</span>
+          </div>
+
+          <ul class="events-list">
+            <li class="event-item event-item--next hoverable" style="--ev-accent: #c8ff00">
+              <div class="event-date">
+                <span class="event-day">SAT</span>
+                <span class="event-num">31 MAY</span>
+              </div>
+              <div>
+                <p class="event-title">CONCRETE OPENING</p>
+                <p class="event-lineup">NDRX · KIAI · LOCAL CREW</p>
+                <p class="event-tag">Upper deck · Main room</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+            <li class="event-item hoverable" style="--ev-accent: #33ddff">
+              <div class="event-date">
+                <span class="event-day">FRI</span>
+                <span class="event-num">07 JUN</span>
+              </div>
+              <div>
+                <p class="event-title">SKYLINE RITUAL</p>
+                <p class="event-lineup">VOID ECHO · MARTA K</p>
+                <p class="event-tag">Spiral stairs · Live</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+            <li class="event-item hoverable" style="--ev-accent: #ff0044">
+              <div class="event-date">
+                <span class="event-day">SAT</span>
+                <span class="event-num">14 JUN</span>
+              </div>
+              <div>
+                <p class="event-title">FOREST ECHO</p>
+                <p class="event-lineup">DARK MATTER · ZURAB LIVE</p>
+                <p class="event-tag">Open air · All night</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+            <li class="event-item hoverable" style="--ev-accent: #f5ffe8">
+              <div class="event-date">
+                <span class="event-day">FRI</span>
+                <span class="event-num">21 JUN</span>
+              </div>
+              <div>
+                <p class="event-title">GUEST NIGHT</p>
+                <p class="event-lineup">INTL B2B · SURPRISE SET</p>
+                <p class="event-tag">Warehouse · Special</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+            <li class="event-item hoverable" style="--ev-accent: #cc00ff">
+              <div class="event-date">
+                <span class="event-day">SAT</span>
+                <span class="event-num">28 JUN</span>
+              </div>
+              <div>
+                <p class="event-title">ACID DAWN</p>
+                <p class="event-lineup">TBILISI ALLIANCE</p>
+                <p class="event-tag">Sunrise session · Terrace</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+            <li class="event-item hoverable" style="--ev-accent: #ff9900">
+              <div class="event-date">
+                <span class="event-day">FRI</span>
+                <span class="event-num">04 JUL</span>
+              </div>
+              <div>
+                <p class="event-title">RAW FREQUENCY</p>
+                <p class="event-lineup">INDUSTRIAL LINEUP TBA</p>
+                <p class="event-tag">Basement · Heavy</p>
+              </div>
+              <span class="event-arrow" aria-hidden="true">→</span>
+            </li>
+          </ul>
+
+          <div class="events-actions">
+            <a href="/shop" class="events-cta hoverable">TICKETS</a>
+            <a href="/shop" class="events-link hoverable">Shop all →</a>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer" id="contact">
+        <span>© Sabagiro 2025</span>
+        <ul class="social">
+          <li><a href="https://instagram.com" class="hoverable" target="_blank" rel="noopener noreferrer">Instagram</a></li>
+          <li><a href="https://ra.co" class="hoverable" target="_blank" rel="noopener noreferrer">RA</a></li>
+          <li><a href="https://soundcloud.com" class="hoverable" target="_blank" rel="noopener noreferrer">SoundCloud</a></li>
+        </ul>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var cursor = document.getElementById('cursor');
+        var canvas = document.getElementById('pixels');
+        var hoverables = document.querySelectorAll('.hoverable');
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        document.addEventListener('mousemove', function (e) {
+          cursor.style.left = e.clientX + 'px';
+          cursor.style.top = e.clientY + 'px';
+        });
+
+        hoverables.forEach(function (el) {
+          el.addEventListener('mouseenter', function () {
+            cursor.classList.add('hover');
+          });
+          el.addEventListener('mouseleave', function () {
+            cursor.classList.remove('hover');
+          });
+        });
+
+        if (reduceMotion || !canvas) return;
+
+        var ctx = canvas.getContext('2d', { willReadFrequently: true });
+        var palette = ['#c8ff00', '#e4ff1a', '#00f0ff', '#ff0044', '#cc00ff', '#ff9900', '#f5ffe8', '#c8ff00'];
+        var strips = [];
+        var cell = 6;
+        var frame = 0;
+
+        function resize() {
+          var dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+          canvas.width = Math.floor(window.innerWidth * dpr * 0.5);
+          canvas.height = Math.floor(window.innerHeight * dpr * 0.5);
+          canvas.style.width = window.innerWidth + 'px';
+          canvas.style.height = window.innerHeight + 'px';
+          buildStrips();
+        }
+
+        function buildStrips() {
+          strips = [];
+          var h = canvas.height;
+          var count = Math.max(14, Math.floor(h / 28));
+          var sh = Math.ceil(h / count);
+          for (var i = 0; i < count; i++) {
+            strips.push({
+              y: i * sh,
+              h: sh,
+              color: palette[i % palette.length],
+              drift: 0,
+              speed: 0.3 + Math.random() * 1.2,
+              scramble: Math.random() > 0.5 ? 1 : -1,
+              matrix: [],
+            });
+            seedMatrix(strips[strips.length - 1]);
+          }
+        }
+
+        function makeCell() {
+          return {
+            on: Math.random() > 0.5,
+            bright: 0,
+            phase: 'idle',
+            riseSpeed: 0.012 + Math.random() * 0.035,
+            fallSpeed: 0.008 + Math.random() * 0.022,
+          };
+        }
+
+        function seedMatrix(strip) {
+          var cols = Math.ceil(canvas.width / cell);
+          var rows = Math.ceil(strip.h / cell);
+          strip.matrix = [];
+          var r, c;
+          for (r = 0; r < rows; r++) {
+            var row = [];
+            for (c = 0; c < cols; c++) {
+              row.push(makeCell());
+            }
+            strip.matrix.push(row);
+          }
+        }
+
+        /** მხოლოდ ცალკეული პიქსელი: idle → rising → falling */
+        function tickCellBrightness(cell) {
+          if (!cell.on) return;
+
+          if (cell.phase === 'idle') {
+            if (Math.random() > 0.9935) {
+              cell.phase = 'rising';
+              cell.bright = 0.08;
+            }
+            return;
+          }
+
+          if (cell.phase === 'rising') {
+            cell.bright += cell.riseSpeed;
+            if (cell.bright >= 1) {
+              cell.bright = 1;
+              cell.phase = 'falling';
+            }
+            return;
+          }
+
+          if (cell.phase === 'falling') {
+            cell.bright -= cell.fallSpeed;
+            if (cell.bright <= 0) {
+              cell.bright = 0;
+              cell.phase = 'idle';
+            }
+          }
+        }
+
+        function lum(r, g, b) {
+          return r * 0.299 + g * 0.587 + b * 0.114;
+        }
+
+        function hexToRgb(hex) {
+          var n = parseInt(hex.slice(1), 16);
+          return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        }
+
+        function sortStripRow(data, w, rowH, y, dir) {
+          var row = [];
+          var x, idx;
+          for (x = 0; x < w; x++) {
+            idx = (y * w + x) * 4;
+            row.push({ r: data[idx], g: data[idx + 1], b: data[idx + 2], a: data[idx + 3], x: x });
+          }
+          row.sort(function (a, b) {
+            return dir > 0 ? lum(a.r, a.g, a.b) - lum(b.r, b.g, b.b) : lum(b.r, b.g, b.b) - lum(a.r, a.g, a.b);
+          });
+          for (x = 0; x < w; x++) {
+            idx = (y * w + x) * 4;
+            data[idx] = row[x].r;
+            data[idx + 1] = row[x].g;
+            data[idx + 2] = row[x].b;
+            data[idx + 3] = row[x].a;
+          }
+        }
+
+        function render() {
+          var w = canvas.width;
+          var h = canvas.height;
+          frame++;
+
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillRect(0, 0, w, h);
+
+          var si, rgb, rows, cols, r, c, px, py, alpha, yy, band, data, cellData, br, rr, gg, bb, size;
+
+          for (si = 0; si < strips.length; si++) {
+            var s = strips[si];
+            rgb = hexToRgb(s.color);
+            rows = s.matrix.length;
+            cols = rows ? s.matrix[0].length : 0;
+            s.drift += s.speed * s.scramble;
+
+            for (r = 0; r < rows; r++) {
+              for (c = 0; c < cols; c++) {
+                cellData = s.matrix[r][c];
+                if (!cellData.on) continue;
+
+                tickCellBrightness(cellData);
+                br = cellData.bright;
+
+                px = Math.floor(c * cell + s.drift) % (w + cell);
+                if (px < 0) px += w;
+                py = s.y + r * cell;
+
+                alpha = 0.14 + br * 0.92;
+                var sharpen = br * br * br;
+                rr = Math.min(255, rgb[0] + sharpen * 200);
+                gg = Math.min(255, rgb[1] + sharpen * 200);
+                bb = Math.min(255, rgb[2] + sharpen * 185);
+                size = br > 0.45 ? cell : Math.max(2, cell - 1);
+
+                ctx.fillStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + alpha + ')';
+                ctx.fillRect(px, py, size, size);
+
+                if (br > 0.58) {
+                  ctx.fillStyle = 'rgba(255,255,255,' + (0.12 + br * 0.42) + ')';
+                  ctx.fillRect(px, py, Math.max(2, size - 1), Math.max(2, size - 1));
+                }
+
+                if (br > 0.88) {
+                  ctx.fillStyle = 'rgba(200,255,0,' + (br * 0.35) + ')';
+                  ctx.fillRect(px, py, size, size);
+                }
+              }
+            }
+
+            if (frame % 8 === si % 8) {
+              band = ctx.getImageData(0, s.y, w, Math.min(s.h, h - s.y));
+              data = band.data;
+              for (yy = 0; yy < Math.min(s.h, h - s.y); yy += cell * 2) {
+                if (Math.random() > 0.4) sortStripRow(data, w, Math.min(s.h, h - s.y), yy, s.scramble);
+              }
+              ctx.putImageData(band, Math.floor(s.drift * 0.3) % 12, s.y);
+            }
+
+            if (Math.random() > 0.992) {
+              seedMatrix(s);
+            }
+          }
+
+          requestAnimationFrame(render);
+        }
+
+        resize();
+        window.addEventListener('resize', resize);
+        render();
+      })();
+    </script>
+  </body>
+</html>
