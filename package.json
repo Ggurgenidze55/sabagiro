@@ -11,7 +11,9 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "seed:admin": "node scripts/seed-admin.mjs",
-    "seed:events": "node scripts/seed-events.mjs"
+    "seed:events": "node scripts/seed-events.mjs",
+    "seed:test": "node scripts/seed-test-users.mjs",
+    "setup:db": "prisma db push && npm run seed:test && npm run seed:events"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

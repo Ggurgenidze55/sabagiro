@@ -545,3 +545,43 @@ a {
   flex-wrap: wrap;
   gap: 0.35rem;
 }
+
+.dev-test-logins {
+  margin-top: 2rem;
+  max-width: 640px;
+  padding: 1rem;
+  border: 1px dashed rgba(200, 255, 0, 0.35);
+  background: rgba(200, 255, 0, 0.04);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+}
+
+.dev-test-logins__title {
+  color: var(--acid);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.dev-test-logins table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dev-test-logins th,
+.dev-test-logins td {
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dev-test-logins a {
+  color: var(--acid);
+}
+
+.dev-test-logins__hint {
+  margin-top: 0.75rem;
+  opacity: 0.45;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

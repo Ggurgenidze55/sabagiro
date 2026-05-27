@@ -12,18 +12,27 @@ Standalone site for **Sabagiro** underground club — homepage, shop (tickets + 
 - **Admin:** users, sold tickets, manual ticket + QR generation
 - **Scan:** `/scan/{token}` — shows holder name, ID, email, phone
 
-## Setup (first time)
+## Setup (first time) — DB on Railway
+
+Full guide: **[docs/RAILWAY.md](docs/RAILWAY.md)**
 
 ```bash
 cd ~/Desktop/sabagiro
-cp .env.example .env.local
-# Edit DATABASE_URL + AUTH_SECRET + APP_URL
+cp .env.local.example .env.local
+# Paste Railway DATABASE_URL + AUTH_SECRET into .env.local
 npm install
-npm run db:push
-npm run seed:admin
-npm run seed:events
+npm run setup:db    # tables + test users + sample events
 npm run dev
 ```
+
+### Test logins (`npm run seed:test`)
+
+| Role | Email | Password | Panel |
+|------|--------|----------|--------|
+| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` | [/admin](http://localhost:3000/admin) |
+| User | `user@sabagiro.test` | `SabagiroUser2026!` | [/account](http://localhost:3000/account) |
+
+Login: http://localhost:3000/login
 
 | URL | Role |
 |-----|------|

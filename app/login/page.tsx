@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { SiteChrome } from '@/components/SiteChrome';
 import { AuthForm } from '@/components/AuthForm';
+import { DevTestLogins } from '@/components/DevTestLogins';
 
 export const metadata = { title: 'Log in — Sabagiro' };
 
@@ -12,6 +13,7 @@ export default function LoginPage() {
       <Suspense fallback={<p className="cart-empty">Loading…</p>}>
         <AuthForm mode="login" />
       </Suspense>
+      <DevTestLogins />
     </SiteChrome>
   );
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getEventsSeasonLabel, listPublishedEvents } from '@/lib/events';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   const [events, season] = await Promise.all([listPublishedEvents(), getEventsSeasonLabel()]);
   return NextResponse.json({
