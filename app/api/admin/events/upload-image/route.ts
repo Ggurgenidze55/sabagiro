@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { storeEventImage } from '@/lib/event-image-storage';
 
+export const runtime = 'nodejs';
+export const maxDuration = 30;
+
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export async function POST(request: Request) {
@@ -44,7 +47,7 @@ export async function POST(request: Request) {
         ? 401
         : message === 'FORBIDDEN'
           ? 403
-          : message.includes('Vercel Blob')
+          : message.includes('BLOB_READ_WRITE_TOKEN') || message.includes('Blob upload failed')
             ? 503
             : 400;
     return NextResponse.json({ error: message }, { status });

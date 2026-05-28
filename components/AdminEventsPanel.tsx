@@ -116,7 +116,10 @@ export function AdminEventsPanel() {
         });
         const uploadJson = await uploadRes.json().catch(() => ({}));
         if (!uploadRes.ok) {
-          setError(uploadJson.error || 'Failed to upload image');
+          setError(
+            uploadJson.error ||
+              `Image upload failed (${uploadRes.status}). Try again or create without image.`,
+          );
           return;
         }
         imagePath = uploadJson.path || '';
