@@ -1231,7 +1231,7 @@ body.nav-lock {
     z-index: 100;
     width: min(100%, 18rem);
     height: 100dvh;
-    padding: 4.75rem 1.35rem 1.5rem;
+    padding: 1.35rem 1.35rem 1.5rem;
     background: rgba(8, 8, 8, 0.98);
     border-left: 1px solid rgba(176, 168, 154, 0.2);
     box-shadow: -12px 0 40px rgba(0, 0, 0, 0.55);

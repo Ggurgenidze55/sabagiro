@@ -244,6 +244,10 @@
         display: block;
       }
 
+      .nav-panel__head {
+        display: none;
+      }
+
       .nav {
         display: flex;
         flex-wrap: wrap;
@@ -631,11 +635,11 @@
         }
 
         .brand-logo {
-          display: block;
+          display: none;
         }
 
         .brand-name {
-          display: none;
+          display: block;
         }
 
         .cursor {
@@ -665,13 +669,48 @@
           z-index: 30;
           width: min(100%, 18rem);
           height: 100dvh;
-          padding: 4.75rem 1.25rem 1.5rem;
+          padding: 1.35rem 1.25rem 1.5rem;
           background: rgba(8, 8, 8, 0.98);
           border-left: 1px solid rgba(176, 168, 154, 0.2);
           transform: translateX(105%);
           transition: transform 0.22s ease;
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-panel__head {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 1.2rem;
+          position: relative;
+        }
+
+        .nav-panel__logo-link {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .nav-panel__logo {
+          width: auto;
+          height: 2.15rem;
+          object-fit: contain;
+          opacity: 0.96;
+        }
+
+        .nav-panel__close {
+          position: absolute;
+          right: 0;
+          top: 0;
+          border: 1px solid rgba(176, 168, 154, 0.35);
+          background: transparent;
+          color: var(--concrete-light);
+          width: 2.2rem;
+          height: 2.2rem;
+          font-size: 1rem;
+          line-height: 1;
+          cursor: pointer;
         }
 
         body.nav-open .nav-panel {
@@ -798,6 +837,19 @@
         </button>
         <button type="button" class="nav-backdrop" id="navBackdrop" aria-label="Close menu" hidden></button>
         <nav class="nav-panel" id="navPanel" aria-label="Main">
+          <div class="nav-panel__head">
+            <a href="/" class="nav-panel__logo-link hoverable" aria-label="Sabagiro home">
+              <img
+                class="nav-panel__logo"
+                src="/club/sabagiro-logo-white.png"
+                alt="Sabagiro"
+                width="120"
+                height="89"
+                decoding="async"
+              />
+            </a>
+            <button type="button" class="nav-panel__close" id="navClose" aria-label="Close menu">✕</button>
+          </div>
           <ul class="nav">
             <li><a href="#about" class="hoverable">About</a></li>
             <li><a href="#events" class="hoverable">Events</a></li>
@@ -892,18 +944,25 @@
         var toggle = document.getElementById('navToggle');
         var panel = document.getElementById('navPanel');
         var backdrop = document.getElementById('navBackdrop');
+        var closeBtn = document.getElementById('navClose');
         if (!toggle || !panel) return;
 
         function setOpen(open) {
           document.body.classList.toggle('nav-open', open);
           toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-          toggle.textContent = open ? 'Close' : 'Menu';
+          toggle.textContent = 'Menu';
           if (backdrop) backdrop.hidden = !open;
         }
 
         toggle.addEventListener('click', function () {
           setOpen(!document.body.classList.contains('nav-open'));
         });
+
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            setOpen(false);
+          });
+        }
 
         if (backdrop) {
           backdrop.addEventListener('click', function () {
