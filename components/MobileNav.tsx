@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useId, useState, type ReactNode } from 'react';
 
 type MobileNavProps = {
@@ -49,12 +51,34 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
         className="mobile-nav__panel"
         role="navigation"
         aria-label={label}
-        onClick={(e) => {
-          const target = e.target as HTMLElement;
-          if (target.closest('a, button')) setOpen(false);
-        }}
       >
+        <div className="mobile-nav__head">
+          <Link href="/" className="mobile-nav__logo-link" onClick={() => setOpen(false)}>
+            <Image
+              src="/club/sabagiro-logo-white.png"
+              alt="Sabagiro"
+              width={120}
+              height={89}
+              className="mobile-nav__logo"
+            />
+          </Link>
+          <button
+            type="button"
+            className="mobile-nav__close"
+            aria-label="Close menu"
+            onClick={() => setOpen(false)}
+          >
+            ✕
+          </button>
+        </div>
+        <div
+          onClick={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('a')) setOpen(false);
+          }}
+        >
         {children}
+        </div>
       </div>
     </div>
   );

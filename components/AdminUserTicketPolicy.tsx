@@ -66,7 +66,7 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
             <span>Paid ticket limit per event</span>
             <input
               type="number"
-              min={1}
+              min={0}
               max={20}
               value={ticketLimitPerEvent}
               onChange={(e) => setTicketLimitPerEvent(Number(e.target.value))}

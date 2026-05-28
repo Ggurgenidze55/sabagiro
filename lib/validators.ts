@@ -126,7 +126,7 @@ export const checkoutSchema = z.object({
 });
 
 export const ticketPolicySchema = z.object({
-  ticketLimitPerEvent: z.coerce.number().int().min(1).max(20),
+  ticketLimitPerEvent: z.coerce.number().int().min(0).max(20),
   freeTicketsEnabled: z.boolean(),
   freeTicketsQuota: z.coerce.number().int().min(0).max(500),
 });

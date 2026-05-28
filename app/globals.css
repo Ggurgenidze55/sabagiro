@@ -1097,6 +1097,41 @@ a {
   display: block;
 }
 
+.mobile-nav__head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.mobile-nav__logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav__logo {
+  width: auto;
+  height: 2rem;
+  object-fit: contain;
+  opacity: 0.96;
+}
+
+.mobile-nav__close {
+  position: absolute;
+  right: 0;
+  top: -0.15rem;
+  border: 1px solid rgba(176, 168, 154, 0.35);
+  background: transparent;
+  color: var(--concrete-light);
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 body.nav-lock {
   overflow: hidden;
 }
@@ -1111,6 +1146,11 @@ body.nav-lock {
 
 .table-scroll > table {
   min-width: 36rem;
+}
+
+.admin-users-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 @media (max-width: 768px) {
@@ -1149,6 +1189,16 @@ body.nav-lock {
     transition: transform 0.22s ease;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav__logo {
+    height: 2.15rem;
+  }
+
+  .mobile-nav__close {
+    width: 2.2rem;
+    height: 2.2rem;
+    font-size: 1rem;
   }
 
   .mobile-nav--open .mobile-nav__panel {
@@ -1275,6 +1325,10 @@ body.nav-lock {
 
   .table-actions .btn {
     width: 100%;
+  }
+
+  .admin-users-scroll > table {
+    min-width: 52rem;
   }
 
   .scan-page {

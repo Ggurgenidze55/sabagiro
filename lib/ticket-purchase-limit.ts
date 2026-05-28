@@ -7,7 +7,7 @@ export function purchaseLimitApplies(user: { role: Role }) {
 
 export function getTicketLimitPerEvent(user: Pick<User, 'ticketLimitPerEvent' | 'role'>) {
   if (user.role === 'ADMIN') return 99;
-  return Math.max(1, user.ticketLimitPerEvent);
+  return Math.max(0, user.ticketLimitPerEvent);
 }
 
 export async function countPurchasedTicketsForEvent(userId: string, eventSlug: string) {
@@ -52,6 +52,9 @@ export function ticketLimitMessage(limit: number) {
 }
 
 export function ticketAlreadyOwnedMessage(limit: number) {
+  if (limit <= 0) {
+    return 'Paid ticket purchase is currently disabled for this event.';
+  }
   if (limit <= 1) {
     return 'You have already reached the 1 paid-ticket limit for this event.';
   }

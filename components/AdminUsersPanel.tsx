@@ -86,7 +86,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     <>
       {error ? <p className="form-error">{error}</p> : null}
       {msg ? <p className="form-ok">{msg}</p> : null}
-      <div className="table-scroll">
+      <div className="table-scroll admin-users-scroll">
       <table className="data-table">
         <thead>
           <tr>

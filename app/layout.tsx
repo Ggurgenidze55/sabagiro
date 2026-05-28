@@ -7,9 +7,9 @@ export const metadata: Metadata = {
   title: 'Sabagiro — Underground · Tbilisi',
   description: 'Sabagiro — brutalist underground club. Tickets, merch, events. Tbilisi, Georgia.',
   icons: {
-    icon: '/club/sabagiro-logo-face.svg',
-    shortcut: '/club/sabagiro-logo-face.svg',
-    apple: '/club/sabagiro-logo-face.svg',
+    icon: '/club/sabagiro-logo-white.png',
+    shortcut: '/club/sabagiro-logo-white.png',
+    apple: '/club/sabagiro-logo-white.png',
   },
 };
 
