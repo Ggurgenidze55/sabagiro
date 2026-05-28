@@ -151,11 +151,18 @@ export function AdminEventsPanel() {
             />
           </label>
           <label className="form-field">
-            <span>Slug (optional)</span>
+            <span>Slug (optional — latin, no spaces)</span>
             <input
               value={form.slug}
               onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              placeholder="auto-from-title"
+              placeholder={
+                form.title
+                  ? form.title
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]+/g, '-')
+                      .replace(/^-+|-+$/g, '')
+                  : 'auto-from-title'
+              }
             />
           </label>
           <label className="form-field">
@@ -249,6 +256,30 @@ export function AdminEventsPanel() {
 
       <section className="admin-events__section">
         <h2 className="section-title">All events</h2>
+        <p className="page-lead" style={{ marginBottom: '1rem' }}>
+          If homepage links show 404, click to fix old slugs (spaces → hyphens).
+        </p>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          style={{ marginBottom: '1rem' }}
+          onClick={async () => {
+            const res = await fetch('/api/admin/events/normalize-slugs', { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) {
+              setError(data.error || 'Failed');
+              return;
+            }
+            setMsg(
+              data.updated?.length
+                ? `Fixed slugs: ${data.updated.join(', ')}`
+                : 'All slugs already OK',
+            );
+            load();
+          }}
+        >
+          FIX EVENT SLUGS
+        </button>
         <table className="data-table">
           <thead>
             <tr>

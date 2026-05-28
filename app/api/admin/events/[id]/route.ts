@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { normalizeEventSlug } from '@/lib/events';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { clubEventSchema } from '@/lib/validators';
@@ -18,7 +19,9 @@ export async function PATCH(request: Request, { params }: Params) {
       where: { id: params.id },
       data: {
         ...(body.title !== undefined ? { title: body.title } : {}),
-        ...(body.slug !== undefined ? { slug: body.slug } : {}),
+        ...(body.slug !== undefined
+          ? { slug: normalizeEventSlug(body.slug, body.title) }
+          : {}),
         ...(body.lineup !== undefined ? { lineup: body.lineup } : {}),
         ...(body.tag !== undefined ? { tag: body.tag } : {}),
         ...(body.dayLabel !== undefined ? { dayLabel: body.dayLabel } : {}),

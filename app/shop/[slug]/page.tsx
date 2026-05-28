@@ -1,7 +1,8 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { SiteChrome } from '@/components/SiteChrome';
+import { normalizeEventSlug } from '@/lib/events';
 import { formatGel, getProduct } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +16,13 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ProductPage({ params }: PageProps) {
+  const decoded = decodeURIComponent(params.slug);
+  const canonical = normalizeEventSlug(decoded);
+  if (decoded !== canonical) {
+    const legacy = await getProduct(decoded);
+    if (legacy) redirect(`/shop/${canonical}`);
+  }
+
   const product = await getProduct(params.slug);
   if (!product) notFound();
 

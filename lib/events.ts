@@ -2,12 +2,20 @@ import type { ClubEvent } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
 
+/** URL-safe slug: lowercase, hyphens, no spaces (fixes /shop/foo bar → 404). */
 export function slugifyTitle(title: string) {
-  return title
+  const slug = title
+    .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
+    .replace(/^-+|-+$/g, '')
     .slice(0, 80);
+  return slug || 'event';
+}
+
+export function normalizeEventSlug(input: string, fallbackTitle?: string) {
+  const raw = input.trim() || fallbackTitle?.trim() || '';
+  return slugifyTitle(raw);
 }
 
 export function eventToProduct(event: ClubEvent): Product {
@@ -38,9 +46,33 @@ export async function listPublishedEvents() {
 
 export async function getPublishedEventBySlug(slug: string) {
   if (!hasDatabase()) return null;
-  return prisma.clubEvent.findFirst({
-    where: { slug, published: true },
+  const decoded = decodeURIComponent(slug).trim();
+  const normalized = normalizeEventSlug(decoded);
+
+  const direct = await prisma.clubEvent.findFirst({
+    where: { published: true, OR: [{ slug: decoded }, { slug: normalized }] },
   });
+  if (direct) return direct;
+
+  // Legacy slugs (spaces, manual text) — match by normalized form
+  const published = await prisma.clubEvent.findMany({ where: { published: true } });
+  return (
+    published.find((e) => normalizeEventSlug(e.slug, e.title) === normalized) ?? null
+  );
+}
+
+/** Fix slugs already stored with spaces or invalid characters. */
+export async function normalizeAllEventSlugs() {
+  const events = await prisma.clubEvent.findMany();
+  const updated: string[] = [];
+  for (const ev of events) {
+    const next = normalizeEventSlug(ev.slug, ev.title);
+    if (next !== ev.slug) {
+      await prisma.clubEvent.update({ where: { id: ev.id }, data: { slug: next } });
+      updated.push(`${ev.slug} → ${next}`);
+    }
+  }
+  return updated;
 }
 
 export async function getEventsSeasonLabel() {

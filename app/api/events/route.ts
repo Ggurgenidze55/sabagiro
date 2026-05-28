@@ -20,7 +20,7 @@ export async function GET() {
       dateLabel: e.dateLabel,
       accent: e.accent,
       isFeatured: e.isFeatured,
-      shopUrl: `/shop/${e.slug}`,
+      shopUrl: `/shop/${encodeURI(e.slug)}`,
     })),
   });
 }

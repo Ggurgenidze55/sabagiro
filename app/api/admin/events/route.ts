@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { slugifyTitle } from '@/lib/events';
+import { normalizeEventSlug } from '@/lib/events';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { clubEventSchema } from '@/lib/validators';
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   try {
     await requireAdmin();
     const body = clubEventSchema.parse(await request.json());
-    const slug = body.slug?.trim() || slugifyTitle(body.title);
+    const slug = normalizeEventSlug(body.slug ?? '', body.title);
 
     const exists = await prisma.clubEvent.findUnique({ where: { slug } });
     if (exists) {
