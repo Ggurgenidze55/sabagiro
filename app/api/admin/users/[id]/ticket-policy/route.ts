@@ -21,7 +21,7 @@ export async function PATCH(request: Request, { params }: Params) {
     if (body.freeTicketsQuota < existing.freeTicketsUsed) {
       return NextResponse.json(
         {
-          error: `უფასო ბილეთების კვოტა ვერ იქნება ${existing.freeTicketsUsed}-ზე ნაკლები (უკვე გამოყენებული).`,
+          error: `Free ticket quota cannot be lower than ${existing.freeTicketsUsed} (already used).`,
         },
         { status: 400 },
       );

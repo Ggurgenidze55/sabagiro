@@ -60,7 +60,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
       }
       setUsers((list) => list.filter((u) => u.id !== user.id));
       setConfirmDeleteId(null);
-      setMsg(`${user.firstName} ${user.lastName} წაიშალა`);
+      setMsg(`${user.firstName} ${user.lastName} deleted`);
     } catch {
       setError('Network error');
     } finally {
@@ -138,10 +138,10 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
               <td>
                 {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
                   <>
-                    <span className="table-sub">ყიდვა: {u.ticketLimitPerEvent} ჯამური</span>
+                    <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
                     <br />
                     <span className="table-sub">
-                      უფასო: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'გამორთ.'}
+                      Free: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'off'}
                     </span>
                   </>
                 ) : (
@@ -175,7 +175,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                     {confirmDeleteId === u.id ? (
                       <div className="delete-confirm">
                         <p className="delete-confirm__text">
-                          ვერიფიცირებული მომხმარებელი — ნამდვილად წავშალოთ?
+                          Verified user — confirm deletion?
                         </p>
                         <div className="delete-confirm__actions">
                           <button
@@ -184,7 +184,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                             disabled={deletingId === u.id}
                             onClick={() => void deleteUser(u)}
                           >
-                            {deletingId === u.id ? '…' : 'დიახ, წაშლა'}
+                            {deletingId === u.id ? '…' : 'Yes, delete'}
                           </button>
                           <button
                             type="button"
@@ -192,7 +192,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                             disabled={deletingId === u.id}
                             onClick={() => setConfirmDeleteId(null)}
                           >
-                            გაუქმება
+                            Cancel
                           </button>
                         </div>
                       </div>
@@ -203,7 +203,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         disabled={deletingId === u.id}
                         onClick={() => onDeleteClick(u)}
                       >
-                        {deletingId === u.id ? '…' : 'წაშლა'}
+                        {deletingId === u.id ? '…' : 'Delete'}
                       </button>
                     )}
                     <AdminUserTicketPolicy

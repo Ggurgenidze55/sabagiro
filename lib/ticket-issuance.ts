@@ -17,41 +17,41 @@ export function describeTicketIssuance(
 
   if (ticket.source === 'PURCHASE') {
     return {
-      holderNote: 'საკარის ბილეთის მფლობელი (შესვლა)',
-      actorNote: 'ყიდვა',
+      holderNote: 'Ticket Holder (Entry)',
+      actorNote: 'Purchased by',
       actorLabel,
       ownerLabel,
-      detail: actor.id === owner.id ? `${actorLabel} · ${owner.email}` : `${actorLabel} → ანგარიში: ${ownerLabel}`,
+      detail: actor.id === owner.id ? `${actorLabel} · ${owner.email}` : `${actorLabel} → account: ${ownerLabel}`,
     };
   }
 
   if (ticket.source === 'FREE') {
     return {
-      holderNote: 'საკარის ბილეთის მფლობელი (შესვლა)',
-      actorNote: 'უფასო გენერაცია',
+      holderNote: 'Ticket Holder (Entry)',
+      actorNote: 'Free ticket issued by',
       actorLabel,
       ownerLabel,
-      detail: `${actorLabel} (უფასო ბილეთი · ანგარიში ${ownerLabel})`,
+      detail: `${actorLabel} (free ticket · account ${ownerLabel})`,
     };
   }
 
   return {
-    holderNote: 'საკარის ბილეთის მფლობელი (შესვლა)',
-    actorNote: 'ადმინის გენერაცია',
+    holderNote: 'Ticket Holder (Entry)',
+    actorNote: 'Admin issued by',
     actorLabel,
     ownerLabel,
-    detail: `${actorLabel} · ანგარიში: ${ownerLabel}`,
+    detail: `${actorLabel} · account: ${ownerLabel}`,
   };
 }
 
 export function sourceLabel(source: TicketSource) {
   switch (source) {
     case 'PURCHASE':
-      return 'ყიდვა';
+      return 'Purchase';
     case 'FREE':
-      return 'უფასო';
+      return 'Free';
     case 'ADMIN':
-      return 'ადმინი';
+      return 'Admin';
     default:
       return source;
   }

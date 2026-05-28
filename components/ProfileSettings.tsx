@@ -66,19 +66,19 @@ export function ProfileSettings({ user }: { user: User }) {
       <section>
         <h2 className="section-title">Profile</h2>
         <p className="form-foot form-foot--note">
-          სახელი, გვარი და პირადი ნომერი რეგისტრაციისას ივსება და შემდეგ ვერ იცვლება.
+          First name, last name, and personal ID are set at registration and cannot be changed.
         </p>
         <dl className="identity-readonly">
           <div>
-            <dt>სახელი</dt>
+            <dt>First name</dt>
             <dd>{user.firstName}</dd>
           </div>
           <div>
-            <dt>გვარი</dt>
+            <dt>Last name</dt>
             <dd>{user.lastName}</dd>
           </div>
           <div>
-            <dt>პირადი ნომერი</dt>
+            <dt>Personal ID</dt>
             <dd>{user.personalId}</dd>
           </div>
         </dl>

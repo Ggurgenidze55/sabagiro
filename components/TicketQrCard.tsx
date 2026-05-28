@@ -59,7 +59,7 @@ export function TicketQrCard({
         <span className={`ticket-status ticket-status--${status.toLowerCase()}`}>{status}</span>
       </div>
       <p className="ticket-card__meta">
-        შესვლა: {holderName} · {personalId}
+        Entry: {holderName} · {personalId}
       </p>
       {issuanceLine ? <p className="ticket-card__meta">{issuanceLine}</p> : null}
       {dataUrl ? (

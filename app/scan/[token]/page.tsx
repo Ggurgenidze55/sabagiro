@@ -63,7 +63,7 @@ export default async function ScanPage({ params }: PageProps) {
               </dd>
             </div>
             <div>
-              <dt>პირადი ნომერი</dt>
+              <dt>Personal ID</dt>
               <dd>{ticket.holderPersonalId}</dd>
             </div>
             <div>
@@ -71,7 +71,7 @@ export default async function ScanPage({ params }: PageProps) {
               <dd>{ticket.holderEmail}</dd>
             </div>
             <div>
-              <dt>ტელეფონი</dt>
+              <dt>Phone</dt>
               <dd>{ticket.holderPhone}</dd>
             </div>
             <div>
@@ -79,18 +79,18 @@ export default async function ScanPage({ params }: PageProps) {
               <dd>{issuance.detail}</dd>
             </div>
             <div>
-              <dt>ანგარიში (მფლობელი)</dt>
+              <dt>Owner Account</dt>
               <dd>
                 {issuance.ownerLabel} · {ticket.user.email}
               </dd>
             </div>
             <div>
-              <dt>ფასი</dt>
-              <dd>{ticket.priceGel > 0 ? `${ticket.priceGel} ₾` : 'უფასო'}</dd>
+              <dt>Price</dt>
+              <dd>{ticket.priceGel > 0 ? `${ticket.priceGel} ₾` : 'Free'}</dd>
             </div>
           </dl>
         ) : (
-          <p className="scan-door-hint">დეტალები სკანის შემდეგ იმალება.</p>
+          <p className="scan-door-hint">Details are hidden after scan.</p>
         )}
 
         {qrImage ? (

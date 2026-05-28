@@ -3,9 +3,7 @@ import type { TicketStatus } from '@prisma/client';
 export type ScanVerdict = {
   tone: 'ok' | 'warn' | 'bad';
   title: string;
-  titleKa: string;
   subtitle: string;
-  subtitleKa: string;
   admit: boolean;
 };
 
@@ -23,9 +21,7 @@ export function getScanVerdict(status: TicketStatus, scannedAt: Date | null): Sc
     return {
       tone: 'bad',
       title: 'TICKET CANCELLED',
-      titleKa: 'ბილეთი გაუქმებულია',
       subtitle: 'Do not admit · Invalid ticket',
-      subtitleKa: 'არ ჩაუშვა · ბილეთი არ მოქმედებს',
       admit: false,
     };
   }
@@ -35,13 +31,9 @@ export function getScanVerdict(status: TicketStatus, scannedAt: Date | null): Sc
     return {
       tone: 'bad',
       title: 'ALREADY SCANNED',
-      titleKa: 'უკვე დასკანერებულია',
       subtitle: when
         ? `Scanned at ${when} · Do not admit again`
         : 'This ticket was already used · Do not admit again',
-      subtitleKa: when
-        ? `სკანირებულია: ${when} · ხელახალი გავლა აკრძალულია`
-        : 'ბილეთი უკვე გამოყენებულია · ხელახალი გავლა აკრძალულია',
       admit: false,
     };
   }
@@ -49,9 +41,7 @@ export function getScanVerdict(status: TicketStatus, scannedAt: Date | null): Sc
   return {
     tone: 'ok',
     title: 'VALID · NOT SCANNED YET',
-    titleKa: 'ვალიდურია · ჯერ არ არის დასკანერებული',
     subtitle: 'OK to admit · Confirm scan at the door',
-    subtitleKa: 'შეიძლება ჩაშვა · დარწმუნდი სკანერით',
     admit: true,
   };
 }

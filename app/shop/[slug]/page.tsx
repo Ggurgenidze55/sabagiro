@@ -37,7 +37,7 @@ export default async function ProductPage({ params }: PageProps) {
   const purchaseLimit = user ? getTicketLimitPerEvent(user) : 1;
   const purchaseRemaining =
     user && product.type === 'ticket'
-      ? await remainingPurchaseSlots(user)
+      ? await remainingPurchaseSlots(user, product.slug)
       : purchaseLimit;
   const cannotBuyMore = Boolean(
     user && product.type === 'ticket' && purchaseRemaining <= 0,
@@ -70,16 +70,16 @@ export default async function ProductPage({ params }: PageProps) {
 
       {product.type === 'ticket' && user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
         <p className="notice-banner notice-banner--inline">
-          ყიდვის ლიმიტი ({purchaseLimit}) ამოიწურა — ეს ლიმიტი ყველა ღონისძიებაზე ჯამურია.
+          Purchase limit reached for this event ({purchaseLimit}).
           <Link href="/account" className="btn btn--ghost" style={{ marginTop: '0.75rem' }}>
-            ჩემი ბილეთები
+            My tickets
           </Link>
         </p>
       ) : null}
 
       {product.type === 'ticket' && user && canPurchaseTickets(user) && !cannotBuyMore && purchaseLimit > 1 && showLimitDetails ? (
         <p className="page-lead" style={{ marginBottom: '1rem' }}>
-          შეგიძლია იყიდო კიდევ {purchaseRemaining} ბილეთი ჯამურად ყველა ღონისძიებაზე (ლიმიტი {purchaseLimit}).
+          You can buy {purchaseRemaining} more ticket(s) for this event (limit {purchaseLimit}).
         </p>
       ) : null}
 
@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: PageProps) {
               ? 'SOLD OUT'
               : cannotBuyMore
                 ? showLimitDetails
-                  ? 'ლიმიტი ამოიწურა'
+                  ? 'LIMIT REACHED'
                   : 'UNAVAILABLE'
               : user && !canPurchaseTickets(user)
                 ? 'VERIFICATION REQUIRED'

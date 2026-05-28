@@ -37,34 +37,13 @@ export async function POST(request: Request) {
 
     const { items } = checkoutSchema.parse(await request.json());
     const tickets = [];
-    const ticketItems = [];
 
     for (const item of items) {
       const product = await getProduct(item.slug);
       if (!product || product.type !== 'ticket') continue;
-      ticketItems.push(item);
-    }
 
-    if (purchaseLimitApplies(user)) {
-      const remaining = await remainingPurchaseSlots(user);
-      const requestedTotal = ticketItems.reduce((sum, item) => sum + item.qty, 0);
-      if (requestedTotal > remaining) {
-        return NextResponse.json(
-          {
-            error:
-              remaining <= 0
-                ? ticketAlreadyOwnedMessage(purchaseLimit)
-                : ticketLimitMessage(purchaseLimit),
-            code: remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT',
-          },
-          { status: remaining <= 0 ? 409 : 400 },
-        );
-      }
-    }
-
-    for (const item of ticketItems) {
       if (purchaseLimitApplies(user)) {
-        const remaining = await remainingPurchaseSlots(user);
+        const remaining = await remainingPurchaseSlots(user, item.slug);
         if (item.qty > remaining) {
           return NextResponse.json(
             {
@@ -72,10 +51,10 @@ export async function POST(request: Request) {
                 remaining <= 0
                   ? showLimitDetails
                     ? ticketAlreadyOwnedMessage(purchaseLimit)
-                    : 'ბილეთის შეძენა ახლა ვერ ხერხდება. დაუკავშირდი ადმინისტრაციას.'
+                    : 'Ticket purchase is currently unavailable. Please contact support.'
                   : showLimitDetails
                     ? ticketLimitMessage(purchaseLimit)
-                    : 'ბილეთის რაოდენობა ვერ დამუშავდა. დაუკავშირდი ადმინისტრაციას.',
+                    : 'Ticket quantity could not be processed. Please contact support.',
               code: remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT',
             },
             { status: remaining <= 0 ? 409 : 400 },
@@ -85,7 +64,7 @@ export async function POST(request: Request) {
 
       const batch = await prisma.$transaction(async () => {
         if (purchaseLimitApplies(user)) {
-          const remaining = await remainingPurchaseSlots(user);
+          const remaining = await remainingPurchaseSlots(user, item.slug);
           if (item.qty > remaining) {
             throw new Error(remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT');
           }
@@ -100,6 +79,10 @@ export async function POST(request: Request) {
         const created = [];
 
         for (let i = 0; i < item.qty; i++) {
+          const holder = i === 0 ? undefined : item.holders?.[i - 1];
+          if (i > 0 && !holder) {
+            throw new Error('HOLDER_REQUIRED');
+          }
           const ticket = await createTicketForUser({
             user,
             productSlug: item.slug,
@@ -107,6 +90,7 @@ export async function POST(request: Request) {
             priceGel: prices[i],
             tierLabel: labels[i],
             createdByUserId: user.id,
+            holder,
           });
           created.push(ticket);
         }
@@ -130,6 +114,12 @@ export async function POST(request: Request) {
     if (message === 'SOLD_OUT') {
       return NextResponse.json({ error: 'Not enough tickets left for this event' }, { status: 409 });
     }
+    if (message === 'HOLDER_REQUIRED') {
+      return NextResponse.json(
+        { error: 'Please provide full holder details for each additional ticket.', code: 'HOLDER_REQUIRED' },
+        { status: 400 },
+      );
+    }
     if (message === 'ALREADY_OWNED' || message === 'TICKET_LIMIT') {
       return NextResponse.json(
         {
@@ -137,10 +127,10 @@ export async function POST(request: Request) {
             message === 'ALREADY_OWNED'
               ? showLimitDetails
                 ? ticketAlreadyOwnedMessage(purchaseLimit)
-                : 'ბილეთის შეძენა ახლა ვერ ხერხდება. დაუკავშირდი ადმინისტრაციას.'
+                : 'Ticket purchase is currently unavailable. Please contact support.'
               : showLimitDetails
                 ? ticketLimitMessage(purchaseLimit)
-                : 'ბილეთის რაოდენობა ვერ დამუშავდა. დაუკავშირდი ადმინისტრაციას.',
+                : 'Ticket quantity could not be processed. Please contact support.',
           code: message,
         },
         { status: message === 'ALREADY_OWNED' ? 409 : 400 },

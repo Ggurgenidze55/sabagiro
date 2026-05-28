@@ -38,7 +38,7 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || 'შენახვა ვერ მოხერხდა');
+        setError(data.error || 'Could not save settings');
         return;
       }
       onUpdated({
@@ -47,9 +47,9 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
         freeTicketsQuota,
         freeTicketsUsed: data.user?.freeTicketsUsed ?? user.freeTicketsUsed,
       });
-      setMsg('პოლიტიკა შენახულია');
+      setMsg('Policy saved');
     } catch {
-      setError('ქსელის შეცდომა');
+      setError('Network error');
     } finally {
       setSaving(false);
     }
@@ -58,12 +58,12 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
   return (
     <div className="user-policy">
       <button type="button" className="btn btn--ghost" onClick={() => setOpen((v) => !v)}>
-        {open ? 'დახურვა' : 'ლიმიტები / უფასო ბილეთები'}
+        {open ? 'Close' : 'Limits / Free Tickets'}
       </button>
       {open ? (
         <form className="form-stack user-policy__form" onSubmit={save}>
           <label className="form-field">
-            <span>ყიდვის ჯამური ლიმიტი (ყველა ღონისძიებაზე)</span>
+            <span>Paid ticket limit per event</span>
             <input
               type="number"
               min={1}
@@ -79,10 +79,10 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
               checked={freeTicketsEnabled}
               onChange={(e) => setFreeTicketsEnabled(e.target.checked)}
             />
-            <span>უფასო ბილეთის გენერაცია ჩართული</span>
+            <span>Enable free ticket generation</span>
           </label>
           <label className="form-field">
-            <span>უფასო ბილეთების რაოდენობა (კვოტა)</span>
+            <span>Free tickets per event (quota)</span>
             <input
               type="number"
               min={user.freeTicketsUsed}
@@ -93,13 +93,13 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
             />
           </label>
           <p className="form-foot">
-            გამოყენებული უფასო: {user.freeTicketsUsed} · დარჩენილი:{' '}
+            Total free tickets issued: {user.freeTicketsUsed} · Remaining now:{' '}
             {Math.max(0, freeTicketsQuota - user.freeTicketsUsed)}
           </p>
           {error ? <p className="form-error">{error}</p> : null}
           {msg ? <p className="form-ok">{msg}</p> : null}
           <button type="submit" className="btn btn--ghost" disabled={saving}>
-            {saving ? '…' : 'შენახვა'}
+            {saving ? '…' : 'Save'}
           </button>
         </form>
       ) : null}

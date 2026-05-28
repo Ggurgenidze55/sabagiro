@@ -2,27 +2,35 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
 import { formatGel } from '@/lib/products';
 
+type HolderDraft = {
+  firstName: string;
+  lastName: string;
+  personalId: string;
+  email: string;
+  phone: string;
+};
+
 type CartViewProps = {
-  purchaseLimitTotal?: number;
-  purchasedTotal?: number;
-  remainingTotal?: number;
+  purchaseLimitPerEvent?: number;
+  purchasedCountBySlug?: Record<string, number>;
+  remainingBySlug?: Record<string, number>;
   showLimitDetails?: boolean;
 };
 
 function normalizeCartTickets(
   lines: CartLine[],
-  remainingTotal: number,
+  purchaseLimitPerEvent: number,
+  purchasedCountBySlug: Record<string, number>,
 ) {
   let changed = false;
-  let used = 0;
   const next = lines.map((line) => {
     if (line.type !== 'ticket') return line;
-    const maxInCart = Math.max(0, remainingTotal - used);
-    used += Math.min(line.qty, maxInCart);
+    const purchased = purchasedCountBySlug[line.slug] ?? 0;
+    const maxInCart = Math.max(0, purchaseLimitPerEvent - purchased);
     if (line.qty > maxInCart) {
       changed = true;
       return { ...line, qty: Math.max(0, maxInCart) };
@@ -34,9 +42,9 @@ function normalizeCartTickets(
 }
 
 export function CartView({
-  purchaseLimitTotal = 1,
-  purchasedTotal = 0,
-  remainingTotal = purchaseLimitTotal,
+  purchaseLimitPerEvent = 1,
+  purchasedCountBySlug = {},
+  remainingBySlug = {},
   showLimitDetails = false,
 }: CartViewProps) {
   const router = useRouter();
@@ -44,39 +52,74 @@ export function CartView({
   const [ready, setReady] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [error, setError] = useState('');
+  const [holderDrafts, setHolderDrafts] = useState<Record<string, HolderDraft>>({});
 
   useEffect(() => {
-    setLines(normalizeCartTickets(readCart(), remainingTotal));
+    setLines(normalizeCartTickets(readCart(), purchaseLimitPerEvent, purchasedCountBySlug));
     setReady(true);
-  }, [remainingTotal]);
+  }, [purchaseLimitPerEvent, purchasedCountBySlug]);
 
   const ticketLines = useMemo(() => lines.filter((line) => line.type === 'ticket'), [lines]);
   const merchLines = useMemo(() => lines.filter((line) => line.type === 'merch'), [lines]);
   const ticketTotal = useMemo(() => cartTotal(ticketLines), [ticketLines]);
 
-  function cartTicketQty(linesInput: CartLine[]) {
-    return linesInput
-      .filter((line) => line.type === 'ticket')
-      .reduce((sum, line) => sum + line.qty, 0);
+  function maxQtyForTicket(slug: string) {
+    const purchased = purchasedCountBySlug[slug] ?? 0;
+    return Math.max(0, purchaseLimitPerEvent - purchased);
   }
 
   function updateQty(slug: string, delta: number) {
     const current = readCart().find((line) => line.slug === slug);
     if (current?.type === 'ticket' && delta > 0) {
-      const now = readCart();
-      if (cartTicketQty(now) >= remainingTotal) return;
+      const maxQty = maxQtyForTicket(slug);
+      if (current.qty >= maxQty) return;
     }
 
     const next = readCart()
       .map((line) => (line.slug === slug ? { ...line, qty: line.qty + delta } : line))
       .filter((line) => line.qty > 0);
-    writeCart(normalizeCartTickets(next, remainingTotal));
+    writeCart(normalizeCartTickets(next, purchaseLimitPerEvent, purchasedCountBySlug));
     setLines(readCart());
+  }
+
+  function getHolderKey(slug: string, index: number) {
+    return `${slug}:${index}`;
+  }
+
+  function updateHolderField(slug: string, index: number, field: keyof HolderDraft, value: string) {
+    const key = getHolderKey(slug, index);
+    setHolderDrafts((prev) => ({
+      ...prev,
+      [key]: (() => {
+        const current: HolderDraft = prev[key] ?? {
+          firstName: '',
+          lastName: '',
+          personalId: '',
+          email: '',
+          phone: '',
+        };
+        const next: HolderDraft = { ...current };
+        next[field] = value;
+        return next;
+      })(),
+    }));
+  }
+
+  function hasValidHolder(holder: HolderDraft | undefined) {
+    if (!holder) return false;
+    return (
+      holder.firstName.trim().length >= 2 &&
+      holder.lastName.trim().length >= 2 &&
+      /^\d{11}$/.test(holder.personalId.trim()) &&
+      holder.email.trim().includes('@') &&
+      holder.phone.trim().length >= 9
+    );
   }
 
   function clearCart() {
     writeCart([]);
     setLines([]);
+    setHolderDrafts({});
   }
 
   function removeMerch() {
@@ -89,7 +132,25 @@ export function CartView({
     setError('');
     setCheckingOut(true);
 
-    const ticketItems = ticketLines.map((line) => ({ slug: line.slug, qty: line.qty }));
+    const ticketItems = ticketLines.map((line) => {
+      const holders: HolderDraft[] = [];
+      for (let i = 1; i < line.qty; i++) {
+        const draft = holderDrafts[getHolderKey(line.slug, i)];
+        if (!hasValidHolder(draft)) {
+          throw new Error(
+            `Please complete holder details for extra ticket #${i + 1} in ${line.name}.`,
+          );
+        }
+        holders.push({
+          firstName: draft!.firstName.trim(),
+          lastName: draft!.lastName.trim(),
+          personalId: draft!.personalId.trim(),
+          email: draft!.email.trim(),
+          phone: draft!.phone.trim(),
+        });
+      }
+      return { slug: line.slug, qty: line.qty, holders };
+    });
 
     if (ticketItems.length === 0) {
       setError('Add at least one event ticket to checkout.');
@@ -124,9 +185,9 @@ export function CartView({
       clearCart();
       router.push('/account');
       router.refresh();
-    } catch {
+    } catch (e) {
       setCheckingOut(false);
-      setError('Network error — try again');
+      setError(e instanceof Error ? e.message : 'Network error — try again');
     }
   }
 
@@ -175,11 +236,12 @@ export function CartView({
           {lines.map((line) => {
             const remaining =
               line.type === 'ticket'
-                ? remainingTotal
-                : purchaseLimitTotal;
+                ? (remainingBySlug[line.slug] ?? maxQtyForTicket(line.slug))
+                : purchaseLimitPerEvent;
             const limitReached = line.type === 'ticket' && remaining <= 0;
             return (
-            <tr key={line.slug}>
+              <Fragment key={line.slug}>
+            <tr>
               <td style={{ color: line.accent }}>
                 {line.name}
                 {line.type === 'merch' ? (
@@ -190,13 +252,13 @@ export function CartView({
                 {limitReached ? (
                   showLimitDetails ? (
                     <span className="table-sub" style={{ display: 'block', color: '#ff6688' }}>
-                      ყიდვის ლიმიტი ამოიწურა ({purchaseLimitTotal} ჯამური)
+                      Purchase limit reached ({purchaseLimitPerEvent}/event)
                     </span>
                   ) : null
                 ) : line.type === 'ticket' ? (
                   showLimitDetails ? (
                     <span className="table-sub" style={{ display: 'block' }}>
-                      კიდევ შეგიძლია {remainingTotal} ბილეთის ყიდვა ჯამურად
+                      You can still buy {remaining} ticket(s) for this event
                     </span>
                   ) : null
                 ) : null}
@@ -207,11 +269,9 @@ export function CartView({
                 </button>
                 <span style={{ margin: '0 0.5rem' }}>{line.qty}</span>
                 {line.type === 'ticket' ? (
-                  showLimitDetails ? (
-                    <span className="table-sub" style={{ marginLeft: '0.35rem' }}>
-                      left {remainingTotal}
-                    </span>
-                  ) : null
+                  <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, 1)}>
+                    +
+                  </button>
                 ) : (
                   <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, 1)}>
                     +
@@ -225,6 +285,80 @@ export function CartView({
                 </button>
               </td>
             </tr>
+            {line.type === 'ticket' && line.qty > 1
+              ? Array.from({ length: line.qty - 1 }).map((_, idx) => {
+                  const extraIndex = idx + 1;
+                  const key = getHolderKey(line.slug, extraIndex);
+                  const draft = holderDrafts[key];
+                  return (
+                    <tr key={`${line.slug}-holder-${extraIndex}`}>
+                      <td colSpan={4}>
+                        <div className="notice-banner notice-banner--inline" style={{ maxWidth: '100%' }}>
+                          <p className="table-sub" style={{ marginBottom: '0.6rem' }}>
+                            Extra ticket #{extraIndex + 1} holder details (required)
+                          </p>
+                          <div className="form-row">
+                            <label className="form-field">
+                              <span>First name</span>
+                              <input
+                                value={draft?.firstName ?? ''}
+                                onChange={(e) =>
+                                  updateHolderField(line.slug, extraIndex, 'firstName', e.target.value)
+                                }
+                                required
+                              />
+                            </label>
+                            <label className="form-field">
+                              <span>Last name</span>
+                              <input
+                                value={draft?.lastName ?? ''}
+                                onChange={(e) =>
+                                  updateHolderField(line.slug, extraIndex, 'lastName', e.target.value)
+                                }
+                                required
+                              />
+                            </label>
+                            <label className="form-field">
+                              <span>Personal ID</span>
+                              <input
+                                value={draft?.personalId ?? ''}
+                                onChange={(e) =>
+                                  updateHolderField(line.slug, extraIndex, 'personalId', e.target.value)
+                                }
+                                pattern="\d{11}"
+                                inputMode="numeric"
+                                required
+                              />
+                            </label>
+                            <label className="form-field">
+                              <span>Email</span>
+                              <input
+                                type="email"
+                                value={draft?.email ?? ''}
+                                onChange={(e) =>
+                                  updateHolderField(line.slug, extraIndex, 'email', e.target.value)
+                                }
+                                required
+                              />
+                            </label>
+                            <label className="form-field">
+                              <span>Phone</span>
+                              <input
+                                value={draft?.phone ?? ''}
+                                onChange={(e) =>
+                                  updateHolderField(line.slug, extraIndex, 'phone', e.target.value)
+                                }
+                                required
+                              />
+                            </label>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              : null}
+              </Fragment>
           );
           })}
         </tbody>
@@ -233,11 +367,6 @@ export function CartView({
       <div className="cart-actions">
         <p className="cart-total">
           Tickets total {formatGel(ticketTotal)}
-          {showLimitDetails ? (
-            <span className="cart-total__note">
-              შეძენილი: {purchasedTotal} / {purchaseLimitTotal} · დარჩენილი: {remainingTotal}
-            </span>
-          ) : null}
           {merchLines.length > 0 ? (
             <span className="cart-total__note"> · Merch not included in checkout</span>
           ) : null}
@@ -249,7 +378,10 @@ export function CartView({
           disabled={
             checkingOut ||
             ticketLines.length === 0 ||
-            remainingTotal <= 0
+            ticketLines.some((line) => {
+              const remaining = remainingBySlug[line.slug] ?? maxQtyForTicket(line.slug);
+              return remaining <= 0;
+            })
           }
         >
           {checkingOut ? 'PROCESSING…' : 'BUY TICKETS'}

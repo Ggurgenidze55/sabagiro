@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { createFreeTicketForVerifiedUser } from '@/lib/tickets';
-import { freeTicketsRemaining } from '@/lib/ticket-purchase-limit';
+import { remainingFreeTicketsForEvent } from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
 import { formatValidationError, freeTicketGenerateSchema } from '@/lib/validators';
 
@@ -13,19 +13,23 @@ export async function POST(request: Request) {
 
     if (!canPurchaseTickets(user)) {
       return NextResponse.json(
-        { error: 'უფასო ბილეთები მხოლოდ ვერიფიცირებულ ანგარიშზე.', code: 'NOT_VERIFIED' },
+        { error: 'Free tickets are available only for verified accounts.', code: 'NOT_VERIFIED' },
         { status: 403 },
       );
     }
 
-    if (freeTicketsRemaining(user) <= 0) {
+    const body = freeTicketGenerateSchema.parse(await request.json());
+    const remainingForEvent = await remainingFreeTicketsForEvent(user, body.productSlug);
+
+    if (remainingForEvent <= 0) {
       return NextResponse.json(
-        { error: 'უფასო ბილეთების ლიმიტი ამოიწურა.', code: 'NO_FREE_TICKETS' },
+        {
+          error: `Free ticket limit reached for this event (${user.freeTicketsQuota}/event).`,
+          code: 'NO_FREE_TICKETS',
+        },
         { status: 409 },
       );
     }
-
-    const body = freeTicketGenerateSchema.parse(await request.json());
 
     const ticket = await createFreeTicketForVerifiedUser({
       owner: user,
@@ -47,7 +51,7 @@ export async function POST(request: Request) {
     }
     if (message === 'NO_FREE_TICKETS') {
       return NextResponse.json(
-        { error: 'უფასო ბილეთების ლიმიტი ამოიწურა.', code: 'NO_FREE_TICKETS' },
+        { error: 'Free ticket limit reached.', code: 'NO_FREE_TICKETS' },
         { status: 409 },
       );
     }

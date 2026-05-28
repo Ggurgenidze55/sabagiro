@@ -7,7 +7,7 @@ import { TicketQrCard } from '@/components/TicketQrCard';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
-import { freeTicketsRemaining, getTicketLimitPerEvent } from '@/lib/ticket-purchase-limit';
+import { getTicketLimitPerEvent } from '@/lib/ticket-purchase-limit';
 import { verificationLabel } from '@/lib/verification';
 
 export const dynamic = 'force-dynamic';
@@ -31,7 +31,6 @@ export default async function AccountPage() {
     },
   });
 
-  const freeRemaining = freeTicketsRemaining(user);
   const purchaseLimit = getTicketLimitPerEvent(user);
 
   return (
@@ -77,8 +76,8 @@ export default async function AccountPage() {
           {user.verificationStatus === 'VERIFIED' ? (
             <p className="page-lead">
               {user.freeTicketsEnabled
-                ? `ყიდვის ლიმიტი: ${purchaseLimit} ბილეთი ჯამურად ყველა ღონისძიებაზე. უფასო ბილეთები: ${freeRemaining} დარჩენილი.`
-                : 'თქვენი ანგარიში აქტიურია — ბილეთის ყიდვა შესაძლებელია.'}
+                ? `Purchase limit: ${purchaseLimit} paid ticket(s) per event. Free limit: ${user.freeTicketsQuota} free ticket(s) per event.`
+                : 'Your account is active. You can purchase tickets.'}
             </p>
           ) : null}
         </div>
@@ -86,9 +85,7 @@ export default async function AccountPage() {
 
       {user.verificationStatus === 'VERIFIED' && user.freeTicketsEnabled ? (
         <FreeTicketGenerator
-          remaining={freeRemaining}
           quota={user.freeTicketsQuota}
-          used={user.freeTicketsUsed}
         />
       ) : null}
 

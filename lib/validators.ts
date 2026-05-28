@@ -19,7 +19,7 @@ export function formatValidationError(e: unknown): string {
       .map((issue) => {
         const field = issue.path.join('.') || 'field';
         if (field === 'slug') {
-          return 'Slug დატოვე ცარიელი (ავტომატურად სათაურიდან) ან შეიყვანე მინიმუმ 2 ლათინური ასო.';
+          return 'Leave slug empty to auto-generate from title, or enter at least 2 latin characters.';
         }
         return `${field}: ${issue.message}`;
       })
@@ -108,6 +108,18 @@ export const checkoutSchema = z.object({
       z.object({
         slug: z.string().min(1),
         qty: z.number().int().min(1).max(20),
+        holders: z
+          .array(
+            z.object({
+              firstName: z.string().trim().min(2).max(80),
+              lastName: z.string().trim().min(2).max(80),
+              personalId: personalIdSchema,
+              email: z.string().trim().email(),
+              phone: z.string().trim().min(9).max(20),
+            }),
+          )
+          .max(19)
+          .optional(),
       }),
     )
     .min(1),

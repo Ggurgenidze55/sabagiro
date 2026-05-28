@@ -2,7 +2,7 @@ import { CartView } from '@/components/CartView';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
 import {
-  countPurchasedTicketsTotal,
+  countAllPurchasedByEvent,
   getTicketLimitPerEvent,
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
@@ -16,8 +16,13 @@ export const metadata = {
 export default async function CartPage() {
   const user = await getSessionUser();
   const purchaseLimitPerEvent = user ? getTicketLimitPerEvent(user) : 1;
-  const purchasedTotal = user ? await countPurchasedTicketsTotal(user.id) : 0;
-  const remainingTotal = user ? await remainingPurchaseSlots(user) : purchaseLimitPerEvent;
+  const purchasedCountBySlug = user ? await countAllPurchasedByEvent(user.id) : {};
+  const remainingBySlug: Record<string, number> = {};
+  if (user) {
+    for (const slug of Object.keys(purchasedCountBySlug)) {
+      remainingBySlug[slug] = await remainingPurchaseSlots(user, slug);
+    }
+  }
   const showLimitDetails = Boolean(user?.freeTicketsEnabled);
 
   return (
@@ -25,13 +30,13 @@ export default async function CartPage() {
       <h1 className="page-title">CART</h1>
       <p className="page-lead">
         {showLimitDetails
-          ? `ყიდვის ლიმიტი: ${purchaseLimitPerEvent} ბილეთი ჯამურად · გამოყენებული: ${purchasedTotal}`
+          ? `Purchase limit: ${purchaseLimitPerEvent} paid ticket(s) per event`
           : 'Review before checkout'}
       </p>
       <CartView
-        purchaseLimitTotal={purchaseLimitPerEvent}
-        purchasedTotal={purchasedTotal}
-        remainingTotal={remainingTotal}
+        purchaseLimitPerEvent={purchaseLimitPerEvent}
+        purchasedCountBySlug={purchasedCountBySlug}
+        remainingBySlug={remainingBySlug}
         showLimitDetails={showLimitDetails}
       />
     </SiteChrome>

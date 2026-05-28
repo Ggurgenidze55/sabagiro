@@ -15,7 +15,7 @@ export default async function AccountSettingsPage() {
   return (
     <SiteChrome current="account">
       <h1 className="page-title">SETTINGS</h1>
-      <p className="page-lead">Email, ტელეფონი და პაროლი — სახელი/გვარი/პირადი ნომერი უცვლელია</p>
+      <p className="page-lead">Email, phone, and password can be updated. Name/personal ID are locked after registration</p>
       <ProfileSettings user={user} />
     </SiteChrome>
   );

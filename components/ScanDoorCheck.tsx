@@ -55,7 +55,7 @@ export function ScanDoorCheck({ qrToken, status, canCheckIn }: ScanDoorCheckProp
   return (
     <div className="scan-door-actions">
       <button type="button" className="btn scan-door-actions__btn" onClick={confirmScan} disabled={loading}>
-        {loading ? '…' : 'დასკანერება · CONFIRM ENTRY'}
+        {loading ? '…' : 'CONFIRM ENTRY'}
       </button>
       <p className="scan-door-hint">One scan per ticket. After confirm, this QR cannot be used again.</p>
       {error ? <p className="form-error">{error}</p> : null}

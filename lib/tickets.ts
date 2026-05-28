@@ -76,22 +76,30 @@ export async function createFreeTicketForVerifiedUser(opts: {
   productSlug: string;
   holder: Holder;
 }) {
-  const remaining = opts.owner.freeTicketsQuota - opts.owner.freeTicketsUsed;
-  if (!opts.owner.freeTicketsEnabled || remaining <= 0) {
+  if (!opts.owner.freeTicketsEnabled) {
     throw new Error('NO_FREE_TICKETS');
   }
 
   return prisma.$transaction(async (tx) => {
-    const updated = await tx.user.updateMany({
+    const usedForEvent = await tx.ticket.count({
+      where: {
+        userId: opts.owner.id,
+        productSlug: opts.productSlug,
+        source: 'FREE',
+        status: { not: 'CANCELLED' },
+      },
+    });
+
+    if (usedForEvent >= opts.owner.freeTicketsQuota) {
+      throw new Error('NO_FREE_TICKETS');
+    }
+
+    await tx.user.update({
       where: {
         id: opts.owner.id,
-        freeTicketsEnabled: true,
-        freeTicketsUsed: { lt: opts.owner.freeTicketsQuota },
       },
       data: { freeTicketsUsed: { increment: 1 } },
     });
-
-    if (updated.count !== 1) throw new Error('NO_FREE_TICKETS');
 
     const product = await getProduct(opts.productSlug);
     if (!product || product.type !== 'ticket') throw new Error('INVALID_PRODUCT');
@@ -105,7 +113,7 @@ export async function createFreeTicketForVerifiedUser(opts: {
         productName: product.name,
         eventDate: product.eventDate ?? null,
         priceGel: 0,
-        tierLabel: 'უფასო',
+        tierLabel: 'Free',
         holderFirstName: opts.holder.firstName,
         holderLastName: opts.holder.lastName,
         holderPersonalId: opts.holder.personalId,
