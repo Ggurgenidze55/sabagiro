@@ -43,81 +43,118 @@ export default async function ProductPage({ params }: PageProps) {
     user && product.type === 'ticket' && purchaseRemaining <= 0,
   );
   const showLimitDetails = Boolean(user?.freeTicketsEnabled);
+  const aboutText = product.about?.trim() || product.description;
+  const isTicket = product.type === 'ticket';
 
   return (
     <SiteChrome current="shop">
-      <p className="page-lead">{product.tag ?? product.type.toUpperCase()}</p>
-      <h1 className="page-title" style={{ color: product.accent }}>
-        {product.name}
-      </h1>
-      {product.type === 'ticket' && product.imagePath ? (
-        <div className="event-hero-image" style={{ ['--event-image-url' as string]: `url(${product.imagePath})` }}>
-          <img src={product.imagePath} alt={product.name} className="event-hero-image__img" />
-          <div className="event-hero-image__pixel" aria-hidden />
+      <article
+        className="event-page"
+        style={{ ['--event-accent' as string]: product.accent }}
+      >
+        <header className="event-page__head">
+          {product.tag ? <p className="event-page__tag">{product.tag}</p> : null}
+          <h1 className="event-page__title">{product.name}</h1>
+          {isTicket && product.description && product.about?.trim() ? (
+            <p className="event-page__lineup">{product.description}</p>
+          ) : null}
+        </header>
+
+        {isTicket && product.imagePath ? (
+          <div className="event-hero-image">
+            <img src={product.imagePath} alt={product.name} className="event-hero-image__img" />
+            <div className="event-hero-image__pixel" aria-hidden />
+            <div className="event-hero-image__fade" aria-hidden />
+          </div>
+        ) : null}
+
+        {aboutText ? (
+          <section className="event-page__about" aria-label="About this event">
+            <h2 className="event-page__section-label">About</h2>
+            <p className="event-about">{aboutText}</p>
+          </section>
+        ) : null}
+
+        <div className="event-page__price-card">
+          <span className="event-page__price-label">Current wave</span>
+          <p className="event-page__price">{formatGel(product.priceGel)}</p>
+          {isTicket && product.ticketsRemaining !== undefined ? (
+            <p className="event-page__stock">
+              {product.ticketsRemaining > 0
+                ? `${product.ticketsRemaining} tickets left`
+                : 'Sold out'}
+            </p>
+          ) : null}
         </div>
-      ) : null}
-      <p className="event-about" style={{ maxWidth: '42rem' }}>
-        {product.about || product.description}
-      </p>
-      <p className="cart-total" style={{ margin: '1.5rem 0' }}>
-        Current price {formatGel(product.priceGel)}
-      </p>
 
-      {product.type === 'ticket' ? (
-        <EventTierList tiers={product.tiers} ticketsRemaining={product.ticketsRemaining} />
-      ) : null}
+        {isTicket ? (
+          <EventTierList tiers={product.tiers} ticketsRemaining={product.ticketsRemaining} />
+        ) : null}
 
-      {product.type === 'ticket' && user && !canPurchaseTickets(user) ? (
-        <p className="notice-banner notice-banner--inline">
-          Ticket purchase requires a verified account. Status: {user.verificationStatus}. Check your
-          account page after admin review.
-        </p>
-      ) : null}
+        <div className="event-page__notices">
+          {isTicket && user && !canPurchaseTickets(user) ? (
+            <p className="notice-banner notice-banner--inline">
+              Ticket purchase requires a verified account. Status: {user.verificationStatus}.
+              Check your account page after admin review.
+            </p>
+          ) : null}
 
-      {product.type === 'ticket' && user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
-        <p className="notice-banner notice-banner--inline">
-          Purchase limit reached for this event ({purchaseLimit}).
-          <Link href="/account" className="btn btn--ghost" style={{ marginTop: '0.75rem' }}>
-            My tickets
+          {isTicket &&
+          user &&
+          canPurchaseTickets(user) &&
+          cannotBuyMore &&
+          showLimitDetails ? (
+            <p className="notice-banner notice-banner--inline">
+              Purchase limit reached for this event ({purchaseLimit}).
+              <Link href="/account" className="btn btn--ghost event-page__notice-btn">
+                My tickets
+              </Link>
+            </p>
+          ) : null}
+
+          {isTicket &&
+          user &&
+          canPurchaseTickets(user) &&
+          !cannotBuyMore &&
+          purchaseLimit > 1 &&
+          showLimitDetails ? (
+            <p className="event-page__hint">
+              You can buy {purchaseRemaining} more ticket(s) for this event (limit {purchaseLimit}
+              ).
+            </p>
+          ) : null}
+        </div>
+
+        <div className="event-page__actions">
+          {isTicket && product.ticketsRemaining === 0 ? (
+            <p className="form-error event-page__sold-out">Sold out</p>
+          ) : (
+            <AddToCartButton
+              product={product}
+              disabled={
+                isTicket &&
+                ((user && !canPurchaseTickets(user)) ||
+                  product.ticketsRemaining === 0 ||
+                  cannotBuyMore)
+              }
+              label={
+                product.ticketsRemaining === 0
+                  ? 'SOLD OUT'
+                  : cannotBuyMore
+                    ? showLimitDetails
+                      ? 'LIMIT REACHED'
+                      : 'UNAVAILABLE'
+                    : user && !canPurchaseTickets(user)
+                      ? 'VERIFICATION REQUIRED'
+                      : undefined
+              }
+            />
+          )}
+          <Link href="/shop" className="btn btn--ghost">
+            ← All events
           </Link>
-        </p>
-      ) : null}
-
-      {product.type === 'ticket' && user && canPurchaseTickets(user) && !cannotBuyMore && purchaseLimit > 1 && showLimitDetails ? (
-        <p className="page-lead" style={{ marginBottom: '1rem' }}>
-          You can buy {purchaseRemaining} more ticket(s) for this event (limit {purchaseLimit}).
-        </p>
-      ) : null}
-
-      {product.type === 'ticket' && product.ticketsRemaining === 0 ? (
-        <p className="form-error">Sold out</p>
-      ) : (
-        <AddToCartButton
-          product={product}
-          disabled={
-            product.type === 'ticket' &&
-            ((user && !canPurchaseTickets(user)) ||
-              product.ticketsRemaining === 0 ||
-              cannotBuyMore)
-          }
-          label={
-            product.ticketsRemaining === 0
-              ? 'SOLD OUT'
-              : cannotBuyMore
-                ? showLimitDetails
-                  ? 'LIMIT REACHED'
-                  : 'UNAVAILABLE'
-              : user && !canPurchaseTickets(user)
-                ? 'VERIFICATION REQUIRED'
-                : undefined
-          }
-        />
-      )}
-      <div className="cart-actions">
-        <Link href="/shop" className="btn btn--ghost">
-          ← All products
-        </Link>
-      </div>
+        </div>
+      </article>
     </SiteChrome>
   );
 }
