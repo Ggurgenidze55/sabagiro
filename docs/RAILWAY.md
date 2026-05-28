@@ -70,7 +70,9 @@ Open:
 3. After first deploy, run migrations from your Mac against production DB:
 
    ```bash
-   DATABASE_URL="postgresql://production..." npm run db:push
+   npm run db:migrate
+   # or: npm run db:push
+   # Requires DATABASE_URL in .env.local (Prisma does not read .env.local by default — use npm scripts)
    DATABASE_URL="postgresql://production..." npm run seed:test
    DATABASE_URL="postgresql://production..." npm run seed:events
    ```
