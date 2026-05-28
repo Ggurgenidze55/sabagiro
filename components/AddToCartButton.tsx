@@ -32,7 +32,7 @@ export function AddToCartButton({
     const lines = readCart();
     const existing = lines.find((l) => l.slug === product.slug);
     if (existing) {
-      existing.qty += 1;
+      return;
     } else {
       lines.push({
         slug: product.slug,

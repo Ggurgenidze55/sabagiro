@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { AdminUserTicketPolicy } from '@/components/AdminUserTicketPolicy';
 
 export type AdminUserRow = {
   id: string;
@@ -14,6 +15,10 @@ export type AdminUserRow = {
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   role: string;
   ticketCount: number;
+  ticketLimitPerEvent: number;
+  freeTicketsEnabled: boolean;
+  freeTicketsQuota: number;
+  freeTicketsUsed: number;
 };
 
 export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
@@ -90,6 +95,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
             <th>Social</th>
             <th>Status</th>
             <th>Tickets</th>
+            <th>Limits</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -129,6 +135,19 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                 </span>
               </td>
               <td>{u.ticketCount}</td>
+              <td>
+                {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                  <>
+                    <span className="table-sub">ყიდვა: {u.ticketLimitPerEvent}/ივენთი</span>
+                    <br />
+                    <span className="table-sub">
+                      უფასო: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'გამორთ.'}
+                    </span>
+                  </>
+                ) : (
+                  <span className="table-sub">—</span>
+                )}
+              </td>
               <td className="table-actions">
                 {u.role !== 'ADMIN' ? (
                   <>
@@ -187,6 +206,14 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         {deletingId === u.id ? '…' : 'წაშლა'}
                       </button>
                     )}
+                    <AdminUserTicketPolicy
+                      user={u}
+                      onUpdated={(patch) =>
+                        setUsers((list) =>
+                          list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
+                        )
+                      }
+                    />
                   </>
                 ) : (
                   <span className="table-sub">ADMIN</span>

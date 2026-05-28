@@ -9,8 +9,7 @@ type SiteNavProps = {
 
 export function SiteNav({ user, current }: SiteNavProps) {
   return (
-    <nav aria-label="Main">
-      <ul className="site-nav">
+    <ul className="site-nav">
         <li>
           <Link href="/">Home</Link>
         </li>
@@ -53,7 +52,6 @@ export function SiteNav({ user, current }: SiteNavProps) {
             </li>
           </>
         )}
-      </ul>
-    </nav>
+    </ul>
   );
 }

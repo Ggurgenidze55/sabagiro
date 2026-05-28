@@ -107,8 +107,23 @@ export const checkoutSchema = z.object({
     .array(
       z.object({
         slug: z.string().min(1),
-        qty: z.number().int().min(1).max(10),
+        qty: z.number().int().min(1).max(20),
       }),
     )
     .min(1),
+});
+
+export const ticketPolicySchema = z.object({
+  ticketLimitPerEvent: z.coerce.number().int().min(1).max(20),
+  freeTicketsEnabled: z.boolean(),
+  freeTicketsQuota: z.coerce.number().int().min(0).max(500),
+});
+
+export const freeTicketGenerateSchema = z.object({
+  productSlug: z.string().min(1),
+  firstName: z.string().trim().min(2).max(80),
+  lastName: z.string().trim().min(2).max(80),
+  personalId: personalIdSchema,
+  email: z.string().trim().email(),
+  phone: z.string().trim().min(9).max(20),
 });

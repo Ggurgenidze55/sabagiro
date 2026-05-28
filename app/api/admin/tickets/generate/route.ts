@@ -5,7 +5,7 @@ import { adminGenerateSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const body = adminGenerateSchema.parse(await request.json());
     const user = await findOrCreateUserForAdmin({
       email: body.email,
@@ -19,6 +19,8 @@ export async function POST(request: Request) {
       user,
       productSlug: body.productSlug,
       source: 'ADMIN',
+      createdByUserId: admin.id,
+      priceGel: 0,
       holder: {
         firstName: body.firstName,
         lastName: body.lastName,

@@ -26,6 +26,7 @@ export async function createTicketForUser(opts: {
   holder?: Holder;
   priceGel?: number;
   tierLabel?: string;
+  createdByUserId?: string;
 }) {
   const product = await getProduct(opts.productSlug);
   if (!product || product.type !== 'ticket') {
@@ -44,6 +45,7 @@ export async function createTicketForUser(opts: {
     data: {
       qrToken: newQrToken(),
       userId: opts.user.id,
+      createdByUserId: opts.createdByUserId ?? opts.user.id,
       productSlug: product.slug,
       productName: product.name,
       eventDate: product.eventDate ?? null,
@@ -67,6 +69,62 @@ export async function createTicketForUser(opts: {
   });
 
   return ticket;
+}
+
+export async function createFreeTicketForVerifiedUser(opts: {
+  owner: User;
+  productSlug: string;
+  holder: Holder;
+}) {
+  const remaining = opts.owner.freeTicketsQuota - opts.owner.freeTicketsUsed;
+  if (!opts.owner.freeTicketsEnabled || remaining <= 0) {
+    throw new Error('NO_FREE_TICKETS');
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.user.updateMany({
+      where: {
+        id: opts.owner.id,
+        freeTicketsEnabled: true,
+        freeTicketsUsed: { lt: opts.owner.freeTicketsQuota },
+      },
+      data: { freeTicketsUsed: { increment: 1 } },
+    });
+
+    if (updated.count !== 1) throw new Error('NO_FREE_TICKETS');
+
+    const product = await getProduct(opts.productSlug);
+    if (!product || product.type !== 'ticket') throw new Error('INVALID_PRODUCT');
+
+    const ticket = await tx.ticket.create({
+      data: {
+        qrToken: newQrToken(),
+        userId: opts.owner.id,
+        createdByUserId: opts.owner.id,
+        productSlug: product.slug,
+        productName: product.name,
+        eventDate: product.eventDate ?? null,
+        priceGel: 0,
+        tierLabel: 'უფასო',
+        holderFirstName: opts.holder.firstName,
+        holderLastName: opts.holder.lastName,
+        holderPersonalId: opts.holder.personalId,
+        holderEmail: opts.holder.email,
+        holderPhone: opts.holder.phone,
+        source: 'FREE',
+      },
+    });
+
+    const qrImage = await qrDataUrl(ticket.qrToken);
+    await sendTicketEmail({
+      to: opts.holder.email,
+      ticket,
+      scanLink: scanUrl(ticket.qrToken),
+      qrImageDataUrl: qrImage,
+    });
+
+    return ticket;
+  });
 }
 
 export async function findOrCreateUserForAdmin(input: Holder & { role?: 'USER' }) {

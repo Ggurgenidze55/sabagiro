@@ -44,9 +44,10 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
         tabIndex={open ? 0 : -1}
         onClick={() => setOpen(false)}
       />
-      <nav
+      <div
         id={panelId}
         className="mobile-nav__panel"
+        role="navigation"
         aria-label={label}
         onClick={(e) => {
           const target = e.target as HTMLElement;
@@ -54,7 +55,7 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
         }}
       >
         {children}
-      </nav>
+      </div>
     </div>
   );
 }

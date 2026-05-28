@@ -27,6 +27,7 @@ enum TicketStatus {
 enum TicketSource {
   PURCHASE
   ADMIN
+  FREE
 }
 
 model User {
@@ -41,10 +42,15 @@ model User {
   instagramUrl       String             @default("")
   verificationStatus VerificationStatus @default(PENDING)
   verifiedAt         DateTime?
-  role               Role               @default(USER)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  tickets            Ticket[]
+  role                 Role               @default(USER)
+  ticketLimitPerEvent  Int                @default(1)
+  freeTicketsEnabled   Boolean            @default(false)
+  freeTicketsQuota     Int                @default(0)
+  freeTicketsUsed      Int                @default(0)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  tickets              Ticket[]           @relation("TicketOwner")
+  ticketsCreated       Ticket[]           @relation("TicketCreatedBy")
 
   @@index([verificationStatus])
 }
@@ -91,7 +97,9 @@ model Ticket {
   id               String       @id @default(cuid())
   qrToken          String       @unique
   userId           String
-  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User         @relation("TicketOwner", fields: [userId], references: [id], onDelete: Cascade)
+  createdByUserId  String?
+  createdBy        User?        @relation("TicketCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   productSlug      String
   productName      String
   eventDate        String?
@@ -108,6 +116,7 @@ model Ticket {
   createdAt        DateTime     @default(now())
 
   @@index([userId])
+  @@index([createdByUserId])
   @@index([productSlug])
   @@index([createdAt])
 }

@@ -4,6 +4,10 @@ import { AddToCartButton } from '@/components/AddToCartButton';
 import { EventTierList } from '@/components/EventTierList';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
+import {
+  getTicketLimitPerEvent,
+  remainingPurchaseSlots,
+} from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
 import { normalizeEventSlug } from '@/lib/events';
 import { formatGel, getProduct } from '@/lib/products';
@@ -30,6 +34,15 @@ export default async function ProductPage({ params }: PageProps) {
   const product = await getProduct(params.slug);
   if (!product) notFound();
 
+  const purchaseLimit = user ? getTicketLimitPerEvent(user) : 1;
+  const purchaseRemaining =
+    user && product.type === 'ticket'
+      ? await remainingPurchaseSlots(user, product.slug)
+      : purchaseLimit;
+  const cannotBuyMore = Boolean(
+    user && product.type === 'ticket' && purchaseRemaining <= 0,
+  );
+
   return (
     <SiteChrome current="shop">
       <p className="page-lead">{product.tag ?? product.type.toUpperCase()}</p>
@@ -54,6 +67,21 @@ export default async function ProductPage({ params }: PageProps) {
         </p>
       ) : null}
 
+      {product.type === 'ticket' && user && canPurchaseTickets(user) && cannotBuyMore ? (
+        <p className="notice-banner notice-banner--inline">
+          ამ ღონისძიებაზე ყიდვის ლიმიტი ({purchaseLimit}) ამოიწურა.
+          <Link href="/account" className="btn btn--ghost" style={{ marginTop: '0.75rem' }}>
+            ჩემი ბილეთები
+          </Link>
+        </p>
+      ) : null}
+
+      {product.type === 'ticket' && user && canPurchaseTickets(user) && !cannotBuyMore && purchaseLimit > 1 ? (
+        <p className="page-lead" style={{ marginBottom: '1rem' }}>
+          შეგიძლია იყიდო კიდევ {purchaseRemaining} ბილეთი ამ ღონისძიებაზე (ლიმიტი {purchaseLimit}).
+        </p>
+      ) : null}
+
       {product.type === 'ticket' && product.ticketsRemaining === 0 ? (
         <p className="form-error">Sold out</p>
       ) : (
@@ -61,11 +89,15 @@ export default async function ProductPage({ params }: PageProps) {
           product={product}
           disabled={
             product.type === 'ticket' &&
-            ((user && !canPurchaseTickets(user)) || product.ticketsRemaining === 0)
+            ((user && !canPurchaseTickets(user)) ||
+              product.ticketsRemaining === 0 ||
+              cannotBuyMore)
           }
           label={
             product.ticketsRemaining === 0
               ? 'SOLD OUT'
+              : cannotBuyMore
+                ? 'ლიმიტი ამოიწურა'
               : user && !canPurchaseTickets(user)
                 ? 'VERIFICATION REQUIRED'
                 : undefined

@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { SiteChrome } from '@/components/SiteChrome';
+import { FreeTicketGenerator } from '@/components/FreeTicketGenerator';
 import { LogoutButton } from '@/components/LogoutButton';
 import { TicketQrCard } from '@/components/TicketQrCard';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { describeTicketIssuance } from '@/lib/ticket-issuance';
+import { freeTicketsRemaining, getTicketLimitPerEvent } from '@/lib/ticket-purchase-limit';
 import { verificationLabel } from '@/lib/verification';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +21,18 @@ export default async function AccountPage() {
   const tickets = await prisma.ticket.findMany({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
+    include: {
+      createdBy: {
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      },
+      user: {
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      },
+    },
   });
+
+  const freeRemaining = freeTicketsRemaining(user);
+  const purchaseLimit = getTicketLimitPerEvent(user);
 
   return (
     <SiteChrome current="account">
@@ -61,9 +75,22 @@ export default async function AccountPage() {
             </p>
           ) : null}
           {user.verificationStatus === 'VERIFIED' ? (
-            <p className="page-lead">You can buy tickets from the shop.</p>
+            <p className="page-lead">
+              ყიდვის ლიმიტი: {purchaseLimit} ბილეთი ერთ ღონისძიებაზე.
+              {user.freeTicketsEnabled
+                ? ` უფასო ბილეთები: ${freeRemaining} დარჩენილი.`
+                : null}
+            </p>
           ) : null}
         </div>
+      ) : null}
+
+      {user.verificationStatus === 'VERIFIED' && user.freeTicketsEnabled ? (
+        <FreeTicketGenerator
+          remaining={freeRemaining}
+          quota={user.freeTicketsQuota}
+          used={user.freeTicketsUsed}
+        />
       ) : null}
 
       <h2 className="section-title">My tickets</h2>
@@ -73,16 +100,20 @@ export default async function AccountPage() {
         </p>
       ) : (
         <div className="ticket-grid">
-          {tickets.map((t) => (
-            <TicketQrCard
-              key={t.id}
-              ticketId={t.id}
-              productName={t.productName}
-              status={t.status}
-              holderName={`${t.holderFirstName} ${t.holderLastName}`}
-              personalId={t.holderPersonalId}
-            />
-          ))}
+          {tickets.map((t) => {
+            const issuance = describeTicketIssuance(t, t.user, t.createdBy ?? t.user);
+            return (
+              <TicketQrCard
+                key={t.id}
+                ticketId={t.id}
+                productName={t.productName}
+                status={t.status}
+                holderName={`${t.holderFirstName} ${t.holderLastName}`}
+                personalId={t.holderPersonalId}
+                issuanceLine={`${issuance.actorNote}: ${issuance.detail}`}
+              />
+            );
+          })}
         </div>
       )}
     </SiteChrome>

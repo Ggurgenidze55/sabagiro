@@ -18,6 +18,10 @@ export type SessionUser = {
   instagramUrl: string;
   verificationStatus: VerificationStatus;
   role: Role;
+  ticketLimitPerEvent: number;
+  freeTicketsEnabled: boolean;
+  freeTicketsQuota: number;
+  freeTicketsUsed: number;
 };
 
 function getSecret() {
@@ -87,6 +91,10 @@ export async function getSessionUser(): Promise<SessionUser | null> {
         instagramUrl: true,
         verificationStatus: true,
         role: true,
+        ticketLimitPerEvent: true,
+        freeTicketsEnabled: true,
+        freeTicketsQuota: true,
+        freeTicketsUsed: true,
       },
     });
     return user;
@@ -118,6 +126,10 @@ export function toSessionUser(user: {
   instagramUrl: string;
   verificationStatus: VerificationStatus;
   role: Role;
+  ticketLimitPerEvent: number;
+  freeTicketsEnabled: boolean;
+  freeTicketsQuota: number;
+  freeTicketsUsed: number;
 }): SessionUser {
   return user;
 }

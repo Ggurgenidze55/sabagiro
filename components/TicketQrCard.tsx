@@ -8,9 +8,17 @@ type TicketQrCardProps = {
   status: string;
   holderName: string;
   personalId: string;
+  issuanceLine?: string;
 };
 
-export function TicketQrCard({ ticketId, productName, status, holderName, personalId }: TicketQrCardProps) {
+export function TicketQrCard({
+  ticketId,
+  productName,
+  status,
+  holderName,
+  personalId,
+  issuanceLine,
+}: TicketQrCardProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +59,9 @@ export function TicketQrCard({ ticketId, productName, status, holderName, person
         <span className={`ticket-status ticket-status--${status.toLowerCase()}`}>{status}</span>
       </div>
       <p className="ticket-card__meta">
-        {holderName} · {personalId}
+        შესვლა: {holderName} · {personalId}
       </p>
+      {issuanceLine ? <p className="ticket-card__meta">{issuanceLine}</p> : null}
       {dataUrl ? (
         <img src={dataUrl} alt="Ticket QR code" className="ticket-card__qr" width={200} height={200} />
       ) : loading ? (

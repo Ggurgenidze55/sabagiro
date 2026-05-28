@@ -6,7 +6,39 @@ import { useEffect, useMemo, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
 import { formatGel } from '@/lib/products';
 
-export function CartView() {
+type CartViewProps = {
+  ownedEventSlugs?: string[];
+  purchaseLimitPerEvent?: number;
+  purchasedCountBySlug?: Record<string, number>;
+  remainingBySlug?: Record<string, number>;
+};
+
+function normalizeCartTickets(
+  lines: CartLine[],
+  purchaseLimitPerEvent: number,
+  purchasedCountBySlug: Record<string, number>,
+) {
+  let changed = false;
+  const next = lines.map((line) => {
+    if (line.type !== 'ticket') return line;
+    const purchased = purchasedCountBySlug[line.slug] ?? 0;
+    const maxInCart = Math.max(0, purchaseLimitPerEvent - purchased);
+    if (line.qty > maxInCart) {
+      changed = true;
+      return { ...line, qty: Math.max(0, maxInCart) };
+    }
+    return line;
+  }).filter((line) => line.qty > 0);
+  if (changed) writeCart(next);
+  return next;
+}
+
+export function CartView({
+  ownedEventSlugs = [],
+  purchaseLimitPerEvent = 1,
+  purchasedCountBySlug = {},
+  remainingBySlug = {},
+}: CartViewProps) {
   const router = useRouter();
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
@@ -14,20 +46,31 @@ export function CartView() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    setLines(readCart());
+    setLines(normalizeCartTickets(readCart(), purchaseLimitPerEvent, purchasedCountBySlug));
     setReady(true);
-  }, []);
+  }, [purchaseLimitPerEvent, purchasedCountBySlug]);
 
   const ticketLines = useMemo(() => lines.filter((line) => line.type === 'ticket'), [lines]);
   const merchLines = useMemo(() => lines.filter((line) => line.type === 'merch'), [lines]);
   const ticketTotal = useMemo(() => cartTotal(ticketLines), [ticketLines]);
 
+  function maxQtyForTicket(slug: string) {
+    const purchased = purchasedCountBySlug[slug] ?? 0;
+    return Math.max(0, purchaseLimitPerEvent - purchased);
+  }
+
   function updateQty(slug: string, delta: number) {
+    const current = readCart().find((line) => line.slug === slug);
+    if (current?.type === 'ticket' && delta > 0) {
+      const maxQty = maxQtyForTicket(slug);
+      if (current.qty >= maxQty) return;
+    }
+
     const next = readCart()
       .map((line) => (line.slug === slug ? { ...line, qty: line.qty + delta } : line))
       .filter((line) => line.qty > 0);
-    writeCart(next);
-    setLines(next);
+    writeCart(normalizeCartTickets(next, purchaseLimitPerEvent, purchasedCountBySlug));
+    setLines(readCart());
   }
 
   function clearCart() {
@@ -69,6 +112,8 @@ export function CartView() {
     if (!res.ok) {
       if (data.code === 'NOT_VERIFIED') {
         setError('Your account must be verified before buying tickets. Check /account.');
+      } else if (data.code === 'ALREADY_OWNED' || data.code === 'TICKET_LIMIT') {
+        setError(data.error || 'Ticket limit reached');
       } else {
         setError(data.error || 'Checkout failed');
       }
@@ -126,7 +171,10 @@ export function CartView() {
           </tr>
         </thead>
         <tbody>
-          {lines.map((line) => (
+          {lines.map((line) => {
+            const remaining = remainingBySlug[line.slug] ?? purchaseLimitPerEvent;
+            const limitReached = line.type === 'ticket' && remaining <= 0;
+            return (
             <tr key={line.slug}>
               <td style={{ color: line.accent }}>
                 {line.name}
@@ -135,15 +183,30 @@ export function CartView() {
                     Merch · not for online checkout
                   </span>
                 ) : null}
+                {limitReached ? (
+                  <span className="table-sub" style={{ display: 'block', color: '#ff6688' }}>
+                    ყიდვის ლიმიტი ამოიწურა ({purchaseLimitPerEvent}/ივენთი)
+                  </span>
+                ) : line.type === 'ticket' ? (
+                  <span className="table-sub" style={{ display: 'block' }}>
+                    კიდევ შეგიძლია {remaining} ბილეთის ყიდვა
+                  </span>
+                ) : null}
               </td>
               <td>
                 <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, -1)}>
                   −
                 </button>
                 <span style={{ margin: '0 0.5rem' }}>{line.qty}</span>
-                <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, 1)}>
-                  +
-                </button>
+                {line.type === 'ticket' ? (
+                  <span className="table-sub" style={{ marginLeft: '0.35rem' }}>
+                    max {maxQtyForTicket(line.slug)}
+                  </span>
+                ) : (
+                  <button type="button" className="btn btn--ghost" onClick={() => updateQty(line.slug, 1)}>
+                    +
+                  </button>
+                )}
               </td>
               <td>{formatGel(line.priceGel * line.qty)}</td>
               <td>
@@ -152,7 +215,8 @@ export function CartView() {
                 </button>
               </td>
             </tr>
-          ))}
+          );
+          })}
         </tbody>
       </table>
       </div>
@@ -167,7 +231,11 @@ export function CartView() {
           type="button"
           className="btn"
           onClick={checkout}
-          disabled={checkingOut || ticketLines.length === 0}
+          disabled={
+            checkingOut ||
+            ticketLines.length === 0 ||
+            ticketLines.some((line) => (remainingBySlug[line.slug] ?? 0) <= 0)
+          }
         >
           {checkingOut ? 'PROCESSING…' : 'BUY TICKETS'}
         </button>

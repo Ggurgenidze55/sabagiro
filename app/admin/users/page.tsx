@@ -30,6 +30,10 @@ export default async function AdminUsersPage() {
           verificationStatus: u.verificationStatus,
           role: u.role,
           ticketCount: u._count.tickets,
+          ticketLimitPerEvent: u.ticketLimitPerEvent,
+          freeTicketsEnabled: u.freeTicketsEnabled,
+          freeTicketsQuota: u.freeTicketsQuota,
+          freeTicketsUsed: u.freeTicketsUsed,
         }))}
       />
     </>

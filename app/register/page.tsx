@@ -1,10 +1,17 @@
+import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
 import { SiteChrome } from '@/components/SiteChrome';
 import { AuthForm } from '@/components/AuthForm';
+import { getSessionUser } from '@/lib/auth';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Register — Sabagiro' };
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const user = await getSessionUser();
+  if (user) redirect('/account');
+
   return (
     <SiteChrome>
       <h1 className="page-title">REGISTER</h1>

@@ -987,6 +987,19 @@ a {
   margin-bottom: 0.5rem;
 }
 
+.user-policy {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.user-policy__form {
+  margin-top: 0.75rem;
+  max-width: 20rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(176, 168, 154, 0.15);
+  background: rgba(10, 10, 10, 0.6);
+}
+
 /* —— Mobile navigation —— */
 .mobile-nav {
   position: relative;

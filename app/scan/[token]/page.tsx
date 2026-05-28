@@ -4,6 +4,7 @@ import { ScanDoorCheck } from '@/components/ScanDoorCheck';
 import { ScanVerdict } from '@/components/ScanVerdict';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { describeTicketIssuance } from '@/lib/ticket-issuance';
 import { getScanVerdict } from '@/lib/ticket-scan';
 import { qrDataUrl } from '@/lib/qr';
 
@@ -16,6 +17,14 @@ export const metadata = { title: 'Ticket scan — Sabagiro' };
 export default async function ScanPage({ params }: PageProps) {
   const ticket = await prisma.ticket.findUnique({
     where: { qrToken: params.token },
+    include: {
+      user: {
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      },
+      createdBy: {
+        select: { id: true, firstName: true, lastName: true, email: true, role: true },
+      },
+    },
   });
 
   if (!ticket) notFound();
@@ -24,6 +33,11 @@ export default async function ScanPage({ params }: PageProps) {
   const isAdmin = user?.role === 'ADMIN';
   const verdict = getScanVerdict(ticket.status, ticket.scannedAt);
   const showHolderDetails = isAdmin || ticket.status === 'VALID';
+  const issuance = describeTicketIssuance(
+    ticket,
+    ticket.user,
+    ticket.createdBy ?? ticket.user,
+  );
 
   const qrImage = ticket.status === 'VALID' ? await qrDataUrl(ticket.qrToken) : null;
 
@@ -38,20 +52,18 @@ export default async function ScanPage({ params }: PageProps) {
         <ScanVerdict verdict={verdict} />
 
         <h1 className="scan-card__event">{ticket.productName}</h1>
-        {ticket.tierLabel ? (
-          <p className="scan-card__tier">{ticket.tierLabel}</p>
-        ) : null}
+        {ticket.tierLabel ? <p className="scan-card__tier">{ticket.tierLabel}</p> : null}
 
         {showHolderDetails ? (
           <dl className="scan-details">
             <div>
-              <dt>Name</dt>
+              <dt>{issuance.holderNote}</dt>
               <dd>
                 {ticket.holderFirstName} {ticket.holderLastName}
               </dd>
             </div>
             <div>
-              <dt>Personal ID</dt>
+              <dt>პირადი ნომერი</dt>
               <dd>{ticket.holderPersonalId}</dd>
             </div>
             <div>
@@ -59,16 +71,26 @@ export default async function ScanPage({ params }: PageProps) {
               <dd>{ticket.holderEmail}</dd>
             </div>
             <div>
-              <dt>Phone</dt>
+              <dt>ტელეფონი</dt>
               <dd>{ticket.holderPhone}</dd>
             </div>
             <div>
-              <dt>Price paid</dt>
-              <dd>{ticket.priceGel} ₾</dd>
+              <dt>{issuance.actorNote}</dt>
+              <dd>{issuance.detail}</dd>
+            </div>
+            <div>
+              <dt>ანგარიში (მფლობელი)</dt>
+              <dd>
+                {issuance.ownerLabel} · {ticket.user.email}
+              </dd>
+            </div>
+            <div>
+              <dt>ფასი</dt>
+              <dd>{ticket.priceGel > 0 ? `${ticket.priceGel} ₾` : 'უფასო'}</dd>
             </div>
           </dl>
         ) : (
-          <p className="scan-door-hint">Ticket details hidden after scan.</p>
+          <p className="scan-door-hint">დეტალები სკანის შემდეგ იმალება.</p>
         )}
 
         {qrImage ? (
