@@ -28,3 +28,9 @@ next-env.d.ts
 # vercel
 .vercel
 .env*
+
+# ios / xcode
+ios/DerivedData/
+ios/build/
+*.xcuserstate
+xcuserdata/
