@@ -1,8 +1,5 @@
-import {
-  buildPaymentReturnUrl,
-  buildTbcWebhookUrl,
-  getTbcConfig,
-} from '@/lib/payments/config';
+import { buildTbcWebhookUrl, getTbcConfig } from '@/lib/payments/config';
+import { siteUrl } from '@/lib/site-url';
 import { TBC_CURRENCY, TBC_PATHS } from '@/lib/payments/tbc/constants';
 
 export type TbcCreateResult = {
@@ -92,7 +89,9 @@ export class TbcClient {
         currency: TBC_CURRENCY,
         total: opts.amountGel,
       },
-      returnurl: opts.returnUrl ?? buildPaymentReturnUrl(opts.orderId),
+      returnurl:
+        opts.returnUrl ??
+        siteUrl(`/payment/return?orderId=${encodeURIComponent(opts.orderId)}`),
       merchantPaymentId: String(opts.orderId),
       language: 'EN',
       preAuth: false,

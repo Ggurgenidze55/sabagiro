@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { hashPassword, setSessionCookie, toSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sendWelcomeRegistrationEmail } from '@/lib/email/index';
 import { zodErrorMessage } from '@/lib/zod-error';
 import { registerSchema } from '@/lib/validators';
 
@@ -26,6 +27,8 @@ export async function POST(request: Request) {
         verificationStatus: 'PENDING',
       },
     });
+
+    sendWelcomeRegistrationEmail({ to: user.email, firstName: user.firstName });
 
     await setSessionCookie(toSessionUser(user));
     return NextResponse.json({ ok: true });

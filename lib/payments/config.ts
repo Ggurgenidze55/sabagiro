@@ -1,5 +1,7 @@
 /** Sabagiro payments — independent of LariPay SaaS. */
 
+import { getSiteBaseUrl, siteUrl } from '@/lib/site-url';
+
 function readEnv(name: string, fallback = ''): string {
   const v = process.env[name];
   return v !== undefined && v !== '' ? v : fallback;
@@ -16,24 +18,17 @@ export function getTbcApiOrigin(): string {
 }
 
 export function getPublicBaseUrl(): string {
-  const fromEnv =
-    readEnv('SABAGIRO_PUBLIC_URL') ||
-    readEnv('NEXT_PUBLIC_APP_URL') ||
-    readEnv('VERCEL_URL', '');
-  if (!fromEnv) return 'http://localhost:3001';
-  if (fromEnv.startsWith('http')) return fromEnv.replace(/\/$/, '');
-  return `https://${fromEnv.replace(/\/$/, '')}`;
+  return getSiteBaseUrl();
 }
 
 export function buildPaymentReturnUrl(orderId: string): string {
-  const base = getPublicBaseUrl();
-  return `${base}/payment/return?orderId=${encodeURIComponent(orderId)}`;
+  return siteUrl(`/payment/return?orderId=${encodeURIComponent(orderId)}`);
 }
 
 export function buildTbcWebhookUrl(): string {
   const override = readEnv('TBC_CALLBACK_URL');
   if (override) return override;
-  return `${getPublicBaseUrl()}/api/webhooks/tbc`;
+  return siteUrl('/api/webhooks/tbc');
 }
 
 export function isPaymentsTestMode(): boolean {

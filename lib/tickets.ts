@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { TicketSource, User } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
-import { sendTicketEmail } from '@/lib/email';
+import { sendTicketEmail } from '@/lib/email/index';
 import { qrDataUrl, scanUrl } from '@/lib/qr';
 
 export { scanUrl, qrDataUrl };

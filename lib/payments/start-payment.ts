@@ -1,10 +1,7 @@
 import type { Order } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import {
-  buildPaymentReturnUrl,
-  getPublicBaseUrl,
-  isPaymentsTestMode,
-} from '@/lib/payments/config';
+import { isPaymentsTestMode } from '@/lib/payments/config';
+import { siteUrl } from '@/lib/site-url';
 import { TbcClient } from '@/lib/payments/tbc/client';
 
 export async function startPaymentForOrder(order: Order) {
@@ -21,7 +18,7 @@ export async function startPaymentForOrder(order: Order) {
         orderId: order.id,
         provider: 'TEST',
         amountGel: order.totalGel,
-        redirectUrl: `${getPublicBaseUrl()}/payment/test?orderId=${order.id}`,
+        redirectUrl: siteUrl(`/payment/test?orderId=${order.id}`),
       },
     });
     return {
@@ -35,7 +32,7 @@ export async function startPaymentForOrder(order: Order) {
   const result = await client.createPayment({
     amountGel: order.totalGel,
     orderId: order.id,
-    returnUrl: buildPaymentReturnUrl(order.id),
+    returnUrl: siteUrl(`/payment/return?orderId=${encodeURIComponent(order.id)}`),
     description: `SABAGIRO tickets · ${order.totalGel} GEL`,
   });
 

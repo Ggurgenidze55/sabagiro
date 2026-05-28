@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sendAccountRejectedEmail, sendAccountVerifiedEmail } from '@/lib/email/index';
 import { verificationStatusSchema } from '@/lib/validators';
 
 type Params = { params: { id: string } };
@@ -15,6 +16,8 @@ export async function PATCH(request: Request, { params }: Params) {
     await requireAdmin();
     const { status } = bodySchema.parse(await request.json());
 
+    const previous = await prisma.user.findUniqueOrThrow({ where: { id: params.id } });
+
     const user = await prisma.user.update({
       where: { id: params.id },
       data: {
@@ -22,6 +25,14 @@ export async function PATCH(request: Request, { params }: Params) {
         verifiedAt: status === 'VERIFIED' ? new Date() : null,
       },
     });
+
+    if (previous.verificationStatus !== status) {
+      if (status === 'VERIFIED') {
+        sendAccountVerifiedEmail({ to: user.email, firstName: user.firstName });
+      } else if (status === 'REJECTED') {
+        sendAccountRejectedEmail({ to: user.email, firstName: user.firstName });
+      }
+    }
 
     return NextResponse.json({ user });
   } catch (e) {

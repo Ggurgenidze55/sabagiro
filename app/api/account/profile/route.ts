@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser, requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sendProfileEmailChangedNotification } from '@/lib/email/index';
 import { profileUpdateSchema } from '@/lib/validators';
 
 export async function GET() {
@@ -21,6 +22,8 @@ export async function PATCH(request: Request) {
       }
     }
 
+    const emailChanged = body.email !== session.email;
+
     const user = await prisma.user.update({
       where: { id: session.id },
       data: {
@@ -28,6 +31,19 @@ export async function PATCH(request: Request) {
         phone: body.phone,
       },
     });
+
+    if (emailChanged) {
+      sendProfileEmailChangedNotification({
+        to: session.email,
+        firstName: user.firstName,
+        newEmail: user.email,
+      });
+      sendProfileEmailChangedNotification({
+        to: user.email,
+        firstName: user.firstName,
+        newEmail: user.email,
+      });
+    }
 
     return NextResponse.json({ user });
   } catch (e) {

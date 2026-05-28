@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { hashPassword, requireUser, verifyPassword } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sendPasswordChangedEmail } from '@/lib/email/index';
 import { passwordSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
@@ -13,10 +14,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Current password is wrong' }, { status: 401 });
     }
 
-    await prisma.user.update({
+    const updated = await prisma.user.update({
       where: { id: user.id },
       data: { passwordHash: await hashPassword(body.newPassword) },
     });
+
+    sendPasswordChangedEmail({ to: updated.email, firstName: updated.firstName });
 
     return NextResponse.json({ ok: true });
   } catch (e) {

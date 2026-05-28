@@ -41,6 +41,7 @@ Login: http://localhost:3001/login (port **3001** — avoid clash with LariPay o
 | `/` | Homepage |
 | `/shop` `/cart` | Tickets |
 | `/register` `/login` | Auth |
+| `/forgot-password` `/reset-password` | Password recovery |
 | `/account` | User dashboard + QR tickets |
 | `/account/settings` | Email, phone, password |
 | `/admin` | Admin dashboard |

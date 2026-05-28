@@ -71,8 +71,22 @@ model User {
   tickets              Ticket[]           @relation("TicketOwner")
   ticketsCreated       Ticket[]           @relation("TicketCreatedBy")
   orders               Order[]
+  passwordResetTokens  PasswordResetToken[]
 
   @@index([verificationStatus])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Order {

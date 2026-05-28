@@ -28,8 +28,8 @@ Optional:
 
 | Variable | Purpose |
 |----------|---------|
-| `RESEND_API_KEY` | Ticket emails |
-| `EMAIL_FROM` | Sender address |
+| `RESEND_API_KEY` | All transactional emails (tickets, registration, reset, verification) |
+| `EMAIL_FROM` | Sender address (must be verified in Resend) |
 
 ## After adding variables
 

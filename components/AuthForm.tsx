@@ -12,6 +12,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const nextParam = search.get('next');
   const next = nextParam || '/account';
   const nextQuery = nextParam ? `?next=${encodeURIComponent(nextParam)}` : '';
+  const passwordResetDone = search.get('reset') === '1';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -111,6 +112,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
           autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
         />
       </label>
+      {mode === 'login' ? (
+        <p className="form-foot" style={{ marginTop: '-0.5rem' }}>
+          <Link href="/forgot-password">Forgot password?</Link>
+        </p>
+      ) : null}
+      {passwordResetDone && mode === 'login' ? (
+        <p className="form-foot" style={{ color: '#c8ff00' }}>
+          Password updated. You can log in now.
+        </p>
+      ) : null}
       {error ? <p className="form-error">{error}</p> : null}
       <button type="submit" className="btn" disabled={loading}>
         {loading ? '…' : mode === 'login' ? 'LOG IN' : 'CREATE ACCOUNT'}

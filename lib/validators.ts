@@ -66,6 +66,15 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(32).max(128),
+  newPassword: z.string().min(8).max(128),
+});
+
 /** Profile edits — identity fields are set at registration only. */
 export const profileUpdateSchema = z.object({
   email: z.string().trim().email(),
