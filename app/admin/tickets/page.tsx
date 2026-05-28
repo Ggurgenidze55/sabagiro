@@ -44,7 +44,7 @@ export default async function AdminTicketsPage() {
               <td>{t.priceGel} ₾</td>
               <td>{t.status}</td>
               <td>
-                <Link href={`/scan/${t.qrToken}`} className="ticket-card__link" target="_blank">
+                <Link href={`/scan/${t.qrToken}`} className="ticket-card__link">
                   QR scan →
                 </Link>
               </td>

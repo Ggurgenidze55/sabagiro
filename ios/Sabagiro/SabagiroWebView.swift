@@ -40,6 +40,22 @@ struct SabagiroWebView: UIViewRepresentable {
       self.model = model
     }
 
+    private func shouldNavigateInApp(_ url: URL) -> Bool {
+      guard url.scheme == "http" || url.scheme == "https" else { return false }
+      let host = url.host?.lowercased() ?? ""
+      if host == "sabagiro.vercel.app" || host.hasSuffix(".vercel.app") {
+        return true
+      }
+      if AppConfig.allowsLocalhost && (host == "localhost" || host == "127.0.0.1") {
+        return true
+      }
+      return false
+    }
+
+    private func openInSameWebView(_ webView: WKWebView, url: URL) {
+      webView.load(URLRequest(url: url))
+    }
+
     override func observeValue(
       forKeyPath keyPath: String?,
       of object: Any?,
@@ -78,6 +94,18 @@ struct SabagiroWebView: UIViewRepresentable {
 
     func webView(
       _ webView: WKWebView,
+      createWebViewWith configuration: WKWebViewConfiguration,
+      for navigationAction: WKNavigationAction,
+      windowFeatures: WKWindowFeatures
+    ) -> WKWebView? {
+      if let url = navigationAction.request.url, shouldNavigateInApp(url) {
+        openInSameWebView(webView, url: url)
+      }
+      return nil
+    }
+
+    func webView(
+      _ webView: WKWebView,
       decidePolicyFor navigationAction: WKNavigationAction,
       decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
@@ -86,27 +114,33 @@ struct SabagiroWebView: UIViewRepresentable {
         return
       }
 
-      if url.scheme == "http" || url.scheme == "https" {
-        let host = url.host?.lowercased() ?? ""
-        let allowed =
-          host == "sabagiro.vercel.app"
-          || host.hasSuffix(".vercel.app")
-          || host == "localhost"
-          || host == "127.0.0.1"
-        if allowed || AppConfig.allowsLocalhost {
-          decisionHandler(.allow)
-          return
-        }
-      }
-
       if ["tel", "mailto", "maps"].contains(url.scheme ?? "") {
         UIApplication.shared.open(url)
         decisionHandler(.cancel)
         return
       }
 
+      // target="_blank" / window.open — must load in-place (`.allow` alone does nothing).
       if navigationAction.targetFrame == nil {
-        webView.load(URLRequest(url: url))
+        if shouldNavigateInApp(url) {
+          openInSameWebView(webView, url: url)
+          decisionHandler(.cancel)
+          return
+        }
+        if url.scheme == "http" || url.scheme == "https" {
+          UIApplication.shared.open(url)
+          decisionHandler(.cancel)
+          return
+        }
+      }
+
+      if shouldNavigateInApp(url) {
+        decisionHandler(.allow)
+        return
+      }
+
+      if url.scheme == "http" || url.scheme == "https" {
+        UIApplication.shared.open(url)
         decisionHandler(.cancel)
         return
       }

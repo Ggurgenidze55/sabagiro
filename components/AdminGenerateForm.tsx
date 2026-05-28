@@ -91,7 +91,7 @@ export function AdminGenerateForm() {
             {result.productName} — ticket created. Email sent if Resend is configured.
           </p>
           <img src={qrImage} alt="Generated QR" className="ticket-card__qr" width={280} height={280} />
-          <a href={scanUrl(result.qrToken)} className="ticket-card__link" target="_blank" rel="noopener noreferrer">
+          <a href={scanUrl(result.qrToken)} className="ticket-card__link">
             {scanUrl(result.qrToken)}
           </a>
         </div>

@@ -70,7 +70,7 @@ export function TicketQrCard({
         <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
       )}
       {qrToken ? (
-        <a href={`/scan/${qrToken}`} className="ticket-card__link" target="_blank" rel="noopener noreferrer">
+        <a href={`/scan/${qrToken}`} className="ticket-card__link">
           Scan link →
         </a>
       ) : null}
