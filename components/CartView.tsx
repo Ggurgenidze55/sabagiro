@@ -183,6 +183,14 @@ export function CartView({
     }
 
       clearCart();
+      if (typeof data.redirectUrl === 'string' && data.redirectUrl) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
+      if (typeof data.orderId === 'string' && data.orderId) {
+        router.push(`/payment/return?orderId=${encodeURIComponent(data.orderId)}`);
+        return;
+      }
       router.push('/account');
       router.refresh();
     } catch (e) {

@@ -30,6 +30,25 @@ enum TicketSource {
   FREE
 }
 
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentProvider {
+  TBC
+  TEST
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
 model User {
   id                 String             @id @default(cuid())
   email              String             @unique
@@ -51,8 +70,59 @@ model User {
   updatedAt            DateTime           @updatedAt
   tickets              Ticket[]           @relation("TicketOwner")
   ticketsCreated       Ticket[]           @relation("TicketCreatedBy")
+  orders               Order[]
 
   @@index([verificationStatus])
+}
+
+model Order {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    OrderStatus @default(PENDING)
+  totalGel  Int
+  currency  String      @default("GEL")
+  expiresAt DateTime?
+  paidAt    DateTime?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  items     OrderItem[]
+  payments  Payment[]
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productSlug String
+  productName String
+  quantity    Int
+  unitPrices  Json
+  tierLabels  Json
+  holders     Json   @default("[]")
+
+  @@index([orderId])
+}
+
+model Payment {
+  id            String          @id @default(cuid())
+  orderId       String
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider      PaymentProvider
+  status        PaymentStatus   @default(PENDING)
+  amountGel     Int
+  bankPaymentId String?         @unique
+  redirectUrl   String          @default("")
+  rawCreate     Json?
+  rawCallback   Json?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([orderId])
+  @@index([status])
 }
 
 model ClubEvent {
