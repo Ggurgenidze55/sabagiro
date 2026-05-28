@@ -18,6 +18,14 @@ type ClubEventRow = {
   sortOrder: number;
 };
 
+type TierFormRow = { label: string; quantity: number; priceGel: number };
+
+const defaultTiers: TierFormRow[] = [
+  { label: 'Wave 1', quantity: 10, priceGel: 35 },
+  { label: 'Wave 2', quantity: 10, priceGel: 45 },
+  { label: 'Wave 3', quantity: 10, priceGel: 55 },
+];
+
 const defaultForm = {
   title: '',
   slug: '',
@@ -37,6 +45,7 @@ export function AdminEventsPanel() {
   const [events, setEvents] = useState<ClubEventRow[]>([]);
   const [season, setSeason] = useState('Summer 2025');
   const [form, setForm] = useState(defaultForm);
+  const [tiers, setTiers] = useState<TierFormRow[]>(defaultTiers);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
 
@@ -94,8 +103,13 @@ export function AdminEventsPanel() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
-        priceGel: Number(form.priceGel),
+        priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
         sortOrder: Number(form.sortOrder),
+        tiers: tiers.map((t) => ({
+          label: t.label,
+          quantity: Number(t.quantity),
+          priceGel: Number(t.priceGel),
+        })),
       }),
     });
     const data = await res.json();
@@ -104,6 +118,7 @@ export function AdminEventsPanel() {
       return;
     }
     setForm(defaultForm);
+    setTiers(defaultTiers);
     setMsg('Event created — visible on homepage & shop');
     load();
   }
@@ -246,6 +261,67 @@ export function AdminEventsPanel() {
             />
             Published
           </label>
+
+          <div className="tier-editor">
+            <h3 className="section-title">Ticket waves (qty + price per wave)</h3>
+            {tiers.map((tier, index) => (
+              <div key={index} className="form-row tier-editor__row">
+                <label className="form-field">
+                  <span>Label</span>
+                  <input
+                    value={tier.label}
+                    onChange={(e) => {
+                      const next = [...tiers];
+                      next[index] = { ...tier, label: e.target.value };
+                      setTiers(next);
+                    }}
+                  />
+                </label>
+                <label className="form-field">
+                  <span>Qty</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={tier.quantity}
+                    onChange={(e) => {
+                      const next = [...tiers];
+                      next[index] = { ...tier, quantity: Number(e.target.value) };
+                      setTiers(next);
+                    }}
+                  />
+                </label>
+                <label className="form-field">
+                  <span>Price ₾</span>
+                  <input
+                    type="number"
+                    min={0}
+                    value={tier.priceGel}
+                    onChange={(e) => {
+                      const next = [...tiers];
+                      next[index] = { ...tier, priceGel: Number(e.target.value) };
+                      setTiers(next);
+                    }}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  onClick={() => setTiers(tiers.filter((_, i) => i !== index))}
+                  disabled={tiers.length <= 1}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => setTiers([...tiers, { label: `Wave ${tiers.length + 1}`, quantity: 10, priceGel: 50 }])}
+            >
+              + Add wave
+            </button>
+          </div>
+
           {error ? <p className="form-error">{error}</p> : null}
           {msg ? <p className="form-ok">{msg}</p> : null}
           <button type="submit" className="btn">

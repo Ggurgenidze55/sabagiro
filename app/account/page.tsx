@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 import { TicketQrCard } from '@/components/TicketQrCard';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { verificationLabel } from '@/lib/verification';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +41,30 @@ export default async function AccountPage() {
           <LogoutButton />
         </div>
       </div>
+
+      {user.role !== 'ADMIN' ? (
+        <div
+          className={`verify-banner verify-banner--${user.verificationStatus.toLowerCase()}`}
+          style={{ marginBottom: '1.5rem' }}
+        >
+          <p className="verify-banner__title">{verificationLabel(user.verificationStatus)}</p>
+          {user.verificationStatus === 'PENDING' ? (
+            <p className="page-lead">
+              We are reviewing your Facebook &amp; Instagram links. Ticket purchase unlocks after
+              approval.
+            </p>
+          ) : null}
+          {user.verificationStatus === 'REJECTED' ? (
+            <p className="page-lead">
+              Your account was not verified. Check your social links in settings or contact the
+              club.
+            </p>
+          ) : null}
+          {user.verificationStatus === 'VERIFIED' ? (
+            <p className="page-lead">You can buy tickets from the shop.</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <h2 className="section-title">My tickets</h2>
       {tickets.length === 0 ? (

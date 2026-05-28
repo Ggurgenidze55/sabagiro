@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import type { Role } from '@prisma/client';
+import type { Role, VerificationStatus } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
 const SESSION_COOKIE = 'sabagiro_session';
@@ -14,6 +14,9 @@ export type SessionUser = {
   firstName: string;
   lastName: string;
   personalId: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  verificationStatus: VerificationStatus;
   role: Role;
 };
 
@@ -80,6 +83,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
         firstName: true,
         lastName: true,
         personalId: true,
+        facebookUrl: true,
+        instagramUrl: true,
+        verificationStatus: true,
         role: true,
       },
     });
@@ -108,6 +114,9 @@ export function toSessionUser(user: {
   firstName: string;
   lastName: string;
   personalId: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  verificationStatus: VerificationStatus;
   role: Role;
 }): SessionUser {
   return user;

@@ -8,9 +8,14 @@ import { readCart, writeCart } from '@/lib/cart';
 type AddToCartButtonProps = {
   product: Product;
   label?: string;
+  disabled?: boolean;
 };
 
-export function AddToCartButton({ product, label = 'ADD TO CART' }: AddToCartButtonProps) {
+export function AddToCartButton({
+  product,
+  label = 'ADD TO CART',
+  disabled = false,
+}: AddToCartButtonProps) {
   const router = useRouter();
   const [added, setAdded] = useState(false);
 
@@ -23,6 +28,7 @@ export function AddToCartButton({ product, label = 'ADD TO CART' }: AddToCartBut
   }
 
   function handleClick() {
+    if (disabled) return;
     const lines = readCart();
     const existing = lines.find((l) => l.slug === product.slug);
     if (existing) {
@@ -43,7 +49,13 @@ export function AddToCartButton({ product, label = 'ADD TO CART' }: AddToCartBut
   }
 
   return (
-    <button type="button" className="btn" onClick={handleClick} style={{ marginTop: '0.5rem' }}>
+    <button
+      type="button"
+      className="btn"
+      onClick={handleClick}
+      disabled={disabled}
+      style={{ marginTop: '0.5rem', opacity: disabled ? 0.45 : 1 }}
+    >
       {added ? 'ADDED →' : label}
     </button>
   );

@@ -12,6 +12,12 @@ enum Role {
   ADMIN
 }
 
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
 enum TicketStatus {
   VALID
   USED
@@ -24,37 +30,56 @@ enum TicketSource {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  phone        String
-  passwordHash String
-  firstName    String
-  lastName     String
-  personalId   String
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  tickets      Ticket[]
+  id                 String             @id @default(cuid())
+  email              String             @unique
+  phone              String
+  passwordHash       String
+  firstName          String
+  lastName           String
+  personalId         String
+  facebookUrl        String             @default("")
+  instagramUrl       String             @default("")
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedAt         DateTime?
+  role               Role               @default(USER)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  tickets            Ticket[]
+
+  @@index([verificationStatus])
 }
 
 model ClubEvent {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String            @id @default(cuid())
+  slug        String            @unique
   title       String
-  lineup      String   @default("")
-  tag         String   @default("")
+  lineup      String            @default("")
+  tag         String            @default("")
   dayLabel    String
   dateLabel   String
   eventDate   String?
-  accent      String   @default("#c8ff00")
-  priceGel    Int      @default(45)
-  isFeatured  Boolean  @default(false)
-  published   Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  accent      String            @default("#c8ff00")
+  priceGel    Int               @default(45)
+  isFeatured  Boolean           @default(false)
+  published   Boolean           @default(true)
+  sortOrder   Int               @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  ticketTiers EventTicketTier[]
 
   @@index([published, sortOrder])
+}
+
+model EventTicketTier {
+  id        String    @id @default(cuid())
+  eventId   String
+  event     ClubEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  sortOrder Int       @default(0)
+  label     String    @default("")
+  quantity  Int
+  priceGel  Int
+
+  @@index([eventId, sortOrder])
 }
 
 model SiteSetting {
@@ -71,6 +96,7 @@ model Ticket {
   productName      String
   eventDate        String?
   priceGel         Int
+  tierLabel        String       @default("")
   holderFirstName  String
   holderLastName   String
   holderPersonalId String
@@ -82,5 +108,6 @@ model Ticket {
   createdAt        DateTime     @default(now())
 
   @@index([userId])
+  @@index([productSlug])
   @@index([createdAt])
 }

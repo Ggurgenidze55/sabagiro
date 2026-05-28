@@ -43,6 +43,10 @@ export async function POST() {
         lastName: DEFAULT_ADMIN.lastName,
         personalId: DEFAULT_ADMIN.personalId,
         role: 'ADMIN',
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        facebookUrl: 'https://facebook.com/sabagiro',
+        instagramUrl: 'https://instagram.com/sabagiro',
       },
       create: {
         email: DEFAULT_ADMIN.email,
@@ -52,6 +56,10 @@ export async function POST() {
         lastName: DEFAULT_ADMIN.lastName,
         personalId: DEFAULT_ADMIN.personalId,
         role: 'ADMIN',
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        facebookUrl: 'https://facebook.com/sabagiro',
+        instagramUrl: 'https://instagram.com/sabagiro',
       },
     });
 
@@ -64,6 +72,10 @@ export async function POST() {
         lastName: DEFAULT_USER.lastName,
         personalId: DEFAULT_USER.personalId,
         role: 'USER',
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        facebookUrl: 'https://facebook.com/sabagiro',
+        instagramUrl: 'https://instagram.com/sabagiro',
       },
       create: {
         email: DEFAULT_USER.email,
@@ -73,6 +85,10 @@ export async function POST() {
         lastName: DEFAULT_USER.lastName,
         personalId: DEFAULT_USER.personalId,
         role: 'USER',
+        verificationStatus: 'VERIFIED',
+        verifiedAt: new Date(),
+        facebookUrl: 'https://facebook.com/sabagiro',
+        instagramUrl: 'https://instagram.com/sabagiro',
       },
     });
 

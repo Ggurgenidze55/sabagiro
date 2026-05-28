@@ -24,6 +24,8 @@ export async function createTicketForUser(opts: {
   productSlug: string;
   source: TicketSource;
   holder?: Holder;
+  priceGel?: number;
+  tierLabel?: string;
 }) {
   const product = await getProduct(opts.productSlug);
   if (!product || product.type !== 'ticket') {
@@ -45,7 +47,8 @@ export async function createTicketForUser(opts: {
       productSlug: product.slug,
       productName: product.name,
       eventDate: product.eventDate ?? null,
-      priceGel: product.priceGel,
+      priceGel: opts.priceGel ?? product.priceGel,
+      tierLabel: opts.tierLabel ?? '',
       holderFirstName: holder.firstName,
       holderLastName: holder.lastName,
       holderPersonalId: holder.personalId,
@@ -81,6 +84,10 @@ export async function findOrCreateUserForAdmin(input: Holder & { role?: 'USER' }
       personalId: input.personalId,
       passwordHash: await hashPassword(tempPassword),
       role: 'USER',
+      verificationStatus: 'VERIFIED',
+      verifiedAt: new Date(),
+      facebookUrl: '',
+      instagramUrl: '',
     },
   });
 }

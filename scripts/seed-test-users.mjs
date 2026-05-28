@@ -16,6 +16,9 @@ const accounts = [
     lastName: 'Admin',
     personalId: '60001000001',
     role: 'ADMIN',
+    facebookUrl: 'https://facebook.com/sabagiro.admin',
+    instagramUrl: 'https://instagram.com/sabagiro',
+    verificationStatus: 'VERIFIED',
   },
   {
     email: 'user@sabagiro.test',
@@ -25,6 +28,9 @@ const accounts = [
     lastName: 'Guest',
     personalId: '60001000002',
     role: 'USER',
+    facebookUrl: 'https://facebook.com/sabagiro.user',
+    instagramUrl: 'https://instagram.com/sabagiro',
+    verificationStatus: 'VERIFIED',
   },
 ];
 
@@ -41,6 +47,10 @@ for (const acc of accounts) {
       lastName: acc.lastName,
       personalId: acc.personalId,
       role: acc.role,
+      facebookUrl: acc.facebookUrl,
+      instagramUrl: acc.instagramUrl,
+      verificationStatus: acc.verificationStatus,
+      verifiedAt: acc.verificationStatus === 'VERIFIED' ? new Date() : null,
     },
     create: {
       email: acc.email,
@@ -50,6 +60,10 @@ for (const acc of accounts) {
       lastName: acc.lastName,
       personalId: acc.personalId,
       role: acc.role,
+      facebookUrl: acc.facebookUrl,
+      instagramUrl: acc.instagramUrl,
+      verificationStatus: acc.verificationStatus,
+      verifiedAt: acc.verificationStatus === 'VERIFIED' ? new Date() : null,
     },
   });
 

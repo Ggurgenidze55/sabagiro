@@ -68,6 +68,27 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <span>Personal ID (11 digits)</span>
             <input name="personalId" required pattern="\d{11}" inputMode="numeric" />
           </label>
+          <label className="form-field">
+            <span>Facebook profile link</span>
+            <input
+              name="facebookUrl"
+              type="url"
+              required
+              placeholder="https://facebook.com/..."
+            />
+          </label>
+          <label className="form-field">
+            <span>Instagram profile link</span>
+            <input
+              name="instagramUrl"
+              type="url"
+              required
+              placeholder="https://instagram.com/..."
+            />
+          </label>
+          <p className="form-foot" style={{ opacity: 0.7 }}>
+            After signup, admin verifies your links. You can buy tickets once verified.
+          </p>
         </>
       ) : null}
       <label className="form-field">

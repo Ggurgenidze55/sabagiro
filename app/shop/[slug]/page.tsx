@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
+import { EventTierList } from '@/components/EventTierList';
 import { SiteChrome } from '@/components/SiteChrome';
+import { getSessionUser } from '@/lib/auth';
+import { canPurchaseTickets } from '@/lib/verification';
 import { normalizeEventSlug } from '@/lib/events';
 import { formatGel, getProduct } from '@/lib/products';
 
@@ -16,6 +19,7 @@ export async function generateMetadata({ params }: PageProps) {
 }
 
 export default async function ProductPage({ params }: PageProps) {
+  const user = await getSessionUser();
   const decoded = decodeURIComponent(params.slug);
   const canonical = normalizeEventSlug(decoded);
   if (decoded !== canonical) {
@@ -36,9 +40,38 @@ export default async function ProductPage({ params }: PageProps) {
         {product.description}
       </p>
       <p className="cart-total" style={{ margin: '1.5rem 0' }}>
-        {formatGel(product.priceGel)}
+        Current price {formatGel(product.priceGel)}
       </p>
-      <AddToCartButton product={product} />
+
+      {product.type === 'ticket' ? (
+        <EventTierList tiers={product.tiers} ticketsRemaining={product.ticketsRemaining} />
+      ) : null}
+
+      {product.type === 'ticket' && user && !canPurchaseTickets(user) ? (
+        <p className="notice-banner notice-banner--inline">
+          Ticket purchase requires a verified account. Status: {user.verificationStatus}. Check your
+          account page after admin review.
+        </p>
+      ) : null}
+
+      {product.type === 'ticket' && product.ticketsRemaining === 0 ? (
+        <p className="form-error">Sold out</p>
+      ) : (
+        <AddToCartButton
+          product={product}
+          disabled={
+            product.type === 'ticket' &&
+            ((user && !canPurchaseTickets(user)) || product.ticketsRemaining === 0)
+          }
+          label={
+            product.ticketsRemaining === 0
+              ? 'SOLD OUT'
+              : user && !canPurchaseTickets(user)
+                ? 'VERIFICATION REQUIRED'
+                : undefined
+          }
+        />
+      )}
       <div className="cart-actions">
         <Link href="/shop" className="btn btn--ghost">
           ← All products

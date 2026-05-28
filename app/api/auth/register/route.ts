@@ -19,8 +19,11 @@ export async function POST(request: Request) {
         firstName: body.firstName,
         lastName: body.lastName,
         personalId: body.personalId,
+        facebookUrl: body.facebookUrl,
+        instagramUrl: body.instagramUrl,
         passwordHash: await hashPassword(body.password),
         role: 'USER',
+        verificationStatus: 'PENDING',
       },
     });
 

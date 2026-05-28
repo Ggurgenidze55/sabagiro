@@ -1,5 +1,6 @@
-import { eventToProduct, getPublishedEventBySlug, listPublishedEvents } from '@/lib/events';
-import { prisma } from '@/lib/db';
+import { eventToProduct } from '@/lib/events';
+import { getPublishedEventBySlug, listPublishedEvents } from '@/lib/events';
+import { getEventTierAvailability, type TierAvailability } from '@/lib/ticket-tiers';
 
 export type ProductType = 'ticket' | 'merch';
 
@@ -12,6 +13,9 @@ export type Product = {
   accent: string;
   tag?: string;
   eventDate?: string;
+  tiers?: TierAvailability[];
+  ticketsRemaining?: number;
+  priceFromGel?: number;
 };
 
 const merchProducts: Product[] = [
@@ -35,23 +39,40 @@ const merchProducts: Product[] = [
   },
 ];
 
+async function eventToProductWithTiers(slug: string) {
+  const event = await getPublishedEventBySlug(slug);
+  if (!event) return undefined;
+
+  const avail = await getEventTierAvailability(slug);
+  const base = eventToProduct(event);
+
+  return {
+    ...base,
+    priceGel: avail?.currentTierPrice ?? base.priceGel,
+    priceFromGel: avail?.tiers[0]?.priceGel ?? base.priceGel,
+    tiers: avail?.tiers,
+    ticketsRemaining: avail?.totalRemaining ?? 0,
+  };
+}
+
 export async function listProducts(): Promise<Product[]> {
   const events = await listPublishedEvents();
-  return [...events.map(eventToProduct), ...merchProducts];
+  const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiers(e.slug)));
+  return [...ticketProducts.filter(Boolean), ...merchProducts] as Product[];
 }
 
 export async function listTicketProducts(): Promise<Product[]> {
   const events = await listPublishedEvents();
-  return events.map(eventToProduct);
+  const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiers(e.slug)));
+  return ticketProducts.filter(Boolean) as Product[];
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
-  const event = await getPublishedEventBySlug(slug);
-  if (event) return eventToProduct(event);
+  const ticket = await eventToProductWithTiers(slug);
+  if (ticket) return ticket;
   return merchProducts.find((p) => p.slug === slug);
 }
 
-/** Static merch + sync access for client cart metadata */
 export const merchCatalog = merchProducts;
 
 export function formatGel(amount: number): string {

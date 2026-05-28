@@ -66,10 +66,14 @@ export function CartView() {
         router.push('/login?next=/cart');
         return;
       }
-      if (!res.ok) {
+    if (!res.ok) {
+      if (data.code === 'NOT_VERIFIED') {
+        setError('Your account must be verified before buying tickets. Check /account.');
+      } else {
         setError(data.error || 'Checkout failed');
-        return;
       }
+      return;
+    }
 
       clearCart();
       router.push('/account');

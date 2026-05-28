@@ -9,6 +9,7 @@ export async function GET() {
     await requireAdmin();
     const events = await prisma.clubEvent.findMany({
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+      include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
     });
     return NextResponse.json({ events });
   } catch (e) {
@@ -33,6 +34,11 @@ export async function POST(request: Request) {
       await prisma.clubEvent.updateMany({ data: { isFeatured: false } });
     }
 
+    const tiersInput =
+      body.tiers && body.tiers.length > 0
+        ? body.tiers
+        : [{ quantity: 100, priceGel: body.priceGel, label: 'Standard' }];
+
     const event = await prisma.clubEvent.create({
       data: {
         slug,
@@ -43,11 +49,20 @@ export async function POST(request: Request) {
         dateLabel: body.dateLabel,
         eventDate: body.eventDate || null,
         accent: body.accent,
-        priceGel: body.priceGel,
+        priceGel: tiersInput[0].priceGel,
         isFeatured: body.isFeatured ?? false,
         published: body.published ?? true,
         sortOrder: body.sortOrder ?? 0,
+        ticketTiers: {
+          create: tiersInput.map((tier, index) => ({
+            sortOrder: index,
+            label: tier.label ?? '',
+            quantity: tier.quantity,
+            priceGel: tier.priceGel,
+          })),
+        },
       },
+      include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
     });
 
     return NextResponse.json({ event });

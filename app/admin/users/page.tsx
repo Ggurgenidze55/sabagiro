@@ -1,3 +1,4 @@
+import { AdminUsersPanel } from '@/components/AdminUsersPanel';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -13,32 +14,24 @@ export default async function AdminUsersPage() {
   return (
     <>
       <h1 className="page-title">USERS</h1>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Personal ID</th>
-            <th>Role</th>
-            <th>Tickets</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td>
-                {u.firstName} {u.lastName}
-              </td>
-              <td>{u.email}</td>
-              <td>{u.phone}</td>
-              <td>{u.personalId}</td>
-              <td>{u.role}</td>
-              <td>{u._count.tickets}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <p className="page-lead" style={{ marginBottom: '1.5rem' }}>
+        Review Facebook &amp; Instagram links, then verify users so they can buy tickets.
+      </p>
+      <AdminUsersPanel
+        users={users.map((u) => ({
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          email: u.email,
+          phone: u.phone,
+          personalId: u.personalId,
+          facebookUrl: u.facebookUrl,
+          instagramUrl: u.instagramUrl,
+          verificationStatus: u.verificationStatus,
+          role: u.role,
+          ticketCount: u._count.tickets,
+        }))}
+      />
     </>
   );
 }
