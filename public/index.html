@@ -1002,21 +1002,21 @@
         var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-        if (!finePointer) return;
-
-        document.addEventListener('mousemove', function (e) {
-          cursor.style.left = e.clientX + 'px';
-          cursor.style.top = e.clientY + 'px';
-        });
-
-        hoverables.forEach(function (el) {
-          el.addEventListener('mouseenter', function () {
-            cursor.classList.add('hover');
+        if (finePointer) {
+          document.addEventListener('mousemove', function (e) {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
           });
-          el.addEventListener('mouseleave', function () {
-            cursor.classList.remove('hover');
+
+          hoverables.forEach(function (el) {
+            el.addEventListener('mouseenter', function () {
+              cursor.classList.add('hover');
+            });
+            el.addEventListener('mouseleave', function () {
+              cursor.classList.remove('hover');
+            });
           });
-        });
+        }
 
         if (reduceMotion || !canvas) return;
 
@@ -1027,9 +1027,10 @@
         var frame = 0;
 
         function resize() {
-          var dpr = Math.min(window.devicePixelRatio || 1, 1.25);
-          canvas.width = Math.floor(window.innerWidth * dpr * 0.5);
-          canvas.height = Math.floor(window.innerHeight * dpr * 0.5);
+          var dpr = Math.min(window.devicePixelRatio || 1, finePointer ? 1.25 : 1);
+          var scale = finePointer ? 0.5 : 0.42;
+          canvas.width = Math.floor(window.innerWidth * dpr * scale);
+          canvas.height = Math.floor(window.innerHeight * dpr * scale);
           canvas.style.width = window.innerWidth + 'px';
           canvas.style.height = window.innerHeight + 'px';
           buildStrips();
