@@ -15,6 +15,7 @@ export default async function AdminTicketsPage() {
   return (
     <>
       <h1 className="page-title">SOLD TICKETS</h1>
+      <div className="table-scroll">
       <table className="data-table">
         <thead>
           <tr>
@@ -51,6 +52,7 @@ export default async function AdminTicketsPage() {
           ))}
         </tbody>
       </table>
+      </div>
     </>
   );
 }

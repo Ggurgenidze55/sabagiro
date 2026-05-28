@@ -20,6 +20,8 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
   const [users, setUsers] = useState(initial);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function setStatus(userId: string, status: AdminUserRow['verificationStatus']) {
     setError('');
@@ -40,10 +42,46 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     setMsg('Verification status updated');
   }
 
+  async function deleteUser(user: AdminUserRow) {
+    setError('');
+    setMsg('');
+    setDeletingId(user.id);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || 'Could not delete user');
+        return;
+      }
+      setUsers((list) => list.filter((u) => u.id !== user.id));
+      setConfirmDeleteId(null);
+      setMsg(`${user.firstName} ${user.lastName} წაიშალა`);
+    } catch {
+      setError('Network error');
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  function onDeleteClick(user: AdminUserRow) {
+    if (user.role === 'ADMIN') return;
+
+    if (user.verificationStatus === 'VERIFIED') {
+      if (confirmDeleteId === user.id) return;
+      setConfirmDeleteId(user.id);
+      setError('');
+      setMsg('');
+      return;
+    }
+
+    void deleteUser(user);
+  }
+
   return (
     <>
       {error ? <p className="form-error">{error}</p> : null}
       {msg ? <p className="form-ok">{msg}</p> : null}
+      <div className="table-scroll">
       <table className="data-table">
         <thead>
           <tr>
@@ -115,6 +153,40 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                     >
                       Pending
                     </button>
+                    {confirmDeleteId === u.id ? (
+                      <div className="delete-confirm">
+                        <p className="delete-confirm__text">
+                          ვერიფიცირებული მომხმარებელი — ნამდვილად წავშალოთ?
+                        </p>
+                        <div className="delete-confirm__actions">
+                          <button
+                            type="button"
+                            className="btn btn--danger"
+                            disabled={deletingId === u.id}
+                            onClick={() => void deleteUser(u)}
+                          >
+                            {deletingId === u.id ? '…' : 'დიახ, წაშლა'}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn--ghost"
+                            disabled={deletingId === u.id}
+                            onClick={() => setConfirmDeleteId(null)}
+                          >
+                            გაუქმება
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn--danger"
+                        disabled={deletingId === u.id}
+                        onClick={() => onDeleteClick(u)}
+                      >
+                        {deletingId === u.id ? '…' : 'წაშლა'}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <span className="table-sub">ADMIN</span>
@@ -124,6 +196,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </>
   );
 }

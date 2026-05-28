@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { clubEventSchema } from '@/lib/validators';
+import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
 type Params = { params: { id: string } };
 
@@ -10,6 +10,11 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     await requireAdmin();
     const body = clubEventSchema.partial().parse(await request.json());
+
+    const existing = await prisma.clubEvent.findUnique({ where: { id: params.id } });
+    if (!existing) {
+      return NextResponse.json({ error: 'Event not found' }, { status: 404 });
+    }
 
     if (body.isFeatured) {
       await prisma.clubEvent.updateMany({ data: { isFeatured: false } });
@@ -20,7 +25,7 @@ export async function PATCH(request: Request, { params }: Params) {
       data: {
         ...(body.title !== undefined ? { title: body.title } : {}),
         ...(body.slug !== undefined
-          ? { slug: normalizeEventSlug(body.slug, body.title) }
+          ? { slug: normalizeEventSlug(body.slug, body.title ?? existing.title) }
           : {}),
         ...(body.lineup !== undefined ? { lineup: body.lineup } : {}),
         ...(body.tag !== undefined ? { tag: body.tag } : {}),
@@ -37,7 +42,10 @@ export async function PATCH(request: Request, { params }: Params) {
 
     return NextResponse.json({ event });
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'Failed';
+    const message =
+      e instanceof Error && (e.message === 'UNAUTHORIZED' || e.message === 'FORBIDDEN')
+        ? e.message
+        : formatValidationError(e);
     const status =
       message === 'UNAUTHORIZED' ? 401 : message === 'FORBIDDEN' ? 403 : 400;
     return NextResponse.json({ error: message }, { status });

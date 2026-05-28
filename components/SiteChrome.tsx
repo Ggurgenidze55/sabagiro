@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
+import { MobileNav } from '@/components/MobileNav';
 import { SiteNav } from '@/components/SiteNav';
 
 type SiteChromeProps = {
@@ -24,7 +25,9 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
             priority
           />
         </Link>
-        <SiteNav user={user} current={current} />
+        <MobileNav label="Main">
+          <SiteNav user={user} current={current} />
+        </MobileNav>
       </header>
       <main className="site-main">{children}</main>
       <footer className="site-footer">

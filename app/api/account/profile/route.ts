@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser, requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { profileSchema } from '@/lib/validators';
+import { profileUpdateSchema } from '@/lib/validators';
 
 export async function GET() {
   const user = await getSessionUser();
@@ -12,7 +12,7 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const session = await requireUser();
-    const body = profileSchema.parse(await request.json());
+    const body = profileUpdateSchema.parse(await request.json());
 
     if (body.email !== session.email) {
       const taken = await prisma.user.findUnique({ where: { email: body.email } });
@@ -26,9 +26,6 @@ export async function PATCH(request: Request) {
       data: {
         email: body.email,
         phone: body.phone,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        personalId: body.personalId,
       },
     });
 

@@ -1,4 +1,32 @@
-import { z } from 'zod';
+import { z, type ZodError } from 'zod';
+
+/** Zod `.optional()` still validates `""` — treat blank as missing. */
+function emptyToUndefined(val: unknown) {
+  if (val === undefined || val === null) return undefined;
+  if (typeof val === 'string' && val.trim() === '') return undefined;
+  return val;
+}
+
+const optionalEventSlugSchema = z.preprocess(
+  emptyToUndefined,
+  z.string().trim().min(2).max(100).optional(),
+);
+
+export function formatValidationError(e: unknown): string {
+  if (e && typeof e === 'object' && 'issues' in e) {
+    const issues = (e as ZodError).issues;
+    return issues
+      .map((issue) => {
+        const field = issue.path.join('.') || 'field';
+        if (field === 'slug') {
+          return 'Slug დატოვე ცარიელი (ავტომატურად სათაურიდან) ან შეიყვანე მინიმუმ 2 ლათინური ასო.';
+        }
+        return `${field}: ${issue.message}`;
+      })
+      .join(' · ');
+  }
+  return e instanceof Error ? e.message : 'Invalid request';
+}
 
 export const personalIdSchema = z
   .string()
@@ -38,12 +66,10 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-export const profileSchema = z.object({
+/** Profile edits — identity fields are set at registration only. */
+export const profileUpdateSchema = z.object({
   email: z.string().trim().email(),
   phone: z.string().trim().min(9).max(20),
-  firstName: z.string().trim().min(2).max(80),
-  lastName: z.string().trim().min(2).max(80),
-  personalId: personalIdSchema,
 });
 
 export const passwordSchema = z.object({
@@ -62,7 +88,7 @@ export const adminGenerateSchema = z.object({
 
 export const clubEventSchema = z.object({
   title: z.string().trim().min(2).max(120),
-  slug: z.string().trim().min(2).max(100).optional(),
+  slug: optionalEventSlugSchema,
   lineup: z.string().trim().max(300).optional(),
   tag: z.string().trim().max(200).optional(),
   dayLabel: z.string().trim().min(2).max(12),

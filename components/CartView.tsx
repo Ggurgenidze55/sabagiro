@@ -115,6 +115,7 @@ export function CartView() {
         </div>
       ) : null}
 
+      <div className="table-scroll">
       <table className="cart-table">
         <thead>
           <tr>
@@ -154,6 +155,7 @@ export function CartView() {
           ))}
         </tbody>
       </table>
+      </div>
       <div className="cart-actions">
         <p className="cart-total">
           Tickets total {formatGel(ticketTotal)}

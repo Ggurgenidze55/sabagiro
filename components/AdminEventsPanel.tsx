@@ -98,19 +98,22 @@ export function AdminEventsPanel() {
     e.preventDefault();
     setError('');
     setMsg('');
+    const payload: Record<string, unknown> = {
+      ...form,
+      priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
+      sortOrder: Number(form.sortOrder),
+      tiers: tiers.map((t) => ({
+        label: t.label,
+        quantity: Number(t.quantity),
+        priceGel: Number(t.priceGel),
+      })),
+    };
+    if (!String(form.slug).trim()) delete payload.slug;
+
     const res = await fetch('/api/admin/events', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
-        sortOrder: Number(form.sortOrder),
-        tiers: tiers.map((t) => ({
-          label: t.label,
-          quantity: Number(t.quantity),
-          priceGel: Number(t.priceGel),
-        })),
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -356,6 +359,7 @@ export function AdminEventsPanel() {
         >
           FIX EVENT SLUGS
         </button>
+        <div className="table-scroll">
         <table className="data-table">
           <thead>
             <tr>
@@ -394,6 +398,7 @@ export function AdminEventsPanel() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
     </div>
   );

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { clubEventSchema } from '@/lib/validators';
+import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
 export async function GET() {
   try {
@@ -67,7 +67,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ event });
   } catch (e) {
-    const message = e instanceof Error ? e.message : 'Invalid request';
+    const message =
+      e instanceof Error && (e.message === 'UNAUTHORIZED' || e.message === 'FORBIDDEN')
+        ? e.message
+        : formatValidationError(e);
     const status =
       message === 'UNAUTHORIZED' ? 401 : message === 'FORBIDDEN' ? 403 : 400;
     return NextResponse.json({ error: message }, { status });

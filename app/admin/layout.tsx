@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { MobileNav } from '@/components/MobileNav';
 import { getSessionUser } from '@/lib/auth';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <Link href="/" className="site-brand">
           <span className="site-brand__text">SABAGIRO ADMIN</span>
         </Link>
-        <nav aria-label="Admin">
+        <MobileNav label="Admin">
           <ul className="site-nav">
             <li>
               <Link href="/admin">Overview</Link>
@@ -36,7 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               <Link href="/account">My account</Link>
             </li>
           </ul>
-        </nav>
+        </MobileNav>
       </header>
       <main className="site-main">{children}</main>
     </div>

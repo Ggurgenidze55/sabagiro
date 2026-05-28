@@ -65,19 +65,24 @@ export function ProfileSettings({ user }: { user: User }) {
     <div className="settings-grid">
       <section>
         <h2 className="section-title">Profile</h2>
+        <p className="form-foot form-foot--note">
+          სახელი, გვარი და პირადი ნომერი რეგისტრაციისას ივსება და შემდეგ ვერ იცვლება.
+        </p>
+        <dl className="identity-readonly">
+          <div>
+            <dt>სახელი</dt>
+            <dd>{user.firstName}</dd>
+          </div>
+          <div>
+            <dt>გვარი</dt>
+            <dd>{user.lastName}</dd>
+          </div>
+          <div>
+            <dt>პირადი ნომერი</dt>
+            <dd>{user.personalId}</dd>
+          </div>
+        </dl>
         <form className="form-stack" onSubmit={saveProfile}>
-          <label className="form-field">
-            <span>First name</span>
-            <input name="firstName" defaultValue={user.firstName} required />
-          </label>
-          <label className="form-field">
-            <span>Last name</span>
-            <input name="lastName" defaultValue={user.lastName} required />
-          </label>
-          <label className="form-field">
-            <span>Personal ID</span>
-            <input name="personalId" defaultValue={user.personalId} required pattern="\d{11}" />
-          </label>
           <label className="form-field">
             <span>Email</span>
             <input name="email" type="email" defaultValue={user.email} required />
