@@ -63,7 +63,7 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
       {open ? (
         <form className="form-stack user-policy__form" onSubmit={save}>
           <label className="form-field">
-            <span>ყიდვის ლიმიტი ერთ ღონისძიებაზე</span>
+            <span>ყიდვის ჯამური ლიმიტი (ყველა ღონისძიებაზე)</span>
             <input
               type="number"
               min={1}

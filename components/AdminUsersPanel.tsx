@@ -138,7 +138,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
               <td>
                 {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
                   <>
-                    <span className="table-sub">ყიდვა: {u.ticketLimitPerEvent}/ივენთი</span>
+                    <span className="table-sub">ყიდვა: {u.ticketLimitPerEvent} ჯამური</span>
                     <br />
                     <span className="table-sub">
                       უფასო: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'გამორთ.'}

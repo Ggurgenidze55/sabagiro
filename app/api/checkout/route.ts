@@ -16,11 +16,13 @@ import { checkoutSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
   let purchaseLimit = 1;
+  let showLimitDetails = false;
 
   try {
     const session = await requireUser();
     const user = await prisma.user.findUniqueOrThrow({ where: { id: session.id } });
     purchaseLimit = getTicketLimitPerEvent(user);
+    showLimitDetails = user.freeTicketsEnabled;
 
     if (!canPurchaseTickets(user)) {
       return NextResponse.json(
@@ -35,20 +37,45 @@ export async function POST(request: Request) {
 
     const { items } = checkoutSchema.parse(await request.json());
     const tickets = [];
+    const ticketItems = [];
 
     for (const item of items) {
       const product = await getProduct(item.slug);
       if (!product || product.type !== 'ticket') continue;
+      ticketItems.push(item);
+    }
 
+    if (purchaseLimitApplies(user)) {
+      const remaining = await remainingPurchaseSlots(user);
+      const requestedTotal = ticketItems.reduce((sum, item) => sum + item.qty, 0);
+      if (requestedTotal > remaining) {
+        return NextResponse.json(
+          {
+            error:
+              remaining <= 0
+                ? ticketAlreadyOwnedMessage(purchaseLimit)
+                : ticketLimitMessage(purchaseLimit),
+            code: remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT',
+          },
+          { status: remaining <= 0 ? 409 : 400 },
+        );
+      }
+    }
+
+    for (const item of ticketItems) {
       if (purchaseLimitApplies(user)) {
-        const remaining = await remainingPurchaseSlots(user, item.slug);
+        const remaining = await remainingPurchaseSlots(user);
         if (item.qty > remaining) {
           return NextResponse.json(
             {
               error:
                 remaining <= 0
-                  ? ticketAlreadyOwnedMessage(purchaseLimit)
-                  : ticketLimitMessage(purchaseLimit),
+                  ? showLimitDetails
+                    ? ticketAlreadyOwnedMessage(purchaseLimit)
+                    : 'ბილეთის შეძენა ახლა ვერ ხერხდება. დაუკავშირდი ადმინისტრაციას.'
+                  : showLimitDetails
+                    ? ticketLimitMessage(purchaseLimit)
+                    : 'ბილეთის რაოდენობა ვერ დამუშავდა. დაუკავშირდი ადმინისტრაციას.',
               code: remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT',
             },
             { status: remaining <= 0 ? 409 : 400 },
@@ -58,7 +85,7 @@ export async function POST(request: Request) {
 
       const batch = await prisma.$transaction(async () => {
         if (purchaseLimitApplies(user)) {
-          const remaining = await remainingPurchaseSlots(user, item.slug);
+          const remaining = await remainingPurchaseSlots(user);
           if (item.qty > remaining) {
             throw new Error(remaining <= 0 ? 'ALREADY_OWNED' : 'TICKET_LIMIT');
           }
@@ -108,8 +135,12 @@ export async function POST(request: Request) {
         {
           error:
             message === 'ALREADY_OWNED'
-              ? ticketAlreadyOwnedMessage(purchaseLimit)
-              : ticketLimitMessage(purchaseLimit),
+              ? showLimitDetails
+                ? ticketAlreadyOwnedMessage(purchaseLimit)
+                : 'ბილეთის შეძენა ახლა ვერ ხერხდება. დაუკავშირდი ადმინისტრაციას.'
+              : showLimitDetails
+                ? ticketLimitMessage(purchaseLimit)
+                : 'ბილეთის რაოდენობა ვერ დამუშავდა. დაუკავშირდი ადმინისტრაციას.',
           code: message,
         },
         { status: message === 'ALREADY_OWNED' ? 409 : 400 },

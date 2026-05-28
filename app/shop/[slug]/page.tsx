@@ -37,11 +37,12 @@ export default async function ProductPage({ params }: PageProps) {
   const purchaseLimit = user ? getTicketLimitPerEvent(user) : 1;
   const purchaseRemaining =
     user && product.type === 'ticket'
-      ? await remainingPurchaseSlots(user, product.slug)
+      ? await remainingPurchaseSlots(user)
       : purchaseLimit;
   const cannotBuyMore = Boolean(
     user && product.type === 'ticket' && purchaseRemaining <= 0,
   );
+  const showLimitDetails = Boolean(user?.freeTicketsEnabled);
 
   return (
     <SiteChrome current="shop">
@@ -67,18 +68,18 @@ export default async function ProductPage({ params }: PageProps) {
         </p>
       ) : null}
 
-      {product.type === 'ticket' && user && canPurchaseTickets(user) && cannotBuyMore ? (
+      {product.type === 'ticket' && user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
         <p className="notice-banner notice-banner--inline">
-          ამ ღონისძიებაზე ყიდვის ლიმიტი ({purchaseLimit}) ამოიწურა.
+          ყიდვის ლიმიტი ({purchaseLimit}) ამოიწურა — ეს ლიმიტი ყველა ღონისძიებაზე ჯამურია.
           <Link href="/account" className="btn btn--ghost" style={{ marginTop: '0.75rem' }}>
             ჩემი ბილეთები
           </Link>
         </p>
       ) : null}
 
-      {product.type === 'ticket' && user && canPurchaseTickets(user) && !cannotBuyMore && purchaseLimit > 1 ? (
+      {product.type === 'ticket' && user && canPurchaseTickets(user) && !cannotBuyMore && purchaseLimit > 1 && showLimitDetails ? (
         <p className="page-lead" style={{ marginBottom: '1rem' }}>
-          შეგიძლია იყიდო კიდევ {purchaseRemaining} ბილეთი ამ ღონისძიებაზე (ლიმიტი {purchaseLimit}).
+          შეგიძლია იყიდო კიდევ {purchaseRemaining} ბილეთი ჯამურად ყველა ღონისძიებაზე (ლიმიტი {purchaseLimit}).
         </p>
       ) : null}
 
@@ -97,7 +98,9 @@ export default async function ProductPage({ params }: PageProps) {
             product.ticketsRemaining === 0
               ? 'SOLD OUT'
               : cannotBuyMore
-                ? 'ლიმიტი ამოიწურა'
+                ? showLimitDetails
+                  ? 'ლიმიტი ამოიწურა'
+                  : 'UNAVAILABLE'
               : user && !canPurchaseTickets(user)
                 ? 'VERIFICATION REQUIRED'
                 : undefined

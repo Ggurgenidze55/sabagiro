@@ -76,10 +76,9 @@ export default async function AccountPage() {
           ) : null}
           {user.verificationStatus === 'VERIFIED' ? (
             <p className="page-lead">
-              ყიდვის ლიმიტი: {purchaseLimit} ბილეთი ერთ ღონისძიებაზე.
               {user.freeTicketsEnabled
-                ? ` უფასო ბილეთები: ${freeRemaining} დარჩენილი.`
-                : null}
+                ? `ყიდვის ლიმიტი: ${purchaseLimit} ბილეთი ჯამურად ყველა ღონისძიებაზე. უფასო ბილეთები: ${freeRemaining} დარჩენილი.`
+                : 'თქვენი ანგარიში აქტიურია — ბილეთის ყიდვა შესაძლებელია.'}
             </p>
           ) : null}
         </div>

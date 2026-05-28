@@ -10,11 +10,10 @@ export function getTicketLimitPerEvent(user: Pick<User, 'ticketLimitPerEvent' | 
   return Math.max(1, user.ticketLimitPerEvent);
 }
 
-export async function countPurchasedTicketsForEvent(userId: string, eventSlug: string) {
+export async function countPurchasedTicketsTotal(userId: string) {
   return prisma.ticket.count({
     where: {
       userId,
-      productSlug: eventSlug,
       status: { not: 'CANCELLED' },
       source: 'PURCHASE',
     },
@@ -23,20 +22,11 @@ export async function countPurchasedTicketsForEvent(userId: string, eventSlug: s
 
 export async function remainingPurchaseSlots(
   user: Pick<User, 'id' | 'role' | 'ticketLimitPerEvent'>,
-  eventSlug: string,
 ) {
   if (!purchaseLimitApplies(user)) return 99;
   const limit = getTicketLimitPerEvent(user);
-  const owned = await countPurchasedTicketsForEvent(user.id, eventSlug);
+  const owned = await countPurchasedTicketsTotal(user.id);
   return Math.max(0, limit - owned);
-}
-
-export async function userOwnsTicketForEvent(
-  user: Pick<User, 'id' | 'role' | 'ticketLimitPerEvent'>,
-  eventSlug: string,
-) {
-  const remaining = await remainingPurchaseSlots(user, eventSlug);
-  return remaining <= 0;
 }
 
 export async function listOwnedEventSlugs(userId: string) {
@@ -53,14 +43,14 @@ export async function listOwnedEventSlugs(userId: string) {
 }
 
 export function ticketLimitMessage(limit: number) {
-  return `ამ ღონისძიებაზე მაქსიმუმ ${limit} ბილეთის ყიდვა შეგიძლია.`;
+  return `სულ მაქსიმუმ ${limit} ბილეთის ყიდვა შეგიძლია ყველა ღონისძიებაზე ჯამურად.`;
 }
 
 export function ticketAlreadyOwnedMessage(limit: number) {
   if (limit <= 1) {
-    return 'ამ ღონისძიების ბილეთი უკვე გაქვს — მეორეს ვერ იყიდი.';
+    return 'სულ 1 ბილეთის ყიდვის უფლება გაქვს — ლიმიტი ამოიწურა.';
   }
-  return `ამ ღონისძიებაზე უკვე გაქვთ ${limit} ბილეთი — ლიმიტი ამოიწურა.`;
+  return `სულ ${limit} ბილეთის ლიმიტი ამოიწურა (ყველა ღონისძიებაზე ჯამურად).`;
 }
 
 export function freeTicketsRemaining(user: Pick<User, 'freeTicketsEnabled' | 'freeTicketsQuota' | 'freeTicketsUsed'>) {
