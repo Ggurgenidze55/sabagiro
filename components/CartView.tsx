@@ -172,7 +172,10 @@ export function CartView({
         </thead>
         <tbody>
           {lines.map((line) => {
-            const remaining = remainingBySlug[line.slug] ?? purchaseLimitPerEvent;
+            const remaining =
+              line.type === 'ticket'
+                ? (remainingBySlug[line.slug] ?? maxQtyForTicket(line.slug))
+                : purchaseLimitPerEvent;
             const limitReached = line.type === 'ticket' && remaining <= 0;
             return (
             <tr key={line.slug}>
@@ -234,7 +237,10 @@ export function CartView({
           disabled={
             checkingOut ||
             ticketLines.length === 0 ||
-            ticketLines.some((line) => (remainingBySlug[line.slug] ?? 0) <= 0)
+            ticketLines.some((line) => {
+              const remaining = remainingBySlug[line.slug] ?? maxQtyForTicket(line.slug);
+              return remaining <= 0;
+            })
           }
         >
           {checkingOut ? 'PROCESSING…' : 'BUY TICKETS'}
