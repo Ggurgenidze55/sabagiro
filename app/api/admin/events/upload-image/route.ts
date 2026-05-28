@@ -1,9 +1,7 @@
-import { randomUUID } from 'crypto';
-import { mkdir, writeFile } from 'fs/promises';
-import path from 'path';
 import sharp from 'sharp';
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
+import { storeEventImage } from '@/lib/event-image-storage';
 
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
@@ -33,21 +31,22 @@ export async function POST(request: Request) {
       .webp({ quality: 70, effort: 4 })
       .toBuffer();
 
-    const fileName = `event-${randomUUID()}.webp`;
-    const relativePath = `/uploads/events/${fileName}`;
-    const outputDir = path.join(process.cwd(), 'public', 'uploads', 'events');
-    const outputPath = path.join(outputDir, fileName);
-
-    await mkdir(outputDir, { recursive: true });
-    await writeFile(outputPath, outputBuffer);
+    const stored = await storeEventImage(outputBuffer);
 
     return NextResponse.json({
-      path: relativePath,
-      sizeBytes: outputBuffer.byteLength,
+      path: stored.path,
+      sizeBytes: stored.sizeBytes,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed to upload image';
-    const status = message === 'UNAUTHORIZED' ? 401 : message === 'FORBIDDEN' ? 403 : 400;
+    const status =
+      message === 'UNAUTHORIZED'
+        ? 401
+        : message === 'FORBIDDEN'
+          ? 403
+          : message.includes('Vercel Blob')
+            ? 503
+            : 400;
     return NextResponse.json({ error: message }, { status });
   }
 }
