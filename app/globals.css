@@ -1144,7 +1144,7 @@ a {
 }
 
 .mobile-nav__head {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.2rem;
@@ -1218,6 +1218,10 @@ body.nav-lock {
   .mobile-nav__toggle {
     display: inline-flex;
     margin-left: auto;
+  }
+
+  .mobile-nav__head {
+    display: flex;
   }
 
   .mobile-nav__panel {
