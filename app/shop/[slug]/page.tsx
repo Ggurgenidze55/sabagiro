@@ -50,8 +50,14 @@ export default async function ProductPage({ params }: PageProps) {
       <h1 className="page-title" style={{ color: product.accent }}>
         {product.name}
       </h1>
-      <p className="page-lead" style={{ opacity: 0.75, maxWidth: '42rem', lineHeight: 1.8 }}>
-        {product.description}
+      {product.type === 'ticket' && product.imagePath ? (
+        <div className="event-hero-image" style={{ ['--event-image-url' as string]: `url(${product.imagePath})` }}>
+          <img src={product.imagePath} alt={product.name} className="event-hero-image__img" />
+          <div className="event-hero-image__pixel" aria-hidden />
+        </div>
+      ) : null}
+      <p className="event-about" style={{ maxWidth: '42rem' }}>
+        {product.about || product.description}
       </p>
       <p className="cart-total" style={{ margin: '1.5rem 0' }}>
         Current price {formatGel(product.priceGel)}

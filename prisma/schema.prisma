@@ -59,6 +59,8 @@ model ClubEvent {
   id          String            @id @default(cuid())
   slug        String            @unique
   title       String
+  about       String            @default("")
+  imagePath   String            @default("")
   lineup      String            @default("")
   tag         String            @default("")
   dayLabel    String

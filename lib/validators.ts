@@ -89,6 +89,8 @@ export const adminGenerateSchema = z.object({
 export const clubEventSchema = z.object({
   title: z.string().trim().min(2).max(120),
   slug: optionalEventSlugSchema,
+  about: z.string().trim().max(6000).optional(),
+  imagePath: z.string().trim().max(500).optional(),
   lineup: z.string().trim().max(300).optional(),
   tag: z.string().trim().max(200).optional(),
   dayLabel: z.string().trim().min(2).max(12),

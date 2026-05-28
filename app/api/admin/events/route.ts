@@ -43,6 +43,8 @@ export async function POST(request: Request) {
       data: {
         slug,
         title: body.title,
+        about: body.about ?? '',
+        imagePath: body.imagePath ?? '',
         lineup: body.lineup ?? '',
         tag: body.tag ?? '',
         dayLabel: body.dayLabel,

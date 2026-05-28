@@ -24,6 +24,8 @@ export function eventToProduct(event: ClubEvent): Product {
     slug: event.slug,
     name: event.title,
     description: desc || event.title,
+    about: event.about || undefined,
+    imagePath: event.imagePath || undefined,
     priceGel: event.priceGel,
     type: 'ticket',
     accent: event.accent,

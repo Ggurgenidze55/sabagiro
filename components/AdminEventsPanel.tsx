@@ -6,6 +6,8 @@ type ClubEventRow = {
   id: string;
   slug: string;
   title: string;
+  about: string;
+  imagePath: string;
   lineup: string;
   tag: string;
   dayLabel: string;
@@ -29,6 +31,8 @@ const defaultTiers: TierFormRow[] = [
 const defaultForm = {
   title: '',
   slug: '',
+  about: '',
+  imagePath: '',
   lineup: '',
   tag: '',
   dayLabel: 'SAT',
@@ -48,6 +52,8 @@ export function AdminEventsPanel() {
   const [tiers, setTiers] = useState<TierFormRow[]>(defaultTiers);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const load = useCallback(async () => {
     setError('');
@@ -98,8 +104,30 @@ export function AdminEventsPanel() {
     e.preventDefault();
     setError('');
     setMsg('');
+    let imagePath = form.imagePath;
+    if (imageFile) {
+      try {
+        setUploadingImage(true);
+        const uploadData = new FormData();
+        uploadData.append('image', imageFile);
+        const uploadRes = await fetch('/api/admin/events/upload-image', {
+          method: 'POST',
+          body: uploadData,
+        });
+        const uploadJson = await uploadRes.json().catch(() => ({}));
+        if (!uploadRes.ok) {
+          setError(uploadJson.error || 'Failed to upload image');
+          return;
+        }
+        imagePath = uploadJson.path || '';
+      } finally {
+        setUploadingImage(false);
+      }
+    }
+
     const payload: Record<string, unknown> = {
       ...form,
+      imagePath,
       priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
       sortOrder: Number(form.sortOrder),
       tiers: tiers.map((t) => ({
@@ -122,6 +150,7 @@ export function AdminEventsPanel() {
     }
     setForm(defaultForm);
     setTiers(defaultTiers);
+    setImageFile(null);
     setMsg('Event created — visible on homepage & shop');
     load();
   }
@@ -181,6 +210,23 @@ export function AdminEventsPanel() {
                       .replace(/^-+|-+$/g, '')
                   : 'auto-from-title'
               }
+            />
+          </label>
+          <label className="form-field">
+            <span>About event (shows on event page)</span>
+            <textarea
+              value={form.about}
+              onChange={(e) => setForm({ ...form, about: e.target.value })}
+              placeholder="Write event description, vibe, artists, and details..."
+              rows={5}
+            />
+          </label>
+          <label className="form-field">
+            <span>Event image (will be auto-compressed)</span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
           </label>
           <label className="form-field">
@@ -327,8 +373,8 @@ export function AdminEventsPanel() {
 
           {error ? <p className="form-error">{error}</p> : null}
           {msg ? <p className="form-ok">{msg}</p> : null}
-          <button type="submit" className="btn">
-            CREATE EVENT
+          <button type="submit" className="btn" disabled={uploadingImage}>
+            {uploadingImage ? 'UPLOADING IMAGE…' : 'CREATE EVENT'}
           </button>
         </form>
       </section>
@@ -377,6 +423,12 @@ export function AdminEventsPanel() {
                   {ev.title}
                   <br />
                   <span className="table-sub">/shop/{ev.slug}</span>
+                  {ev.imagePath ? (
+                    <>
+                      <br />
+                      <span className="table-sub">image: yes</span>
+                    </>
+                  ) : null}
                 </td>
                 <td>
                   {ev.dayLabel} {ev.dateLabel}

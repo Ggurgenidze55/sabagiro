@@ -8,6 +8,8 @@ export type Product = {
   slug: string;
   name: string;
   description: string;
+  about?: string;
+  imagePath?: string;
   priceGel: number;
   type: ProductType;
   accent: string;

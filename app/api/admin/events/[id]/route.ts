@@ -27,6 +27,8 @@ export async function PATCH(request: Request, { params }: Params) {
         ...(body.slug !== undefined
           ? { slug: normalizeEventSlug(body.slug, body.title ?? existing.title) }
           : {}),
+        ...(body.about !== undefined ? { about: body.about } : {}),
+        ...(body.imagePath !== undefined ? { imagePath: body.imagePath } : {}),
         ...(body.lineup !== undefined ? { lineup: body.lineup } : {}),
         ...(body.tag !== undefined ? { tag: body.tag } : {}),
         ...(body.dayLabel !== undefined ? { dayLabel: body.dayLabel } : {}),
