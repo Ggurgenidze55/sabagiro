@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import type { Role, VerificationStatus } from '@prisma/client';
 import { prisma } from '@/lib/db';
 
@@ -69,7 +70,29 @@ export async function clearSessionCookie() {
   cookies().set(SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
 
-export async function getSessionUser(): Promise<SessionUser | null> {
+export type SessionNavUser = Pick<SessionUser, 'id' | 'email' | 'role'>;
+
+export async function getSessionNavUser(): Promise<SessionNavUser | null> {
+  const token = cookies().get(SESSION_COOKIE)?.value;
+  if (!token) return null;
+
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    const userId = payload.sub;
+    if (!userId || typeof userId !== 'string') return null;
+    if (payload.role !== 'ADMIN' && payload.role !== 'USER') return null;
+
+    return {
+      id: userId,
+      email: typeof payload.email === 'string' ? payload.email : '',
+      role: payload.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const token = cookies().get(SESSION_COOKIE)?.value;
   if (!token) return null;
 
@@ -101,7 +124,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   } catch {
     return null;
   }
-}
+});
 
 export async function requireUser() {
   const user = await getSessionUser();

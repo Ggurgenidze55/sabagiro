@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { SiteChrome } from '@/components/SiteChrome';
 import { formatGel, listProducts } from '@/lib/products';
 
-export const dynamic = 'force-dynamic';
+/** Cache product list briefly — stock still checked at checkout. */
+export const revalidate = 30;
 
 export const metadata = {
   title: 'Shop — Sabagiro',

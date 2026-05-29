@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
   async redirects() {
     return [
       { source: '/sabagiro.html', destination: '/', permanent: true },

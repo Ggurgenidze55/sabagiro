@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import type { SessionUser } from '@/lib/auth';
+import type { SessionNavUser } from '@/lib/auth';
 import { LogoutButton } from '@/components/LogoutButton';
 
 type SiteNavProps = {
-  user: SessionUser | null;
+  user: SessionNavUser | null;
   current?: 'shop' | 'cart' | 'account' | 'settings';
 };
 
@@ -11,20 +11,24 @@ export function SiteNav({ user, current }: SiteNavProps) {
   return (
     <ul className="site-nav">
         <li>
-          <Link href="/">Home</Link>
+          <Link href="/" prefetch>
+            Home
+          </Link>
         </li>
         <li>
-          <Link href="/shop" aria-current={current === 'shop' ? 'page' : undefined}>
+          <Link href="/shop" prefetch aria-current={current === 'shop' ? 'page' : undefined}>
             Shop
           </Link>
         </li>
         <li>
-          <Link href="/cart" aria-current={current === 'cart' ? 'page' : undefined}>
+          <Link href="/cart" prefetch aria-current={current === 'cart' ? 'page' : undefined}>
             Cart
           </Link>
         </li>
         <li>
-          <Link href="/location">Location</Link>
+          <Link href="/location" prefetch>
+            Location
+          </Link>
         </li>
         {user ? (
           <>

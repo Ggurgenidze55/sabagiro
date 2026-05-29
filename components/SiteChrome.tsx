@@ -1,6 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionNavUser } from '@/lib/auth';
 import { MobileNav } from '@/components/MobileNav';
 import { SiteNav } from '@/components/SiteNav';
 import { INSTAGRAM_URL } from '@/lib/social';
@@ -11,19 +10,21 @@ type SiteChromeProps = {
 };
 
 export async function SiteChrome({ children, current }: SiteChromeProps) {
-  const user = await getSessionUser();
+  const user = await getSessionNavUser();
 
   return (
     <div className="site-shell">
       <header className="site-header">
         <Link href="/" className="site-brand">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src="/club/sabagiro-logo-white.png"
             alt="Sabagiro"
             width={120}
             height={89}
             className="site-brand__logo"
-            priority
+            fetchPriority="high"
+            decoding="async"
           />
         </Link>
         <MobileNav label="Main">

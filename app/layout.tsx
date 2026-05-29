@@ -1,9 +1,22 @@
 import type { Metadata } from 'next';
+import { Bebas_Neue, Share_Tech_Mono } from 'next/font/google';
 import { SiteAnalytics } from '@/components/SiteAnalytics';
 import { getSiteBaseUrl } from '@/lib/site-url';
 import './globals.css';
 
-export const dynamic = 'force-dynamic';
+const bebasNeue = Bebas_Neue({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
+});
+
+const shareTechMono = Share_Tech_Mono({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-mono',
+});
 
 const siteUrl = getSiteBaseUrl();
 const siteDescription =
@@ -60,7 +73,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${bebasNeue.variable} ${shareTechMono.variable}`}>
       <body>
         {children}
         <SiteAnalytics />
