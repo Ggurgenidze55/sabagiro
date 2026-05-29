@@ -8,6 +8,12 @@ import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
 import { getTicketLimitPerEvent } from '@/lib/ticket-purchase-limit';
+import {
+  canAccessTicketQr,
+  getQrExpiryMs,
+  qrExpiredMessage,
+  ticketQrContext,
+} from '@/lib/ticket-qr-access';
 import { verificationLabel } from '@/lib/verification';
 
 export const dynamic = 'force-dynamic';
@@ -29,6 +35,31 @@ export default async function AccountPage() {
         select: { id: true, firstName: true, lastName: true, email: true, role: true },
       },
     },
+  });
+
+  const adminBypass = user.role === 'ADMIN';
+  const slugs = [...new Set(tickets.map((t) => t.productSlug))];
+  const events =
+    slugs.length > 0
+      ? await prisma.clubEvent.findMany({
+          where: { slug: { in: slugs } },
+          select: { slug: true, eventDate: true },
+        })
+      : [];
+  const eventDatesBySlug = Object.fromEntries(events.map((e) => [e.slug, e.eventDate])) as Record<
+    string,
+    string | null | undefined
+  >;
+
+  const sortedTickets = [...tickets].sort((a, b) => {
+    const ctxA = ticketQrContext(a, eventDatesBySlug);
+    const ctxB = ticketQrContext(b, eventDatesBySlug);
+    const archivedA = !canAccessTicketQr(ctxA, adminBypass);
+    const archivedB = !canAccessTicketQr(ctxB, adminBypass);
+    if (archivedA !== archivedB) return archivedA ? 1 : -1;
+    const expiryA = getQrExpiryMs(ctxA) ?? 0;
+    const expiryB = getQrExpiryMs(ctxB) ?? 0;
+    return expiryB - expiryA;
   });
 
   const purchaseLimit = getTicketLimitPerEvent(user);
@@ -111,8 +142,10 @@ export default async function AccountPage() {
         </p>
       ) : (
         <div className="ticket-grid">
-          {tickets.map((t) => {
+          {sortedTickets.map((t) => {
             const issuance = describeTicketIssuance(t, t.user, t.createdBy ?? t.user);
+            const ctx = ticketQrContext(t, eventDatesBySlug);
+            const qrAvailable = canAccessTicketQr(ctx, adminBypass);
             return (
               <TicketQrCard
                 key={t.id}
@@ -122,6 +155,8 @@ export default async function AccountPage() {
                 holderName={`${t.holderFirstName} ${t.holderLastName}`}
                 personalId={t.holderPersonalId}
                 issuanceLine={`${issuance.actorNote}: ${issuance.detail}`}
+                qrAvailable={qrAvailable}
+                expiredMessage={qrExpiredMessage()}
               />
             );
           })}

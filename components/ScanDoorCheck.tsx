@@ -7,9 +7,10 @@ type ScanDoorCheckProps = {
   qrToken: string;
   status: string;
   canCheckIn: boolean;
+  qrExpired?: boolean;
 };
 
-export function ScanDoorCheck({ qrToken, status, canCheckIn }: ScanDoorCheckProps) {
+export function ScanDoorCheck({ qrToken, status, canCheckIn, qrExpired }: ScanDoorCheckProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,6 +43,14 @@ export function ScanDoorCheck({ qrToken, status, canCheckIn }: ScanDoorCheckProp
 
   if (status === 'CANCELLED') {
     return null;
+  }
+
+  if (qrExpired) {
+    return (
+      <p className="scan-door-hint scan-door-hint--expired">
+        This event has passed. QR check-in is no longer available.
+      </p>
+    );
   }
 
   if (!canCheckIn) {

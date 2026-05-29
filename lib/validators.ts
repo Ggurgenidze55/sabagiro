@@ -104,7 +104,10 @@ export const clubEventSchema = z.object({
   tag: z.string().trim().max(200).optional(),
   dayLabel: z.string().trim().min(2).max(12),
   dateLabel: z.string().trim().min(2).max(24),
-  eventDate: z.string().trim().optional(),
+  eventDate: z
+    .string()
+    .trim()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Pick event date from calendar'),
   accent: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/),
   priceGel: z.coerce.number().int().min(0).max(10000),
   isFeatured: z.boolean().optional(),

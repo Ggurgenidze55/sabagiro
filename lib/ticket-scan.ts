@@ -16,7 +16,20 @@ export function formatScannedAt(date: Date | null | undefined) {
   }).format(date);
 }
 
-export function getScanVerdict(status: TicketStatus, scannedAt: Date | null): ScanVerdict {
+export function getScanVerdict(
+  status: TicketStatus,
+  scannedAt: Date | null,
+  qrExpired = false,
+): ScanVerdict {
+  if (qrExpired && status === 'VALID') {
+    return {
+      tone: 'bad',
+      title: 'EVENT ENDED',
+      subtitle: 'QR expired · Do not admit',
+      admit: false,
+    };
+  }
+
   if (status === 'CANCELLED') {
     return {
       tone: 'bad',

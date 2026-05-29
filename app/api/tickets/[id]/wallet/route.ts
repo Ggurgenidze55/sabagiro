@@ -3,6 +3,8 @@ import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { isAppleWalletConfigured } from '@/lib/wallet/apple-config';
 import { buildAppleWalletPass } from '@/lib/wallet/apple-pass';
+import { qrExpiredMessage, loadTicketQrContext } from '@/lib/ticket-qr-access';
+import { assertTicketQrAccess } from '@/lib/ticket-qr-guard';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -29,6 +31,23 @@ export async function GET(_request: Request, { params }: Params) {
 
     if (ticket.status === 'CANCELLED') {
       return NextResponse.json({ error: 'This ticket is cancelled' }, { status: 410 });
+    }
+
+    const ctx = await loadTicketQrContext(ticket, async (slug) => {
+      const event = await prisma.clubEvent.findFirst({
+        where: { slug },
+        select: { eventDate: true },
+      });
+      return event?.eventDate;
+    });
+
+    try {
+      assertTicketQrAccess(ctx, session.role === 'ADMIN');
+    } catch (e) {
+      if (e instanceof Error && e.message === 'QR_EXPIRED') {
+        return NextResponse.json({ error: qrExpiredMessage(), code: 'QR_EXPIRED' }, { status: 410 });
+      }
+      throw e;
     }
 
     const buffer = await buildAppleWalletPass(ticket);

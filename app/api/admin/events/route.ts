@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
+import { labelsFromEventDate } from '@/lib/event-date-labels';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { sortPublishedEvents } from '@/lib/sort-published-events';
@@ -40,6 +41,10 @@ export async function POST(request: Request) {
         ? body.tiers
         : [{ quantity: 100, priceGel: body.priceGel, label: 'Standard' }];
 
+    const derivedLabels = labelsFromEventDate(body.eventDate);
+    const dayLabel = derivedLabels?.dayLabel ?? body.dayLabel;
+    const dateLabel = derivedLabels?.dateLabel ?? body.dateLabel;
+
     const event = await prisma.clubEvent.create({
       data: {
         slug,
@@ -48,9 +53,9 @@ export async function POST(request: Request) {
         imagePath: body.imagePath ?? '',
         lineup: body.lineup ?? '',
         tag: body.tag ?? '',
-        dayLabel: body.dayLabel,
-        dateLabel: body.dateLabel,
-        eventDate: body.eventDate || null,
+        dayLabel,
+        dateLabel,
+        eventDate: body.eventDate,
         accent: body.accent,
         priceGel: tiersInput[0].priceGel,
         isFeatured: body.isFeatured ?? false,

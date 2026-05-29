@@ -4,8 +4,10 @@ import { ScanDoorCheck } from '@/components/ScanDoorCheck';
 import { ScanVerdict } from '@/components/ScanVerdict';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { getPublishedEventBySlug } from '@/lib/events';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
 import { getScanVerdict } from '@/lib/ticket-scan';
+import { canAccessTicketQr, ticketQrContext } from '@/lib/ticket-qr-access';
 import { qrDataUrl } from '@/lib/qr';
 
 type PageProps = { params: { token: string } };
@@ -31,7 +33,14 @@ export default async function ScanPage({ params }: PageProps) {
 
   const user = await getSessionUser();
   const isAdmin = user?.role === 'ADMIN';
-  const verdict = getScanVerdict(ticket.status, ticket.scannedAt);
+  const event = ticket.eventDate ? null : await getPublishedEventBySlug(ticket.productSlug);
+  const eventDatesBySlug: Record<string, string | null | undefined> = event
+    ? { [ticket.productSlug]: event.eventDate }
+    : {};
+  const ctx = ticketQrContext(ticket, eventDatesBySlug);
+  const qrAvailable = canAccessTicketQr(ctx, isAdmin);
+  const qrExpired = !qrAvailable && ticket.status === 'VALID';
+  const verdict = getScanVerdict(ticket.status, ticket.scannedAt, qrExpired && !isAdmin);
   const showHolderDetails = isAdmin || ticket.status === 'VALID';
   const issuance = describeTicketIssuance(
     ticket,
@@ -39,7 +48,8 @@ export default async function ScanPage({ params }: PageProps) {
     ticket.createdBy ?? ticket.user,
   );
 
-  const qrImage = ticket.status === 'VALID' ? await qrDataUrl(ticket.qrToken) : null;
+  const qrImage =
+    ticket.status === 'VALID' && qrAvailable ? await qrDataUrl(ticket.qrToken) : null;
 
   return (
     <div className="scan-page">
@@ -97,7 +107,12 @@ export default async function ScanPage({ params }: PageProps) {
           <img src={qrImage} alt="Ticket QR" className="ticket-card__qr" width={200} height={200} />
         ) : null}
 
-        <ScanDoorCheck qrToken={ticket.qrToken} status={ticket.status} canCheckIn={isAdmin} />
+        <ScanDoorCheck
+          qrToken={ticket.qrToken}
+          status={ticket.status}
+          canCheckIn={isAdmin && qrAvailable}
+          qrExpired={qrExpired && !isAdmin}
+        />
       </div>
     </div>
   );

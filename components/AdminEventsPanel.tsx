@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { labelsFromEventDate } from '@/lib/event-date-labels';
 
 type ClubEventRow = {
   id: string;
@@ -35,8 +36,8 @@ const defaultForm = {
   imagePath: '',
   lineup: '',
   tag: '',
-  dayLabel: 'SAT',
-  dateLabel: '01 JAN',
+  dayLabel: '',
+  dateLabel: '',
   eventDate: '',
   accent: '#c8ff00',
   priceGel: 45,
@@ -54,6 +55,28 @@ export function AdminEventsPanel() {
   const [msg, setMsg] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const eventDateRef = useRef<HTMLInputElement>(null);
+
+  function openEventCalendar() {
+    const input = eventDateRef.current;
+    if (!input) return;
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+      return;
+    }
+    input.focus();
+    input.click();
+  }
+
+  function onEventDateChange(isoDate: string) {
+    const labels = labelsFromEventDate(isoDate);
+    setForm((prev) => ({
+      ...prev,
+      eventDate: isoDate,
+      dayLabel: labels?.dayLabel ?? prev.dayLabel,
+      dateLabel: labels?.dateLabel ?? prev.dateLabel,
+    }));
+  }
 
   const load = useCallback(async () => {
     setError('');
@@ -128,8 +151,11 @@ export function AdminEventsPanel() {
       }
     }
 
+    const labels = labelsFromEventDate(form.eventDate);
     const payload: Record<string, unknown> = {
       ...form,
+      dayLabel: labels?.dayLabel ?? form.dayLabel,
+      dateLabel: labels?.dateLabel ?? form.dateLabel,
       imagePath,
       priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
       sortOrder: Number(form.sortOrder),
@@ -244,32 +270,35 @@ export function AdminEventsPanel() {
             <span>Tag / venue</span>
             <input value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} />
           </label>
-          <div className="form-row">
-            <label className="form-field">
-              <span>Day (SAT)</span>
-              <input
-                value={form.dayLabel}
-                onChange={(e) => setForm({ ...form, dayLabel: e.target.value })}
-                required
-              />
-            </label>
-            <label className="form-field">
-              <span>Date (31 MAY)</span>
-              <input
-                value={form.dateLabel}
-                onChange={(e) => setForm({ ...form, dateLabel: e.target.value })}
-                required
-              />
+          <div className="event-date-picker">
+            <label className="form-field form-field--date">
+              <span>Event date</span>
+              <div className="event-date-picker__row">
+                <input
+                  ref={eventDateRef}
+                  type="date"
+                  className="event-date-picker__input"
+                  value={form.eventDate}
+                  onChange={(e) => onEventDateChange(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="btn btn--ghost event-date-picker__open"
+                  onClick={openEventCalendar}
+                >
+                  OPEN CALENDAR
+                </button>
+              </div>
+              {form.eventDate && form.dayLabel && form.dateLabel ? (
+                <p className="event-date-picker__preview">
+                  Displays as <strong>{form.dayLabel}</strong> · <strong>{form.dateLabel}</strong>
+                </p>
+              ) : (
+                <p className="form-foot">Choose a date — day name and label fill in automatically.</p>
+              )}
             </label>
           </div>
-          <label className="form-field">
-            <span>ISO date (optional)</span>
-            <input
-              type="date"
-              value={form.eventDate}
-              onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
-            />
-          </label>
           <div className="form-row">
             <label className="form-field">
               <span>Accent</span>

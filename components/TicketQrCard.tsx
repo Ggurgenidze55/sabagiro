@@ -9,6 +9,8 @@ type TicketQrCardProps = {
   holderName: string;
   personalId: string;
   issuanceLine?: string;
+  qrAvailable?: boolean;
+  expiredMessage?: string;
 };
 
 export function TicketQrCard({
@@ -18,6 +20,8 @@ export function TicketQrCard({
   holderName,
   personalId,
   issuanceLine,
+  qrAvailable = true,
+  expiredMessage = 'This event has passed. QR code is no longer available.',
 }: TicketQrCardProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
@@ -26,6 +30,14 @@ export function TicketQrCard({
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!qrAvailable) {
+      setLoading(false);
+      setDataUrl(null);
+      setQrToken(null);
+      setError('');
+      return;
+    }
+
     let cancelled = false;
     setLoading(true);
     setError('');
@@ -57,13 +69,13 @@ export function TicketQrCard({
     return () => {
       cancelled = true;
     };
-  }, [ticketId]);
+  }, [ticketId, qrAvailable]);
 
   const walletHref = `/api/tickets/${ticketId}/wallet`;
-  const showWallet = walletEnabled && status !== 'CANCELLED';
+  const showWallet = qrAvailable && walletEnabled && status !== 'CANCELLED';
 
   return (
-    <article className="ticket-card">
+    <article className={`ticket-card${qrAvailable ? '' : ' ticket-card--archived'}`}>
       <div className="ticket-card__head">
         <h3>{productName}</h3>
         <span className={`ticket-status ticket-status--${status.toLowerCase()}`}>{status}</span>
@@ -72,7 +84,9 @@ export function TicketQrCard({
         Entry: {holderName} · {personalId}
       </p>
       {issuanceLine ? <p className="ticket-card__meta">{issuanceLine}</p> : null}
-      {dataUrl ? (
+      {!qrAvailable ? (
+        <p className="ticket-card__expired">{expiredMessage}</p>
+      ) : dataUrl ? (
         <img src={dataUrl} alt="Ticket QR code" className="ticket-card__qr" width={200} height={200} />
       ) : loading ? (
         <p className="ticket-card__loading">Loading QR…</p>
