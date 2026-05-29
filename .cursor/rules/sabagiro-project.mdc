@@ -14,9 +14,9 @@ Standalone Next.js 14 club site — tickets, shop, account, admin, door scan.
 | | |
 |--|--|
 | **Path** | `~/Desktop/sabagiro` (repo root) |
-| **Production** | https://sabagiro.vercel.app |
+| **Production** | https://www.sabagiro.ge |
 | **DB** | PostgreSQL on Railway (`DATABASE_URL`) |
-| **Dev** | `npm run dev` → http://localhost:**3001** (not 3000 — LariPay often uses 3000) |
+| **Dev** | `npm run dev` → http://localhost:**3001** |
 
 ## Key routes
 
@@ -29,13 +29,13 @@ Standalone Next.js 14 club site — tickets, shop, account, admin, door scan.
 ## Setup
 
 ```bash
-cp .env.local.example .env.local   # DATABASE_URL + AUTH_SECRET
+cp .env.example .env.local   # DATABASE_URL + AUTH_SECRET
 npm install
 npm run setup:db
 npm run dev
 ```
 
-Test logins: `admin@sabagiro.test` / `SabagiroAdmin2026!`, `user@sabagiro.test` / `SabagiroUser2026!`
+Production admins: `info@sabagiro.ge`, `info.sabagiro@gmail.com` (passwords not in git).
 
 ## Style
 
@@ -44,9 +44,9 @@ Brutalist dark UI: `#0a0a0a`, acid `#c8ff00`, `globals.css` + `SiteChrome`. Matc
 ## Pitfalls
 
 - Wrong host: `laripay.vercel.app` has no Sabagiro routes → 404
-- Merch: preview only; checkout is tickets only (no payment gateway yet)
+- No `@sabagiro.test` accounts in production
 - Do not commit `.env.local` or secrets
 
 ## Docs
 
-- `README.md`, `docs/VERCEL.md`, `docs/RAILWAY.md`
+- `README.md`, `docs/HANDOFF.md`, `docs/VERCEL.md`, `docs/RAILWAY.md`

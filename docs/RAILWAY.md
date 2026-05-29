@@ -9,7 +9,7 @@
 
 ## 2. Connect from your Mac (local dev)
 
-In `~/Desktop/sabagiro`:
+In `sabagiro`:
 
 ```bash
 cp .env.example .env.local
@@ -30,31 +30,26 @@ Generate secret:
 openssl rand -base64 32
 ```
 
-## 3. Create tables + test data
+## 3. Create tables + sample events
 
 ```bash
-cd ~/Desktop/sabagiro
+cd sabagiro
 npm install
 npm run db:push
-npm run seed:test
 npm run seed:events
 npm run dev
 ```
 
-Open:
+Open http://localhost:3001/login — use production admin emails (see `docs/HANDOFF.md`).
 
-| URL | Login |
-|-----|--------|
-| http://localhost:3001/login | see test accounts below |
-| http://localhost:3001/account | user dashboard |
-| http://localhost:3001/admin | admin panel |
+## 4. Production admins
 
-## 4. Test accounts (after `npm run seed:test`)
+| Email | Role |
+|-------|------|
+| `info@sabagiro.ge` | ADMIN |
+| `info.sabagiro@gmail.com` | ADMIN |
 
-| Role | Email | Password |
-|------|--------|----------|
-| **Admin** | `admin@sabagiro.test` | `SabagiroAdmin2026!` |
-| **User** | `user@sabagiro.test` | `SabagiroUser2026!` |
+Passwords are **not** in git. Created via `scripts/reset-production-admins.mjs` or `npm run seed:admin` with env vars.
 
 ## 5. Deploy app on Railway (optional, same project)
 
@@ -63,29 +58,25 @@ Open:
 
    - `DATABASE_URL` → reference Postgres service or paste URL
    - `AUTH_SECRET`
-   - `APP_URL` → `https://YOUR-APP.up.railway.app`
+   - `APP_URL` → `https://www.sabagiro.ge`
    - `NEXT_PUBLIC_APP_URL` → same
    - `RESEND_API_KEY` + `EMAIL_FROM` (optional)
 
-3. After first deploy, run migrations from your Mac against production DB:
+3. After first deploy, run migrations from your Mac:
 
    ```bash
    npm run db:migrate
-   # or: npm run db:push
-   # Requires DATABASE_URL in .env.local (Prisma does not read .env.local by default — use npm scripts)
-   DATABASE_URL="postgresql://production..." npm run seed:test
-   DATABASE_URL="postgresql://production..." npm run seed:events
+   npm run seed:events
    ```
 
-   Or use Railway CLI / one-off command.
+## 6. Vercel + Railway DB (current setup)
 
-## 6. Vercel + Railway DB
-
-You can keep **frontend on Vercel** and **only DB on Railway**:
+**Frontend on Vercel**, **DB on Railway**:
 
 - Vercel env: `DATABASE_URL` = Railway Postgres URL
-- Run `db:push` + seeds once from laptop with that URL
+- Vercel env: `APP_URL` + `NEXT_PUBLIC_APP_URL` = `https://www.sabagiro.ge`
+- Run `db:push` / migrations once from laptop with production `DATABASE_URL`
 
 ---
 
-**Do not use test passwords in production** — change emails/passwords after go-live.
+**No test accounts** — `user@sabagiro.test` / `admin@sabagiro.test` removed from production.

@@ -14,8 +14,7 @@
     "db:studio": "dotenv -e .env.local -e .env -- prisma studio",
     "seed:admin": "node scripts/seed-admin.mjs",
     "seed:events": "node scripts/seed-events.mjs",
-    "seed:test": "node scripts/seed-test-users.mjs",
-    "setup:db": "npm run db:push && npm run seed:test && npm run seed:events"
+    "setup:db": "npm run db:push && npm run seed:events"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

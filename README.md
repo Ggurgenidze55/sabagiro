@@ -25,14 +25,18 @@ npm run setup:db    # tables + test users + sample events
 npm run dev
 ```
 
-### Test logins (`npm run seed:test`)
+### Admin logins (production)
 
-| Role | Email | Password | Panel |
-|------|--------|----------|--------|
-| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` | [/admin](http://localhost:3001/admin) |
-| User | `user@sabagiro.test` | `SabagiroUser2026!` | [/account](http://localhost:3001/account) |
+| Role | Email |
+|------|--------|
+| Admin | `info@sabagiro.ge` or `info.sabagiro@gmail.com` |
 
-Login: http://localhost:3001/login (port **3001** — avoid clash with LariPay on 3000)
+Passwords not in git — see secure store from setup.
+
+```bash
+npm run setup:db    # tables + sample events (no test users)
+npm run dev
+```
 
 **Production (live):** https://www.sabagiro.ge — also https://sabagiro.vercel.app
 

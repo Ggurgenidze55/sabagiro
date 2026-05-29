@@ -41,10 +41,11 @@ Required: `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`.
 
 ## Test accounts
 
-| Role | Email | Password |
-|------|--------|----------|
-| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` |
-| User | `user@sabagiro.test` | `SabagiroUser2026!` |
+Production admins only — no `@sabagiro.test` accounts.
+
+| Role | Email |
+|------|--------|
+| Admin | `info@sabagiro.ge` / `info.sabagiro@gmail.com` |
 
 ## Architecture
 

@@ -90,12 +90,14 @@ Auto-deploy: push to `main` → Vercel builds automatically.
 
 ## 4. Test logins
 
-| Role | Email | Password | URL |
-|------|--------|----------|-----|
-| Admin | `admin@sabagiro.test` | `SabagiroAdmin2026!` | `/admin` |
-| User | `user@sabagiro.test` | `SabagiroUser2026!` | `/account` |
+Production admins (passwords not in git):
 
-Seed: `npm run setup:db` or `npm run seed:admin`
+| Email | Panel |
+|-------|-------|
+| `info@sabagiro.ge` | `/admin` |
+| `info.sabagiro@gmail.com` | `/admin` |
+
+No test users (`@sabagiro.test` removed).
 
 ---
 
