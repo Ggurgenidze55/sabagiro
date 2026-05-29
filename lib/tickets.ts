@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { TicketSource, User } from '@prisma/client';
+import type { Ticket, TicketSource, User } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
 import { sendTicketEmail } from '@/lib/email/index';
@@ -60,12 +60,10 @@ export async function createTicketForUser(opts: {
     },
   });
 
-  const qrImage = await qrDataUrl(ticket.qrToken);
   await sendTicketEmail({
     to: holder.email,
     ticket,
     scanLink: scanUrl(ticket.qrToken),
-    qrImageDataUrl: qrImage,
   });
 
   return ticket;
@@ -123,15 +121,15 @@ export async function createFreeTicketForVerifiedUser(opts: {
       },
     });
 
-    const qrImage = await qrDataUrl(ticket.qrToken);
-    await sendTicketEmail({
-      to: opts.holder.email,
-      ticket,
-      scanLink: scanUrl(ticket.qrToken),
-      qrImageDataUrl: qrImage,
-    });
-
     return ticket;
+  });
+}
+
+export async function deliverTicketEmail(ticket: Ticket) {
+  await sendTicketEmail({
+    to: ticket.holderEmail,
+    ticket,
+    scanLink: scanUrl(ticket.qrToken),
   });
 }
 

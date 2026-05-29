@@ -28,9 +28,9 @@ export async function PATCH(request: Request, { params }: Params) {
 
     if (previous.verificationStatus !== status) {
       if (status === 'VERIFIED') {
-        sendAccountVerifiedEmail({ to: user.email, firstName: user.firstName });
+        await sendAccountVerifiedEmail({ to: user.email, firstName: user.firstName });
       } else if (status === 'REJECTED') {
-        sendAccountRejectedEmail({ to: user.email, firstName: user.firstName });
+        await sendAccountRejectedEmail({ to: user.email, firstName: user.firstName });
       }
     }
 

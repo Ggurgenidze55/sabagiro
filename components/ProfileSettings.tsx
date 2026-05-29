@@ -40,9 +40,10 @@ export function ProfileSettings({ user }: { user: User }) {
 
   async function savePassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setPassError('');
     setPassMsg('');
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     try {
       const res = await fetch('/api/account/password', {
         method: 'POST',
@@ -55,7 +56,7 @@ export function ProfileSettings({ user }: { user: User }) {
         return;
       }
       setPassMsg('Password changed');
-      e.currentTarget.reset();
+      form.reset();
     } catch {
       setPassError('Network error');
     }

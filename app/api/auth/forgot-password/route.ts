@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     if (user) {
       const resetUrl = await createPasswordResetLink(user.id);
       if (resetUrl) {
-        sendPasswordResetEmail({
+        await sendPasswordResetEmail({
           to: user.email,
           firstName: user.firstName,
           resetUrl,

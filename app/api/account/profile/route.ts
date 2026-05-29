@@ -33,12 +33,12 @@ export async function PATCH(request: Request) {
     });
 
     if (emailChanged) {
-      sendProfileEmailChangedNotification({
+      await sendProfileEmailChangedNotification({
         to: session.email,
         firstName: user.firstName,
         newEmail: user.email,
       });
-      sendProfileEmailChangedNotification({
+      await sendProfileEmailChangedNotification({
         to: user.email,
         firstName: user.firstName,
         newEmail: user.email,

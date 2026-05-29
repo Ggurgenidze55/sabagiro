@@ -28,7 +28,17 @@ export async function POST(request: Request) {
       },
     });
 
-    sendWelcomeRegistrationEmail({ to: user.email, firstName: user.firstName });
+    const emailResult = await sendWelcomeRegistrationEmail({
+      to: user.email,
+      firstName: user.firstName,
+    });
+    if (!emailResult.sent) {
+      console.error('[register] welcome email failed', {
+        to: user.email,
+        skipped: emailResult.skipped,
+        error: emailResult.error,
+      });
+    }
 
     await setSessionCookie(toSessionUser(user));
     return NextResponse.json({ ok: true });

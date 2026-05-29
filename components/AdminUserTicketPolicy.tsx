@@ -77,7 +77,12 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
             <input
               type="checkbox"
               checked={freeTicketsEnabled}
-              onChange={(e) => setFreeTicketsEnabled(e.target.checked)}
+              onChange={(e) => {
+                const on = e.target.checked;
+                setFreeTicketsEnabled(on);
+                if (!on) setFreeTicketsQuota(0);
+                else if (freeTicketsQuota < 1) setFreeTicketsQuota(Math.max(1, user.freeTicketsQuota || 1));
+              }}
             />
             <span>Enable free ticket generation</span>
           </label>
@@ -85,7 +90,7 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
             <span>Free tickets per event (quota)</span>
             <input
               type="number"
-              min={user.freeTicketsUsed}
+              min={1}
               max={500}
               value={freeTicketsQuota}
               onChange={(e) => setFreeTicketsQuota(Number(e.target.value))}
@@ -93,8 +98,7 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
             />
           </label>
           <p className="form-foot">
-            Total free tickets issued: {user.freeTicketsUsed} · Remaining now:{' '}
-            {Math.max(0, freeTicketsQuota - user.freeTicketsUsed)}
+            Free tickets issued (all events): {user.freeTicketsUsed}. Quota applies per event.
           </p>
           {error ? <p className="form-error">{error}</p> : null}
           {msg ? <p className="form-ok">{msg}</p> : null}

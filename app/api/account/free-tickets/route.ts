@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { createFreeTicketForVerifiedUser } from '@/lib/tickets';
+import { createFreeTicketForVerifiedUser, deliverTicketEmail } from '@/lib/tickets';
 import { remainingFreeTicketsForEvent } from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
 import { formatValidationError, freeTicketGenerateSchema } from '@/lib/validators';
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
         phone: body.phone,
       },
     });
+
+    await deliverTicketEmail(ticket);
 
     return NextResponse.json({ ok: true, ticket });
   } catch (e) {

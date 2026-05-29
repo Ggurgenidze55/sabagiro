@@ -21,6 +21,7 @@ export function TicketQrCard({
 }: TicketQrCardProps) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
+  const [walletEnabled, setWalletEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -29,16 +30,22 @@ export function TicketQrCard({
     setLoading(true);
     setError('');
 
-    fetch(`/api/tickets/${ticketId}/qr`)
-      .then(async (r) => {
+    Promise.all([
+      fetch(`/api/tickets/${ticketId}/qr`).then(async (r) => {
         const d = await r.json();
         if (!r.ok) throw new Error(d.error || 'Failed to load QR');
         return d;
-      })
-      .then((d) => {
+      }),
+      fetch('/api/wallet/status')
+        .then((r) => r.json())
+        .then((d) => Boolean(d.appleWallet))
+        .catch(() => false),
+    ])
+      .then(([qr, wallet]) => {
         if (cancelled) return;
-        if (d.dataUrl) setDataUrl(d.dataUrl);
-        if (d.qrToken) setQrToken(d.qrToken);
+        if (qr.dataUrl) setDataUrl(qr.dataUrl);
+        if (qr.qrToken) setQrToken(qr.qrToken);
+        setWalletEnabled(wallet);
       })
       .catch((e) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load QR');
@@ -51,6 +58,9 @@ export function TicketQrCard({
       cancelled = true;
     };
   }, [ticketId]);
+
+  const walletHref = `/api/tickets/${ticketId}/wallet`;
+  const showWallet = walletEnabled && status !== 'CANCELLED';
 
   return (
     <article className="ticket-card">
@@ -69,6 +79,11 @@ export function TicketQrCard({
       ) : (
         <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
       )}
+      {showWallet ? (
+        <a href={walletHref} className="wallet-badge" download>
+          Add to Apple Wallet
+        </a>
+      ) : null}
       {qrToken ? (
         <a href={`/scan/${qrToken}`} className="ticket-card__link">
           Scan link →

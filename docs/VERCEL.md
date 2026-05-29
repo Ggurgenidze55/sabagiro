@@ -2,12 +2,13 @@
 
 ## Correct site URL
 
-Use **https://sabagiro.vercel.app** for login, shop, admin, and account.
+Use **https://www.sabagiro.ge** (or **https://sabagiro.vercel.app**) for login, shop, admin, and account.
 
-- `laripay.vercel.app` is the **LariPay** app — `/login`, `/shop`, `/account` return **404** there.
-- `sabagiro-club.vercel.app` is not deployed unless you create that Vercel project.
+- `laripay.vercel.app` is the **LariPay** app — Sabagiro routes return **404** there.
 
-Local dev: `cd ~/Desktop/sabagiro && npm run dev` → **http://localhost:3001** (port 3001 avoids LariPay on 3000).
+Local dev: `cd sabagiro && npm run dev` → **http://localhost:3001** (port 3001 avoids LariPay on 3000).
+
+**Handoff (new machine):** [docs/HANDOFF.md](HANDOFF.md)
 
 ---
 
@@ -29,7 +30,11 @@ Optional:
 | Variable | Purpose |
 |----------|---------|
 | `RESEND_API_KEY` | All transactional emails (tickets, registration, reset, verification) |
-| `EMAIL_FROM` | Sender address (must be verified in Resend) |
+| `EMAIL_FROM` | Sender address (must be verified in Resend) — e.g. `Sabagiro <info@sabagiro.ge>` |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics 4 (`G-...`) — see `docs/SEO.md` |
+| `NEXT_PUBLIC_META_PIXEL_ID` | Facebook Meta Pixel — see `docs/SEO.md` |
+| `GOOGLE_SITE_VERIFICATION` | Search Console meta tag (optional if DNS TXT verified) |
+| `APPLE_WALLET_*` | Apple Wallet `.pkpass` — see `docs/WALLET.md` |
 
 ## After adding variables
 

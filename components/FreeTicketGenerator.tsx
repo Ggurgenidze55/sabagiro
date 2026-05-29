@@ -1,40 +1,58 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type EventOption = { slug: string; title: string };
 
 type FreeTicketGeneratorProps = {
   quota: number;
+  usedByEvent: Record<string, number>;
 };
 
-export function FreeTicketGenerator({ quota }: FreeTicketGeneratorProps) {
+export function FreeTicketGenerator({ quota, usedByEvent }: FreeTicketGeneratorProps) {
   const router = useRouter();
   const [events, setEvents] = useState<EventOption[]>([]);
+  const [selectedSlug, setSelectedSlug] = useState('');
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(false);
+  const [localUsedByEvent, setLocalUsedByEvent] = useState(usedByEvent);
+
+  useEffect(() => {
+    setLocalUsedByEvent(usedByEvent);
+  }, [usedByEvent]);
 
   useEffect(() => {
     fetch('/api/events')
       .then((r) => r.json())
       .then((d) => {
         if (d.events) {
-          setEvents(
-            d.events.map((e: { slug: string; title: string }) => ({ slug: e.slug, title: e.title })),
-          );
+          const list = d.events.map((e: { slug: string; title: string }) => ({
+            slug: e.slug,
+            title: e.title,
+          }));
+          setEvents(list);
+          setSelectedSlug((prev) => prev || list[0]?.slug || '');
         }
       })
       .catch(() => setError('Could not load events'));
   }, []);
 
+  const remainingForSelected = useMemo(() => {
+    if (!selectedSlug) return quota;
+    const used = localUsedByEvent[selectedSlug] ?? 0;
+    return Math.max(0, quota - used);
+  }, [localUsedByEvent, quota, selectedSlug]);
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setError('');
     setMsg('');
     setLoading(true);
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
+    const productSlug = String(fd.get('productSlug') || '');
     try {
       const res = await fetch('/api/account/free-tickets', {
         method: 'POST',
@@ -47,10 +65,17 @@ export function FreeTicketGenerator({ quota }: FreeTicketGeneratorProps) {
         return;
       }
       setMsg('Free ticket created. QR is now visible in My Tickets.');
-      e.currentTarget.reset();
+      if (productSlug) {
+        setLocalUsedByEvent((prev) => ({
+          ...prev,
+          [productSlug]: (prev[productSlug] ?? 0) + 1,
+        }));
+      }
+      form.reset();
       router.refresh();
-    } catch {
-      setError('Network error');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Request failed';
+      setError(message.includes('fetch') ? 'Network error — check connection' : message);
     } finally {
       setLoading(false);
     }
@@ -59,21 +84,35 @@ export function FreeTicketGenerator({ quota }: FreeTicketGeneratorProps) {
   return (
     <section style={{ marginBottom: '2.5rem' }}>
       <h2 className="section-title">Free Ticket Generator</h2>
-      <p className="page-lead" style={{ marginBottom: '1rem' }}>
-        Free limit: {quota} tickets per event. Fill in holder details below.
+      <p className="page-lead" style={{ marginBottom: '0.5rem' }}>
+        Limit: {quota} free ticket(s) per event.
+      </p>
+      <p className="page-lead" style={{ marginBottom: '1rem', color: 'var(--acid, #c8ff00)' }}>
+        {selectedSlug
+          ? `Remaining for selected event: ${remainingForSelected} / ${quota}`
+          : `Remaining: ${quota} / ${quota}`}
       </p>
       <form className="form-stack" onSubmit={onSubmit}>
         <label className="form-field">
           <span>Event</span>
-          <select name="productSlug" required defaultValue={events[0]?.slug}>
+          <select
+            name="productSlug"
+            required
+            value={selectedSlug}
+            onChange={(e) => setSelectedSlug(e.target.value)}
+          >
             {events.length === 0 ? (
               <option value="">No events available</option>
             ) : (
-              events.map((ev) => (
-                <option key={ev.slug} value={ev.slug}>
-                  {ev.title}
-                </option>
-              ))
+              events.map((ev) => {
+                const used = localUsedByEvent[ev.slug] ?? 0;
+                const left = Math.max(0, quota - used);
+                return (
+                  <option key={ev.slug} value={ev.slug}>
+                    {ev.title} ({left} left)
+                  </option>
+                );
+              })
             )}
           </select>
         </label>
@@ -99,7 +138,14 @@ export function FreeTicketGenerator({ quota }: FreeTicketGeneratorProps) {
         </label>
         {error ? <p className="form-error">{error}</p> : null}
         {msg ? <p className="form-ok">{msg}</p> : null}
-        <button type="submit" className="btn" disabled={loading || events.length === 0}>
+        {remainingForSelected <= 0 && selectedSlug ? (
+          <p className="form-error">Free ticket limit reached for this event.</p>
+        ) : null}
+        <button
+          type="submit"
+          className="btn"
+          disabled={loading || events.length === 0 || remainingForSelected <= 0}
+        >
           {loading ? '…' : 'Generate Free Ticket'}
         </button>
       </form>

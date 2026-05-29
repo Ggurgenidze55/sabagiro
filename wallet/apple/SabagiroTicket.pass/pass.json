@@ -1,0 +1,14 @@
+{
+  "formatVersion": 1,
+  "organizationName": "Sabagiro",
+  "description": "Sabagiro Event Ticket",
+  "foregroundColor": "rgb(242, 235, 227)",
+  "backgroundColor": "rgb(10, 10, 10)",
+  "labelColor": "rgb(200, 255, 0)",
+  "eventTicket": {
+    "primaryFields": [],
+    "secondaryFields": [],
+    "auxiliaryFields": [],
+    "backFields": []
+  }
+}

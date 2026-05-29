@@ -1,5 +1,5 @@
 import type { Ticket } from '@prisma/client';
-import { sendEmailAsync } from '@/lib/email/client';
+import { sendEmail, type SendEmailResult } from '@/lib/email/client';
 import {
   accountRejectedEmail,
   accountVerifiedEmail,
@@ -9,30 +9,40 @@ import {
   ticketPurchaseEmail,
   welcomeRegistrationEmail,
 } from '@/lib/email/templates';
+import { qrImageUrl } from '@/lib/qr';
 
-export function sendWelcomeRegistrationEmail(opts: { to: string; firstName: string }) {
+export function sendWelcomeRegistrationEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
   const msg = welcomeRegistrationEmail({ firstName: opts.firstName });
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }
 
-export function sendAccountVerifiedEmail(opts: { to: string; firstName: string }) {
+export function sendAccountVerifiedEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
   const msg = accountVerifiedEmail({ firstName: opts.firstName });
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }
 
-export function sendAccountRejectedEmail(opts: { to: string; firstName: string }) {
+export function sendAccountRejectedEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
   const msg = accountRejectedEmail({ firstName: opts.firstName });
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }
 
-export function sendTicketEmail(payload: {
+export async function sendTicketEmail(payload: {
   to: string;
   ticket: Ticket;
   scanLink: string;
-  qrImageDataUrl: string;
-}) {
-  const { ticket, scanLink, qrImageDataUrl, to } = payload;
+}): Promise<SendEmailResult> {
+  const { ticket, scanLink, to } = payload;
   const msg = ticketPurchaseEmail({
+    ticketId: ticket.id,
     productName: ticket.productName,
     holderFirstName: ticket.holderFirstName,
     holderLastName: ticket.holderLastName,
@@ -40,9 +50,9 @@ export function sendTicketEmail(payload: {
     priceGel: ticket.priceGel,
     tierLabel: ticket.tierLabel,
     scanLink,
-    qrImageDataUrl,
+    qrImageUrl: qrImageUrl(ticket.qrToken),
   });
-  sendEmailAsync({ to, ...msg });
+  return sendEmail({ to, ...msg });
 }
 
 export function sendPasswordResetEmail(opts: {
@@ -50,21 +60,24 @@ export function sendPasswordResetEmail(opts: {
   firstName: string;
   resetUrl: string;
   expiresMinutes: number;
-}) {
+}): Promise<SendEmailResult> {
   const msg = passwordResetEmail(opts);
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }
 
-export function sendPasswordChangedEmail(opts: { to: string; firstName: string }) {
+export function sendPasswordChangedEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
   const msg = passwordChangedEmail({ firstName: opts.firstName });
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }
 
 export function sendProfileEmailChangedNotification(opts: {
   to: string;
   firstName: string;
   newEmail: string;
-}) {
+}): Promise<SendEmailResult> {
   const msg = profileEmailChangedEmail(opts);
-  sendEmailAsync({ to: opts.to, ...msg });
+  return sendEmail({ to: opts.to, ...msg });
 }

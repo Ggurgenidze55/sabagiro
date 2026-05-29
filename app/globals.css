@@ -18,6 +18,15 @@
   --neon-magenta: #ff0044;
   --font-display: 'Bebas Neue', sans-serif;
   --font-mono: 'Share Tech Mono', monospace;
+  /* Readable small copy (was ~8–10px, now ~11–13px at 16px root) */
+  --text-2xs: 0.7rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.82rem;
+  --text-md: 0.95rem;
+}
+
+html {
+  font-size: 17px;
 }
 
 html,
@@ -53,7 +62,7 @@ a {
   flex-wrap: wrap;
   gap: clamp(0.75rem, 2vw, 1.5rem);
   list-style: none;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.28em;
   text-transform: uppercase;
 }
@@ -97,14 +106,14 @@ a {
   gap: 0.75rem;
   padding: 1rem clamp(1rem, 4vw, 2.5rem);
   border-top: 1px solid rgba(176, 168, 154, 0.1);
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.22em;
   opacity: 0.45;
   text-transform: uppercase;
 }
 
 .site-footer__link {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   text-decoration: none;
@@ -116,6 +125,13 @@ a {
   color: var(--acid);
 }
 
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
 .page-title {
   font-family: var(--font-display);
   font-size: clamp(2rem, 6vw, 3.25rem);
@@ -125,7 +141,7 @@ a {
 }
 
 .page-lead {
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.32em;
   text-transform: uppercase;
   opacity: 0.55;
@@ -155,7 +171,7 @@ a {
 }
 
 .product-card__tag {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--card-accent, var(--acid));
@@ -169,7 +185,7 @@ a {
 }
 
 .product-card__meta {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   opacity: 0.55;
   line-height: 1.7;
@@ -202,7 +218,7 @@ a {
 
 .event-page__tag {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.38em;
   text-transform: uppercase;
   color: var(--event-accent);
@@ -221,7 +237,7 @@ a {
 
 .event-page__lineup {
   margin: 0.15rem 0 0;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(212, 204, 196, 0.55);
@@ -230,7 +246,7 @@ a {
 
 .event-page__section-label {
   margin: 0 0 0.65rem;
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: rgba(176, 168, 154, 0.55);
@@ -311,7 +327,7 @@ a {
 }
 
 .event-page__price-label {
-  font-size: 0.52rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: rgba(176, 168, 154, 0.55);
@@ -328,7 +344,7 @@ a {
 
 .event-page__stock {
   margin: 0.25rem 0 0;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(212, 204, 196, 0.6);
@@ -340,7 +356,7 @@ a {
 
 .event-page__hint {
   margin: 0;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.16em;
   line-height: 1.65;
   color: rgba(212, 204, 196, 0.55);
@@ -367,7 +383,7 @@ a {
 
 .event-page__actions .btn--ghost {
   letter-spacing: 0.2em;
-  font-size: 0.72rem;
+  font-size: var(--text-md);
 }
 
 .event-page__notice-btn {
@@ -441,7 +457,7 @@ a {
 }
 
 .delete-confirm__text {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.1em;
   line-height: 1.5;
   margin-bottom: 0.5rem;
@@ -457,7 +473,7 @@ a {
 .cart-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.65rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.1em;
 }
 
@@ -473,7 +489,7 @@ a {
   opacity: 0.5;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
 }
 
 .cart-actions {
@@ -509,7 +525,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
@@ -521,7 +537,7 @@ a {
   border: 1px solid rgba(176, 168, 154, 0.3);
   color: var(--concrete-light);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--text-md);
 }
 
 .form-field input:focus,
@@ -532,18 +548,18 @@ a {
 
 .form-error {
   color: #ff6688;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.12em;
 }
 
 .form-ok {
   color: var(--acid);
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.12em;
 }
 
 .form-foot {
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   opacity: 0.6;
 }
 
@@ -569,7 +585,7 @@ a {
 }
 
 .identity-readonly dt {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   opacity: 0.45;
@@ -610,7 +626,7 @@ a {
   min-height: 2.45rem;
   padding: 0.55rem 0.9rem;
   letter-spacing: 0.2em;
-  font-size: 0.72rem;
+  font-size: var(--text-md);
 }
 
 .ticket-grid {
@@ -641,7 +657,7 @@ a {
 }
 
 .ticket-card__meta {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   opacity: 0.55;
   margin: 0.45rem 0 0.35rem;
   letter-spacing: 0.1em;
@@ -655,17 +671,41 @@ a {
   padding: 0.35rem;
 }
 
+.wallet-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.85rem auto 0;
+  padding: 0.55rem 0.9rem;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  background: #000;
+  color: #fff;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.wallet-badge:hover {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+
 .ticket-card__link {
   display: inline-block;
   margin-top: 0.75rem;
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   color: var(--acid);
   word-break: break-all;
 }
 
 .ticket-status {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.2em;
 }
 
@@ -694,13 +734,13 @@ a {
   min-height: 2.4rem;
   padding: 0.55rem 0.95rem;
   letter-spacing: 0.16em;
-  font-size: 0.72rem;
+  font-size: var(--text-md);
 }
 
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.08em;
   border: 1px solid rgba(176, 168, 154, 0.16);
   background: rgba(10, 10, 10, 0.55);
@@ -715,7 +755,7 @@ a {
 }
 
 .data-table th {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(212, 204, 196, 0.72);
@@ -736,7 +776,7 @@ a {
 
 .stat-card__label {
   display: block;
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.22em;
   opacity: 0.5;
   text-transform: uppercase;
@@ -757,7 +797,7 @@ a {
 .back-link {
   display: inline-block;
   margin-bottom: 1rem;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(176, 168, 154, 0.6);
@@ -829,7 +869,7 @@ a {
 }
 
 .scan-verdict__title-en {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.28em;
   text-transform: uppercase;
   opacity: 0.55;
@@ -846,21 +886,21 @@ a {
 
 .scan-verdict__sub {
   margin-top: 0.75rem;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.1em;
   line-height: 1.5;
   color: var(--concrete-light);
 }
 
 .scan-verdict__sub-en {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.14em;
   opacity: 0.5;
   margin-top: 0.35rem;
 }
 
 .scan-card__tier {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   opacity: 0.6;
@@ -869,7 +909,7 @@ a {
 
 .scan-door-hint {
   margin-top: 1rem;
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.12em;
   text-align: center;
   opacity: 0.55;
@@ -879,12 +919,12 @@ a {
 .scan-door-actions__btn {
   width: 100%;
   margin-top: 0.5rem;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   padding: 1rem 1.25rem;
 }
 
 .scan-card__label {
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.32em;
   color: var(--acid);
 }
@@ -904,7 +944,7 @@ a {
 }
 
 .scan-details dt {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   opacity: 0.45;
@@ -927,7 +967,7 @@ a {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -945,7 +985,7 @@ a {
 
 .table-sub {
   opacity: 0.45;
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.08em;
 }
 
@@ -959,7 +999,7 @@ a {
 .table-actions .btn {
   min-height: 2.15rem;
   padding: 0.4rem 0.65rem;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.14em;
 }
 
@@ -969,7 +1009,7 @@ a {
   padding: 1rem;
   border: 1px dashed rgba(200, 255, 0, 0.35);
   background: rgba(200, 255, 0, 0.04);
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.06em;
 }
 
@@ -1005,7 +1045,7 @@ a {
 
 .site-nav__action .btn {
   padding: 0.35rem 0.65rem;
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
 }
 
 .account-subnav {
@@ -1022,7 +1062,7 @@ a {
 }
 
 .account-subnav a {
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.24em;
   text-transform: uppercase;
   text-decoration: none;
@@ -1039,7 +1079,7 @@ a {
   padding: 1rem 1.1rem;
   border: 1px dashed rgba(200, 255, 0, 0.35);
   background: rgba(200, 255, 0, 0.04);
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.08em;
   line-height: 1.6;
 }
@@ -1055,7 +1095,7 @@ a {
 
 .cart-total__note {
   display: block;
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   opacity: 0.5;
   margin-top: 0.25rem;
   letter-spacing: 0.12em;
@@ -1104,7 +1144,7 @@ a {
 }
 
 .location-list__label {
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   opacity: 0.45;
@@ -1122,13 +1162,13 @@ a {
 
 .scan-door-msg {
   margin-top: 1rem;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.1em;
 }
 
 .verify-badge {
   display: inline-block;
-  font-size: 0.5rem;
+  font-size: var(--text-2xs);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   padding: 0.25rem 0.45rem;
@@ -1168,7 +1208,7 @@ a {
 }
 
 .verify-banner__title {
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--acid);
@@ -1184,7 +1224,7 @@ a {
 
 .user-social a {
   color: var(--acid);
-  font-size: 0.55rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -1207,7 +1247,7 @@ a {
   padding: 0.75rem 0.85rem 0.75rem 1rem;
   border: 1px solid rgba(176, 168, 154, 0.18);
   background: rgba(10, 10, 10, 0.65);
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.12em;
   overflow: hidden;
 }
@@ -1234,7 +1274,7 @@ a {
 
 .tier-list__label {
   grid-column: 1;
-  font-size: 0.68rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(212, 204, 196, 0.88);
@@ -1253,7 +1293,7 @@ a {
 
 .tier-list__qty {
   grid-column: 1;
-  font-size: 0.52rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: rgba(176, 168, 154, 0.5);
@@ -1261,7 +1301,7 @@ a {
 
 .tier-list__total {
   margin: 0.85rem 0 0;
-  font-size: 0.58rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(176, 168, 154, 0.48);
@@ -1300,7 +1340,7 @@ a {
 .user-policy .btn {
   min-height: 2.2rem;
   padding: 0.45rem 0.75rem;
-  font-size: 0.62rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.14em;
 }
 
@@ -1469,7 +1509,7 @@ body.nav-lock {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.1rem;
-    font-size: 0.68rem;
+    font-size: var(--text-sm);
   }
 
   .mobile-nav__panel .site-nav a {
@@ -1480,7 +1520,7 @@ body.nav-lock {
   .mobile-nav__panel .site-nav__action .btn {
     width: 100%;
     min-height: 44px;
-    font-size: 0.58rem;
+    font-size: var(--text-sm);
   }
 
   .page-title {
@@ -1636,7 +1676,7 @@ body.nav-lock {
 
   .scan-door-actions__btn {
     min-height: 48px;
-    font-size: 0.68rem;
+    font-size: var(--text-sm);
   }
 
   .location-list li {
@@ -1662,7 +1702,7 @@ body.nav-lock {
     width: auto;
     min-height: 36px;
     padding: 0.35rem 0.55rem;
-    font-size: 0.5rem;
+    font-size: var(--text-2xs);
   }
 }
 

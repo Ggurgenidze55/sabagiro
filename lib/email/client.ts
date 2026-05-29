@@ -1,21 +1,40 @@
+import { Resend } from 'resend';
+import { getEmailFrom, isEmailConfigured } from '@/lib/email/config';
+
 export type SendEmailInput = {
   to: string;
   subject: string;
   html: string;
   text?: string;
+  attachments?: Array<{
+    filename: string;
+    content: string;
+    contentType?: string;
+    inlineContentId?: string;
+  }>;
 };
 
 export type SendEmailResult = {
   sent: boolean;
   skipped?: boolean;
+  id?: string;
   error?: string;
 };
 
-export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || 'Sabagiro <tickets@sabagiro.ge>';
+let resendClient: Resend | null = null;
 
-  if (!apiKey) {
+function getResend(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return null;
+  if (!resendClient) resendClient = new Resend(apiKey);
+  return resendClient;
+}
+
+export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult> {
+  const client = getResend();
+  const from = getEmailFrom();
+
+  if (!client) {
     console.info('[email] RESEND_API_KEY not set — logged only', {
       to: input.to,
       subject: input.subject,
@@ -24,28 +43,26 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
   }
 
   try {
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from,
-        to: [input.to],
-        subject: input.subject,
-        html: input.html,
-        text: input.text,
-      }),
+    const { data, error } = await client.emails.send({
+      from,
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+      attachments: input.attachments?.map((a) => ({
+        filename: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+        inlineContentId: a.inlineContentId,
+      })),
     });
 
-    if (!res.ok) {
-      const text = await res.text();
-      console.error('[email] Resend failed', res.status, text);
-      return { sent: false, error: text };
+    if (error) {
+      console.error('[email] Resend failed', error);
+      return { sent: false, error: error.message || 'Send failed' };
     }
 
-    return { sent: true };
+    return { sent: true, id: data?.id };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Send failed';
     console.error('[email]', message);
@@ -59,3 +76,5 @@ export function sendEmailAsync(input: SendEmailInput): void {
     console.error('[email] async send failed', e);
   });
 }
+
+export { getEmailFrom, isEmailConfigured };

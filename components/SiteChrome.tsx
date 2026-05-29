@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getSessionUser } from '@/lib/auth';
 import { MobileNav } from '@/components/MobileNav';
 import { SiteNav } from '@/components/SiteNav';
+import { INSTAGRAM_URL } from '@/lib/social';
 
 type SiteChromeProps = {
   children: React.ReactNode;
@@ -32,9 +33,19 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
       <main className="site-main">{children}</main>
       <footer className="site-footer">
         <span>© Sabagiro · Tbilisi · GE</span>
-        <Link href="/location" className="site-footer__link">
-          Location
-        </Link>
+        <div className="site-footer__links">
+          <Link href="/location" className="site-footer__link">
+            Location
+          </Link>
+          <a
+            href={INSTAGRAM_URL}
+            className="site-footer__link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
+        </div>
       </footer>
     </div>
   );

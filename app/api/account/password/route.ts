@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       data: { passwordHash: await hashPassword(body.newPassword) },
     });
 
-    sendPasswordChangedEmail({ to: updated.email, firstName: updated.firstName });
+    await sendPasswordChangedEmail({ to: updated.email, firstName: updated.firstName });
 
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -18,11 +18,9 @@ export async function PATCH(request: Request, { params }: Params) {
       return NextResponse.json({ error: 'Cannot change policy for admin' }, { status: 403 });
     }
 
-    if (body.freeTicketsQuota < existing.freeTicketsUsed) {
+    if (body.freeTicketsEnabled && body.freeTicketsQuota < 1) {
       return NextResponse.json(
-        {
-          error: `Free ticket quota cannot be lower than ${existing.freeTicketsUsed} (already used).`,
-        },
+        { error: 'Free ticket quota must be at least 1 when generation is enabled.' },
         { status: 400 },
       );
     }
@@ -32,7 +30,7 @@ export async function PATCH(request: Request, { params }: Params) {
       data: {
         ticketLimitPerEvent: body.ticketLimitPerEvent,
         freeTicketsEnabled: body.freeTicketsEnabled,
-        freeTicketsQuota: body.freeTicketsQuota,
+        freeTicketsQuota: body.freeTicketsEnabled ? body.freeTicketsQuota : 0,
       },
     });
 

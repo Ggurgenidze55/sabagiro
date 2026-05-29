@@ -66,6 +66,7 @@ export function accountRejectedEmail(opts: {
 }
 
 export function ticketPurchaseEmail(opts: {
+  ticketId: string;
   productName: string;
   holderFirstName: string;
   holderLastName: string;
@@ -73,22 +74,26 @@ export function ticketPurchaseEmail(opts: {
   priceGel: number;
   tierLabel: string;
   scanLink: string;
-  qrImageDataUrl: string;
+  qrImageUrl: string;
 }): { subject: string; html: string; text: string } {
   const holder = escapeHtml(`${opts.holderFirstName} ${opts.holderLastName}`);
   const tier = opts.tierLabel ? ` · ${escapeHtml(opts.tierLabel)}` : '';
+  const qrUrl = escapeHtml(opts.qrImageUrl);
   const bodyHtml = `
+    <!-- sabagiro-ticket:${escapeHtml(opts.ticketId)} -->
     <p>Your ticket for <strong>${escapeHtml(opts.productName)}</strong> is ready.</p>
     <p style="margin:8px 0 0">${holder}<br />ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
     <p style="margin:20px 0 12px">
-      <img src="${opts.qrImageDataUrl}" alt="Ticket QR" width="260" height="260" style="display:block;border:4px solid #c8ff00" />
+      <a href="${escapeHtml(opts.scanLink)}" style="display:inline-block;line-height:0">
+        <img src="${qrUrl}" alt="Ticket QR code" width="260" height="260" style="display:block;width:260px;height:260px;border:4px solid #c8ff00;background:#ffffff" />
+      </a>
     </p>
-    <p style="font-size:13px;color:#8a827a">Show this QR at the door. You can also open it from your account.</p>
+    <p style="font-size:14px;color:#8a827a;margin:0">Show this QR at the door. You can also open it from your account.</p>
   `;
   return {
     subject: `Sabagiro ticket — ${opts.productName}`,
     html: renderEmailLayout({
-      preheader: `Ticket for ${opts.productName}`,
+      preheader: `Ticket for ${opts.productName} — ${opts.holderFirstName}`,
       title: 'Your ticket',
       bodyHtml,
       ctaLabel: 'OPEN TICKET',
@@ -108,7 +113,7 @@ export function passwordResetEmail(opts: {
   const bodyHtml = `
     <p>Hi ${name}, we received a request to reset your Sabagiro password.</p>
     <p>This link expires in <strong>${opts.expiresMinutes} minutes</strong>. If you did not request this, you can ignore this email.</p>
-    <p style="word-break:break-all;font-size:13px;color:#8a827a">${url}</p>
+    <p style="word-break:break-all;font-size:14px;color:#8a827a">${url}</p>
   `;
   return {
     subject: 'Sabagiro — reset your password',
@@ -163,5 +168,23 @@ export function profileEmailChangedEmail(opts: {
       ctaHref: siteUrl('/account/settings'),
     }),
     text: `Your Sabagiro email was changed to ${opts.newEmail}. Settings: ${siteUrl('/account/settings')}`,
+  };
+}
+
+export function testEmail(): { subject: string; html: string; text: string } {
+  const bodyHtml = `
+    <p>Resend is connected. Sabagiro transactional email is ready.</p>
+    <p>This test covers: registration, verification, tickets, password reset.</p>
+  `;
+  return {
+    subject: 'Sabagiro — email test',
+    html: renderEmailLayout({
+      preheader: 'Resend connection test',
+      title: 'Email test OK',
+      bodyHtml,
+      ctaLabel: 'OPEN SITE',
+      ctaHref: siteUrl('/'),
+    }),
+    text: `Sabagiro email test OK. Site: ${siteUrl('/')}`,
   };
 }

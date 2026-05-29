@@ -34,7 +34,9 @@ npm run dev
 
 Login: http://localhost:3001/login (port **3001** — avoid clash with LariPay on 3000)
 
-**Production (live):** https://sabagiro.vercel.app/login — do **not** use `laripay.vercel.app` for Sabagiro routes.
+**Production (live):** https://www.sabagiro.ge — also https://sabagiro.vercel.app
+
+**Continue on another laptop:** see **[docs/HANDOFF.md](docs/HANDOFF.md)**
 
 | URL | Role |
 |-----|------|
