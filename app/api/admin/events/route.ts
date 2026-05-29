@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sortPublishedEvents } from '@/lib/sort-published-events';
 import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
 export async function GET() {
   try {
     await requireAdmin();
-    const events = await prisma.clubEvent.findMany({
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
+    const rows = await prisma.clubEvent.findMany({
       include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
     });
+    const events = sortPublishedEvents(rows);
     return NextResponse.json({ events });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
-import { EventTierList } from '@/components/EventTierList';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
 import {
@@ -76,20 +75,12 @@ export default async function ProductPage({ params }: PageProps) {
         ) : null}
 
         <div className="event-page__price-card">
-          <span className="event-page__price-label">Current wave</span>
+          <span className="event-page__price-label">Ticket</span>
           <p className="event-page__price">{formatGel(product.priceGel)}</p>
-          {isTicket && product.ticketsRemaining !== undefined ? (
-            <p className="event-page__stock">
-              {product.ticketsRemaining > 0
-                ? `${product.ticketsRemaining} tickets left`
-                : 'Sold out'}
-            </p>
+          {isTicket && product.ticketsRemaining === 0 ? (
+            <p className="event-page__stock">Sold out</p>
           ) : null}
         </div>
-
-        {isTicket ? (
-          <EventTierList tiers={product.tiers} ticketsRemaining={product.ticketsRemaining} />
-        ) : null}
 
         <div className="event-page__notices">
           {isTicket && user && !canPurchaseTickets(user) ? (

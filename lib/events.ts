@@ -1,6 +1,7 @@
 import type { ClubEvent } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
+import { sortPublishedEvents } from '@/lib/sort-published-events';
 
 /** URL-safe slug: lowercase, hyphens, no spaces (fixes /shop/foo bar → 404). */
 export function slugifyTitle(title: string) {
@@ -40,10 +41,10 @@ function hasDatabase() {
 
 export async function listPublishedEvents() {
   if (!hasDatabase()) return [];
-  return prisma.clubEvent.findMany({
+  const events = await prisma.clubEvent.findMany({
     where: { published: true },
-    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
   });
+  return sortPublishedEvents(events);
 }
 
 export async function getPublishedEventBySlug(slug: string) {

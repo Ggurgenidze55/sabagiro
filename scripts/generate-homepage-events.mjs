@@ -32,6 +32,19 @@ function mapEvents(events) {
   }));
 }
 
+function sortPublishedEvents(events) {
+  return [...events].sort((a, b) => {
+    const byCreated = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (byCreated !== 0) return byCreated;
+    const dateA = a.eventDate ? Date.parse(a.eventDate) : NaN;
+    const dateB = b.eventDate ? Date.parse(b.eventDate) : NaN;
+    if (!Number.isNaN(dateA) && !Number.isNaN(dateB) && dateA !== dateB) return dateA - dateB;
+    if (!Number.isNaN(dateA) && Number.isNaN(dateB)) return -1;
+    if (Number.isNaN(dateA) && !Number.isNaN(dateB)) return 1;
+    return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+  });
+}
+
 async function loadPayload() {
   if (!process.env.DATABASE_URL?.trim()) {
     console.warn('[homepage-events] DATABASE_URL missing — keeping previous snapshot if any');
@@ -42,13 +55,14 @@ async function loadPayload() {
     }
   }
 
-  const [events, seasonRow] = await Promise.all([
+  const [rawEvents, seasonRow] = await Promise.all([
     prisma.clubEvent.findMany({
       where: { published: true },
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     }),
     prisma.siteSetting.findUnique({ where: { key: 'events_season' } }),
   ]);
+
+  const events = sortPublishedEvents(rawEvents);
 
   return {
     season: seasonRow?.value || 'Summer 2025',
