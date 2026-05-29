@@ -7,7 +7,7 @@ import { INSTAGRAM_URL } from '@/lib/social';
 
 type SiteChromeProps = {
   children: React.ReactNode;
-  current?: 'shop' | 'cart' | 'account';
+  current?: 'shop' | 'cart' | 'account' | 'settings';
 };
 
 export async function SiteChrome({ children, current }: SiteChromeProps) {

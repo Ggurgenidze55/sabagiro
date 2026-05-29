@@ -1048,32 +1048,6 @@ a {
   font-size: var(--text-2xs);
 }
 
-.account-subnav {
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
-}
-
-.account-subnav ul {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem 1.5rem;
-  list-style: none;
-  padding-bottom: 0.75rem;
-}
-
-.account-subnav a {
-  font-size: var(--text-sm);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  text-decoration: none;
-  color: rgba(176, 168, 154, 0.55);
-}
-
-.account-subnav a:hover,
-.account-subnav a[aria-current='page'] {
-  color: var(--acid);
-}
-
 .notice-banner {
   margin-bottom: 1.25rem;
   padding: 1rem 1.1rem;
@@ -1625,10 +1599,6 @@ body.nav-lock {
 
   .cart-actions .btn {
     width: 100%;
-  }
-
-  .account-subnav ul {
-    gap: 0.65rem 1rem;
   }
 
   .tier-list__item {

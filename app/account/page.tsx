@@ -63,9 +63,6 @@ export default async function AccountPage() {
           </p>
         </div>
         <div className="dash-head__actions">
-          <Link href="/account/settings" className="btn btn--ghost">
-            Settings
-          </Link>
           {user.role === 'ADMIN' ? (
             <Link href="/admin" className="btn">
               Admin

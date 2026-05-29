@@ -4,7 +4,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 
 type SiteNavProps = {
   user: SessionUser | null;
-  current?: 'shop' | 'cart' | 'account';
+  current?: 'shop' | 'cart' | 'account' | 'settings';
 };
 
 export function SiteNav({ user, current }: SiteNavProps) {
@@ -30,7 +30,12 @@ export function SiteNav({ user, current }: SiteNavProps) {
           <>
             <li>
               <Link href="/account" aria-current={current === 'account' ? 'page' : undefined}>
-                Account
+                Tickets
+              </Link>
+            </li>
+            <li>
+              <Link href="/account/settings" aria-current={current === 'settings' ? 'page' : undefined}>
+                Settings
               </Link>
             </li>
             {user.role === 'ADMIN' ? (

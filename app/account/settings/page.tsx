@@ -13,7 +13,7 @@ export default async function AccountSettingsPage() {
   if (!user) redirect('/login?next=/account/settings');
 
   return (
-    <SiteChrome current="account">
+    <SiteChrome current="settings">
       <h1 className="page-title">SETTINGS</h1>
       <p className="page-lead">Email, phone, and password can be updated. Name/personal ID are locked after registration</p>
       <ProfileSettings user={user} />
