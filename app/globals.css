@@ -576,19 +576,68 @@ button {
 }
 
 .form-field input,
-.form-field select {
+.form-field select,
+.form-field textarea {
   padding: 0.65rem 0.75rem;
   background: rgba(10, 10, 10, 0.9);
   border: 1px solid rgba(176, 168, 154, 0.3);
   color: var(--concrete-light);
   font-family: var(--font-mono, var(--font-mono-fallback));
   font-size: var(--text-md);
+  color-scheme: dark;
+}
+
+.form-field textarea {
+  line-height: 1.55;
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder {
+  color: rgba(176, 168, 154, 0.42);
 }
 
 .form-field input:focus,
-.form-field select:focus {
+.form-field select:focus,
+.form-field textarea:focus {
   outline: none;
   border-color: var(--acid);
+  box-shadow: 0 0 0 1px rgba(200, 255, 0, 0.15);
+}
+
+.form-field input[type='file'] {
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+}
+
+.form-field input[type='file']::file-selector-button {
+  margin-right: 0.85rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid rgba(176, 168, 154, 0.35);
+  border-radius: 2px;
+  background: rgba(22, 22, 22, 0.98);
+  color: var(--concrete-light);
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.form-field input[type='file']::file-selector-button:hover {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+
+.form-field--file .form-file-name {
+  margin: 0.15rem 0 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--acid);
+  opacity: 0.85;
 }
 
 .form-error {

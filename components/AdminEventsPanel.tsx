@@ -250,13 +250,14 @@ export function AdminEventsPanel() {
               rows={5}
             />
           </label>
-          <label className="form-field">
+          <label className="form-field form-field--file">
             <span>Event image (will be auto-compressed)</span>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
+            {imageFile ? <p className="form-file-name">{imageFile.name}</p> : null}
           </label>
           <label className="form-field">
             <span>Lineup</span>
