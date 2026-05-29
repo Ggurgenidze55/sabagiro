@@ -8,7 +8,7 @@ Sabagiro uses [Flitt](https://docs.flitt.com/) hosted checkout (`POST /api/check
 2. Server calls Flitt → `checkout_url`
 3. Customer pays on Flitt page
 4. Flitt → `POST /api/webhooks/flitt` (server callback)
-5. Customer → `/payment/return?orderId=…` (polls until PAID)
+5. Flitt → `POST /api/payment/flitt-return` → redirect → `/payment/return?orderId=…`
 
 ## Vercel env (Production)
 

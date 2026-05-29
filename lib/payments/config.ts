@@ -15,6 +15,11 @@ export function buildPaymentReturnUrl(orderId: string): string {
   return siteUrl(`/payment/return?orderId=${encodeURIComponent(orderId)}`);
 }
 
+/** Flitt POST redirect target (303 → /payment/return). */
+export function buildFlittResponseUrl(orderId: string): string {
+  return siteUrl(`/api/payment/flitt-return?orderId=${encodeURIComponent(orderId)}`);
+}
+
 export function buildFlittWebhookUrl(): string {
   const override = readEnv('FLITT_CALLBACK_URL');
   if (override) return override;

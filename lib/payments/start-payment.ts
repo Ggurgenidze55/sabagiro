@@ -1,6 +1,6 @@
 import type { Order } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { buildFlittWebhookUrl, buildPaymentReturnUrl, isPaymentsTestMode } from '@/lib/payments/config';
+import { buildFlittWebhookUrl, buildFlittResponseUrl, isPaymentsTestMode } from '@/lib/payments/config';
 import { siteUrl } from '@/lib/site-url';
 import { FlittClient } from '@/lib/payments/flitt/client';
 
@@ -33,7 +33,7 @@ export async function startPaymentForOrder(order: Order) {
     orderId: order.id,
     amountGel: order.totalGel,
     description: `SABAGIRO tickets · ${order.totalGel} GEL`,
-    responseUrl: buildPaymentReturnUrl(order.id),
+    responseUrl: buildFlittResponseUrl(order.id),
     serverCallbackUrl: buildFlittWebhookUrl(),
   });
 

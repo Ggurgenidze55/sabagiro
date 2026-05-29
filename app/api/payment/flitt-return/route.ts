@@ -5,10 +5,12 @@ import { flittStatusToOutcome, parseFlittPayload } from '@/lib/payments/flitt/ca
 
 export const runtime = 'nodejs';
 
-/** Flitt POST redirect to response_url after customer pays. */
+/** Flitt POST to response_url — redirect browser to polling page. */
 export async function POST(request: Request) {
-  let payload: Record<string, unknown>;
+  const url = new URL(request.url);
+  const orderIdFromQuery = url.searchParams.get('orderId') ?? '';
 
+  let payload: Record<string, unknown>;
   const contentType = request.headers.get('content-type') || '';
   if (contentType.includes('application/json')) {
     const body = await request.json().catch(() => ({}));
@@ -18,15 +20,15 @@ export async function POST(request: Request) {
     payload = Object.fromEntries(form.entries()) as Record<string, unknown>;
   }
 
-  const orderId = String(payload.order_id || '');
-  const url = new URL(orderId ? buildPaymentReturnUrl(orderId) : siteUrl('/payment/return'));
+  const orderId = String(payload.order_id || orderIdFromQuery || '');
+  const returnUrl = new URL(orderId ? buildPaymentReturnUrl(orderId) : siteUrl('/payment/return'));
 
   const outcome = flittStatusToOutcome(String(payload.order_status || ''));
   if (outcome === 'failed') {
-    url.searchParams.set('failed', '1');
+    returnUrl.searchParams.set('failed', '1');
   } else if (outcome === 'succeeded') {
-    url.searchParams.set('paid', '1');
+    returnUrl.searchParams.set('paid', '1');
   }
 
-  return NextResponse.redirect(url, 303);
+  return NextResponse.redirect(returnUrl, 303);
 }
