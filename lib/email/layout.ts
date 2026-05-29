@@ -20,7 +20,7 @@ export function renderEmailLayout(opts: LayoutOpts): string {
   const preheader = opts.preheader ? escapeHtml(opts.preheader) : '';
   const title = escapeHtml(opts.title);
   const accountUrl = siteUrl('/account');
-  const shopUrl = siteUrl('/shop');
+  const eventsUrl = siteUrl('/events');
   const homeUrl = siteUrl('/');
   const logoUrl = siteUrl('/club/sabagiro-logo-white.png');
 
@@ -67,7 +67,7 @@ export function renderEmailLayout(opts: LayoutOpts): string {
                 Underground · Tbilisi<br />
                 <a href="${escapeHtml(accountUrl)}" style="color:#c8ff00">Your account</a>
                 ·
-                <a href="${escapeHtml(shopUrl)}" style="color:#c8ff00">Events</a>
+                <a href="${escapeHtml(eventsUrl)}" style="color:#c8ff00">Events</a>
               </p>
             </td>
           </tr>

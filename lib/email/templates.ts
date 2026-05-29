@@ -38,9 +38,9 @@ export function accountVerifiedEmail(opts: {
       title: 'Account verified',
       bodyHtml,
       ctaLabel: 'BROWSE EVENTS',
-      ctaHref: siteUrl('/shop'),
+      ctaHref: siteUrl('/events'),
     }),
-    text: `Hi ${opts.firstName}, your Sabagiro account is verified. Buy tickets: ${siteUrl('/shop')}`,
+    text: `Hi ${opts.firstName}, your Sabagiro account is verified. Buy tickets: ${siteUrl('/events')}`,
   };
 }
 
@@ -168,6 +168,38 @@ export function profileEmailChangedEmail(opts: {
       ctaHref: siteUrl('/account/settings'),
     }),
     text: `Your Sabagiro email was changed to ${opts.newEmail}. Settings: ${siteUrl('/account/settings')}`,
+  };
+}
+
+const CONTACT_TOPIC_LABELS: Record<string, string> = {
+  tickets: 'Tickets & orders',
+  events: 'Events & lineup',
+  press: 'Press & partnerships',
+  other: 'Other',
+};
+
+export function contactFormNotificationEmail(opts: {
+  name: string;
+  email: string;
+  topic: string;
+  message: string;
+}): { subject: string; html: string; text: string } {
+  const topicLabel = CONTACT_TOPIC_LABELS[opts.topic] ?? opts.topic;
+  const bodyHtml = `
+    <p><strong>From:</strong> ${escapeHtml(opts.name)} &lt;${escapeHtml(opts.email)}&gt;</p>
+    <p><strong>Topic:</strong> ${escapeHtml(topicLabel)}</p>
+    <p style="margin-top:16px;white-space:pre-wrap;line-height:1.55">${escapeHtml(opts.message)}</p>
+  `;
+  return {
+    subject: `Sabagiro contact — ${topicLabel}`,
+    html: renderEmailLayout({
+      preheader: `Message from ${opts.name}`,
+      title: 'New contact message',
+      bodyHtml,
+      ctaLabel: 'REPLY BY EMAIL',
+      ctaHref: `mailto:${encodeURIComponent(opts.email)}`,
+    }),
+    text: `Contact form\nFrom: ${opts.name} <${opts.email}>\nTopic: ${topicLabel}\n\n${opts.message}`,
   };
 }
 

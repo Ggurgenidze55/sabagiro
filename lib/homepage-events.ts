@@ -30,7 +30,7 @@ export async function getHomepageEventsPayload(): Promise<HomepageEventsPayload>
       dateLabel: e.dateLabel,
       accent: e.accent,
       isFeatured: e.isFeatured,
-      shopUrl: `/shop/${encodeURI(e.slug)}`,
+      shopUrl: `/events/${encodeURI(e.slug)}`,
     })),
   };
 }

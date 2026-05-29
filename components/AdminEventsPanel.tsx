@@ -180,7 +180,7 @@ export function AdminEventsPanel() {
     setForm(defaultForm);
     setTiers(defaultTiers);
     setImageFile(null);
-    setMsg('Event created — visible on homepage & shop');
+    setMsg('Event created — visible on homepage & events');
     load();
   }
 
@@ -455,7 +455,7 @@ export function AdminEventsPanel() {
                 <td>
                   {ev.title}
                   <br />
-                  <span className="table-sub">/shop/{ev.slug}</span>
+                  <span className="table-sub">/events/{ev.slug}</span>
                   {ev.imagePath ? (
                     <>
                       <br />

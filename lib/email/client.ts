@@ -6,6 +6,7 @@ export type SendEmailInput = {
   subject: string;
   html: string;
   text?: string;
+  replyTo?: string;
   attachments?: Array<{
     filename: string;
     content: string;
@@ -46,6 +47,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     const { data, error } = await client.emails.send({
       from,
       to: input.to,
+      replyTo: input.replyTo,
       subject: input.subject,
       html: input.html,
       text: input.text,

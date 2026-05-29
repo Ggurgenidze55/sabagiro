@@ -138,7 +138,7 @@ export default async function AccountPage() {
       <h2 className="section-title">My tickets</h2>
       {tickets.length === 0 ? (
         <p className="cart-empty">
-          No tickets yet. <Link href="/shop">Buy tickets</Link>
+          No tickets yet. <Link href="/events">Browse events</Link>
         </p>
       ) : (
         <div className="ticket-grid">

@@ -116,6 +116,14 @@ export const clubEventSchema = z.object({
   tiers: z.array(ticketTierSchema).min(1).max(10).optional(),
 });
 
+export const contactFormSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email().max(200),
+  topic: z.enum(['tickets', 'events', 'press', 'other']).default('other'),
+  message: z.string().trim().min(10).max(5000),
+  company: z.string().optional(),
+});
+
 export const checkoutSchema = z.object({
   items: z
     .array(

@@ -8,7 +8,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: `${base}/`, lastModified: now, changeFrequency: 'daily', priority: 1 },
-    { url: `${base}/shop`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${base}/events`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${base}/contact`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/location`, lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ];
 
@@ -17,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const eventPages = products
       .filter((p) => p.type === 'ticket')
       .map((p) => ({
-        url: `${base}/shop/${p.slug}`,
+        url: `${base}/events/${p.slug}`,
         lastModified: now,
         changeFrequency: 'weekly' as const,
         priority: 0.85,

@@ -6,6 +6,8 @@ const nextConfig = {
     return [
       { source: '/sabagiro.html', destination: '/', permanent: true },
       { source: '/index.html', destination: '/', permanent: false },
+      { source: '/shop', destination: '/events', permanent: true },
+      { source: '/shop/:slug', destination: '/events/:slug', permanent: true },
     ];
   },
 };

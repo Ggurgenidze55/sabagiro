@@ -8,7 +8,7 @@ export default function AdminEventsPage() {
   return (
     <>
       <h1 className="page-title">EVENTS</h1>
-      <p className="page-lead">Create events for homepage Upcoming events + shop tickets</p>
+      <p className="page-lead">Create events for homepage + ticket sales</p>
       <AdminEventsPanel />
     </>
   );

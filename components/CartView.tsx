@@ -208,8 +208,8 @@ export function CartView({
       <>
         <p className="cart-empty">Cart is empty</p>
         <div className="cart-actions">
-          <Link href="/shop" className="btn">
-            GO TO SHOP
+          <Link href="/events" className="btn">
+            BROWSE EVENTS
           </Link>
         </div>
       </>
@@ -397,8 +397,8 @@ export function CartView({
         <button type="button" className="btn btn--ghost" onClick={clearCart}>
           Clear
         </button>
-        <Link href="/shop" className="btn btn--ghost">
-          Continue shopping
+        <Link href="/events" className="btn btn--ghost">
+          Continue to events
         </Link>
       </div>
       {error ? (

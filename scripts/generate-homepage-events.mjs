@@ -28,7 +28,7 @@ function mapEvents(events) {
     dateLabel: e.dateLabel,
     accent: e.accent,
     isFeatured: e.isFeatured,
-    shopUrl: `/shop/${encodeURIComponent(e.slug)}`,
+    shopUrl: `/events/${encodeURIComponent(e.slug)}`,
   }));
 }
 

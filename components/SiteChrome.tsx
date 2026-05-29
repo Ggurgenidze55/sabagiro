@@ -6,7 +6,7 @@ import { INSTAGRAM_URL } from '@/lib/social';
 
 type SiteChromeProps = {
   children: React.ReactNode;
-  current?: 'shop' | 'cart' | 'account' | 'settings';
+  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact';
 };
 
 export async function SiteChrome({ children, current }: SiteChromeProps) {
@@ -35,6 +35,12 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
       <footer className="site-footer">
         <span>© Sabagiro · Tbilisi · GE</span>
         <div className="site-footer__links">
+          <Link href="/events" className="site-footer__link">
+            Events
+          </Link>
+          <Link href="/contact" className="site-footer__link">
+            Contact
+          </Link>
           <Link href="/location" className="site-footer__link">
             Location
           </Link>

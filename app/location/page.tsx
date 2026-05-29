@@ -41,7 +41,7 @@ export default function LocationPage() {
             </li>
           </ul>
           <div className="cart-actions" style={{ marginTop: '1.5rem' }}>
-            <Link href="/shop" className="btn">
+            <Link href="/events" className="btn">
               BUY TICKETS
             </Link>
             <Link href="/" className="btn btn--ghost">
