@@ -108,26 +108,25 @@ Optional alias: custom domain.
 
 1. User registers (name, surname, 11-digit personal ID, email, phone).
 2. Adds tickets in `/shop` → **BUY TICKETS** in cart (must be logged in).
-3. Checkout creates a **pending order**, then redirects to payment (TBC card or test simulator).
+3. Checkout creates a **pending order**, then redirects to payment (Flitt or test simulator).
 4. After payment succeeds, tickets are issued — QR in `/account`, emailed if Resend is set.
 5. Admin can generate tickets at `/admin/generate` with the same fields + instant QR.
 6. Scanning QR opens `/scan/{token}` with full holder details.
 
-## Payments (standalone — not LariPay SaaS)
+## Payments (Flitt — not LariPay SaaS)
 
-Code lives in `lib/payments/`. Tickets are **not** created until payment is confirmed.
+Code: `lib/payments/`, docs: **`docs/PAYMENTS-FLITT.md`**. Tickets are **not** created until payment is confirmed.
 
 | Mode | When | Flow |
 |------|------|------|
-| **Test** | No `TBC_CLIENT_ID` / `TBC_CLIENT_SECRET`, or `SABAGIRO_PAYMENTS_TEST_MODE=true` | `/payment/test` → simulate Pay / Cancel |
-| **TBC** | Credentials set on Vercel | Redirect to TBC → webhook `/api/webhooks/tbc` → `/payment/return` |
+| **Test** | No `FLITT_MERCHANT_ID` / `FLITT_SECRET_KEY`, or `SABAGIRO_PAYMENTS_TEST_MODE=true` | `/payment/test` → simulate Pay / Cancel |
+| **Flitt** | Credentials on Vercel | Redirect to Flitt checkout → webhook `/api/webhooks/flitt` → `/payment/return` |
 
 Env (production on Vercel):
 
-- `SABAGIRO_PUBLIC_URL` or `NEXT_PUBLIC_APP_URL` — e.g. `https://sabagiro.vercel.app`
-- `TBC_ENV` — `sandbox` or `production`
-- `TBC_CLIENT_ID`, `TBC_CLIENT_SECRET`, optional `TBC_API_KEY`
-- `TBC_WEBHOOK_SECRET` — optional; defaults to client secret for HMAC callbacks
+- `SABAGIRO_PUBLIC_URL` or `APP_URL` — e.g. `https://www.sabagiro.ge`
+- `FLITT_MERCHANT_ID`, `FLITT_SECRET_KEY`
+- Optional: `FLITT_API_ORIGIN` (default `https://pay.flitt.com`)
 
 After schema change: `npm run db:push`
 

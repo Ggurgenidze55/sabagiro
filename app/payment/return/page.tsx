@@ -113,7 +113,7 @@ function ReturnInner() {
         {totalGel != null ? (
           <p className="payment-card__meta">{formatGel(totalGel)} — please wait.</p>
         ) : (
-          <p className="payment-card__meta">Please wait while we confirm with the bank.</p>
+          <p className="payment-card__meta">Please wait while we confirm with Flitt.</p>
         )}
       </div>
     </main>

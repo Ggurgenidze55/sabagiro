@@ -1,8 +1,8 @@
 import type { Order } from '@prisma/client';
 import { prisma } from '@/lib/db';
-import { isPaymentsTestMode } from '@/lib/payments/config';
+import { buildFlittWebhookUrl, buildPaymentReturnUrl, isPaymentsTestMode } from '@/lib/payments/config';
 import { siteUrl } from '@/lib/site-url';
-import { TbcClient } from '@/lib/payments/tbc/client';
+import { FlittClient } from '@/lib/payments/flitt/client';
 
 export async function startPaymentForOrder(order: Order) {
   if (order.status !== 'PENDING') {
@@ -28,22 +28,23 @@ export async function startPaymentForOrder(order: Order) {
     };
   }
 
-  const client = new TbcClient();
-  const result = await client.createPayment({
-    amountGel: order.totalGel,
+  const client = new FlittClient();
+  const result = await client.createCheckout({
     orderId: order.id,
-    returnUrl: siteUrl(`/payment/return?orderId=${encodeURIComponent(order.id)}`),
+    amountGel: order.totalGel,
     description: `SABAGIRO tickets · ${order.totalGel} GEL`,
+    responseUrl: buildPaymentReturnUrl(order.id),
+    serverCallbackUrl: buildFlittWebhookUrl(),
   });
 
-  if (!result.redirectUrl || !result.paymentId) {
-    throw new Error('TBC_NO_REDIRECT');
+  if (!result.redirectUrl) {
+    throw new Error('FLITT_NO_REDIRECT');
   }
 
   const payment = await prisma.payment.create({
     data: {
       orderId: order.id,
-      provider: 'TBC',
+      provider: 'FLITT',
       amountGel: order.totalGel,
       bankPaymentId: result.paymentId,
       redirectUrl: result.redirectUrl,

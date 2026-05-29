@@ -51,7 +51,7 @@ function TestPaymentInner() {
         <p className="payment-card__eyebrow">Test payment</p>
         <h1>Simulate bank checkout</h1>
         <p className="payment-card__meta">
-          Order <code>{orderId.slice(0, 10)}…</code> — no real charge. Use this until TBC credentials are configured.
+          Order <code>{orderId.slice(0, 10)}…</code> — no real charge. Use this until Flitt credentials are configured.
         </p>
         {error ? <p className="payment-card__error">{error}</p> : null}
         <div className="payment-card__actions">
@@ -73,7 +73,7 @@ function TestPaymentInner() {
           </button>
         </div>
         <p className="payment-card__hint">
-          Production: you will be redirected to TBC card page instead.
+          Production: you will be redirected to Flitt checkout instead.
         </p>
       </div>
     </main>

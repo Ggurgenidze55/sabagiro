@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { syncTbcPaymentFromBank } from '@/lib/payments/complete-payment';
+import { syncFlittPaymentForOrder } from '@/lib/payments/complete-payment';
 import { isPaymentsTestMode } from '@/lib/payments/config';
 
 type Params = { params: { id: string } };
@@ -21,18 +21,15 @@ export async function GET(_request: Request, { params }: Params) {
     }
 
     if (order.status === 'PENDING' && !isPaymentsTestMode()) {
-      const bankId = order.payments[0]?.bankPaymentId;
-      if (bankId) {
-        await syncTbcPaymentFromBank(bankId).catch(() => undefined);
-        const refreshed = await prisma.order.findUnique({ where: { id: order.id } });
-        if (refreshed) {
-          return NextResponse.json({
-            id: refreshed.id,
-            status: refreshed.status,
-            totalGel: refreshed.totalGel,
-            paidAt: refreshed.paidAt,
-          });
-        }
+      await syncFlittPaymentForOrder(order.id).catch(() => undefined);
+      const refreshed = await prisma.order.findUnique({ where: { id: order.id } });
+      if (refreshed) {
+        return NextResponse.json({
+          id: refreshed.id,
+          status: refreshed.status,
+          totalGel: refreshed.totalGel,
+          paidAt: refreshed.paidAt,
+        });
       }
     }
 

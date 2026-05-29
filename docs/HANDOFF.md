@@ -69,9 +69,9 @@ Domain `sabagiro.ge` verified in Resend (DKIM/SPF Cloudflare-ში).
 
 See `docs/WALLET.md`. Needs Apple Developer certs + env vars.
 
-### Payments (TBC — optional)
+### Payments (Flitt)
 
-See `README.md` → Payments. Test mode works without TBC creds.
+See `docs/PAYMENTS-FLITT.md`. Test mode works without Flitt creds.
 
 **Env შეცვლის შემდეგ:** Redeploy ან `npx vercel --prod --yes`
 

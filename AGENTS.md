@@ -57,7 +57,7 @@ Production admins only — no `@sabagiro.test` accounts.
 | Auth | `lib/auth.ts`, `middleware.ts` |
 | Tickets / QR | `lib/tickets.ts`, `lib/qr.ts` |
 | Email | `lib/email/*` |
-| Payments | `lib/payments/*` (TBC or test mode) |
+| Payments | `lib/payments/*` (Flitt or test mode) |
 | Apple Wallet | `lib/wallet/*` |
 | UI shell | `components/SiteChrome.tsx`, `app/globals.css` |
 
@@ -72,7 +72,7 @@ Push to `main` → Vercel auto-deploy. Redeploy after env changes.
 ## User preferences
 
 - Georgian market; UI copy mostly English
-- Instant payment outcome (test simulator or TBC)
+- Instant payment outcome (test simulator or Flitt)
 - QR visible in email (hosted image URL, not CID)
 - Do not commit secrets or `.env*`
 

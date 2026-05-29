@@ -1,8 +1,8 @@
 import { prisma } from '@/lib/db';
 import { fulfillPaidOrder, markOrderFailed } from '@/lib/payments/fulfill-order';
-import { TbcClient } from '@/lib/payments/tbc/client';
-import { TBC_STATUS_FAILED, TBC_STATUS_SUCCEEDED } from '@/lib/payments/tbc/constants';
 import { isPaymentsTestMode } from '@/lib/payments/config';
+import { FlittClient } from '@/lib/payments/flitt/client';
+import { flittStatusToOutcome } from '@/lib/payments/flitt/callback';
 
 export async function completePaymentSuccess(paymentId: string, rawCallback?: unknown) {
   const payment = await prisma.payment.findUnique({
@@ -39,34 +39,56 @@ export async function completePaymentFailed(paymentId: string, rawCallback?: unk
   await markOrderFailed(payment.orderId);
 }
 
-export async function syncTbcPaymentFromBank(bankPaymentId: string) {
+export async function syncFlittPaymentForOrder(orderId: string) {
   if (isPaymentsTestMode()) return null;
 
   const payment = await prisma.payment.findFirst({
-    where: { bankPaymentId },
+    where: { orderId, provider: 'FLITT' },
+    orderBy: { createdAt: 'desc' },
   });
   if (!payment) return null;
 
-  const client = new TbcClient();
-  const { status, raw } = await client.checkStatus(bankPaymentId);
+  const client = new FlittClient();
+  const { status, raw } = await client.getOrderStatus(orderId);
 
-  if (status === TBC_STATUS_SUCCEEDED) {
+  if (status === 'succeeded') {
     await completePaymentSuccess(payment.id, raw);
     return 'succeeded';
   }
-  if (status === TBC_STATUS_FAILED) {
+  if (status === 'failed') {
     await completePaymentFailed(payment.id, raw);
     return 'failed';
   }
   return 'pending';
 }
 
-export async function completePaymentByBankId(bankPaymentId: string, rawCallback?: unknown) {
-  const payment = await prisma.payment.findFirst({
-    where: { bankPaymentId },
-  });
+export async function handleFlittCallback(payload: Record<string, unknown>) {
+  const orderId = String(payload.order_id || '');
+  const paymentId = payload.payment_id != null ? String(payload.payment_id) : null;
+  const orderStatus = String(payload.order_status || '');
+  const outcome = flittStatusToOutcome(orderStatus);
+
+  let payment = paymentId
+    ? await prisma.payment.findFirst({ where: { bankPaymentId: paymentId } })
+    : null;
+
+  if (!payment && orderId) {
+    payment = await prisma.payment.findFirst({
+      where: { orderId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   if (!payment) return null;
 
-  await completePaymentSuccess(payment.id, rawCallback);
+  if (outcome === 'succeeded') {
+    await completePaymentSuccess(payment.id, payload);
+    return payment.orderId;
+  }
+  if (outcome === 'failed') {
+    await completePaymentFailed(payment.id, payload);
+    return payment.orderId;
+  }
+
   return payment.orderId;
 }

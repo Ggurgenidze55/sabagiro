@@ -35,6 +35,9 @@ Optional:
 | `NEXT_PUBLIC_META_PIXEL_ID` | Facebook Meta Pixel — see `docs/SEO.md` |
 | `GOOGLE_SITE_VERIFICATION` | Search Console meta tag (optional if DNS TXT verified) |
 | `APPLE_WALLET_*` | Apple Wallet `.pkpass` — see `docs/WALLET.md` |
+| `FLITT_MERCHANT_ID` | Flitt merchant ID — see `docs/PAYMENTS-FLITT.md` |
+| `FLITT_SECRET_KEY` | Flitt payment secret key |
+| `FLITT_API_ORIGIN` | Optional — default `https://pay.flitt.com` |
 
 ## After adding variables
 

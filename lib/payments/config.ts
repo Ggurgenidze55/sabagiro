@@ -1,20 +1,10 @@
-/** Sabagiro payments — independent of LariPay SaaS. */
+/** Sabagiro payments — Flitt (https://docs.flitt.com/) */
 
 import { getSiteBaseUrl, siteUrl } from '@/lib/site-url';
 
 function readEnv(name: string, fallback = ''): string {
   const v = process.env[name];
   return v !== undefined && v !== '' ? v : fallback;
-}
-
-export function isTbcSandbox(): boolean {
-  return readEnv('TBC_ENV', 'sandbox').toLowerCase() === 'sandbox';
-}
-
-export function getTbcApiOrigin(): string {
-  return isTbcSandbox()
-    ? 'https://test-api.tbcbank.ge/v1'
-    : 'https://api.tbcbank.ge/v1';
 }
 
 export function getPublicBaseUrl(): string {
@@ -25,29 +15,31 @@ export function buildPaymentReturnUrl(orderId: string): string {
   return siteUrl(`/payment/return?orderId=${encodeURIComponent(orderId)}`);
 }
 
-export function buildTbcWebhookUrl(): string {
-  const override = readEnv('TBC_CALLBACK_URL');
+export function buildFlittWebhookUrl(): string {
+  const override = readEnv('FLITT_CALLBACK_URL');
   if (override) return override;
-  return siteUrl('/api/webhooks/tbc');
+  return siteUrl('/api/webhooks/flitt');
+}
+
+/** Whole GEL (45) → Flitt minor units (4500 tetri). */
+export function gelToFlittMinorUnits(amountGel: number): number {
+  return Math.round(amountGel * 100);
 }
 
 export function isPaymentsTestMode(): boolean {
   const flag = readEnv('SABAGIRO_PAYMENTS_TEST_MODE').toLowerCase();
   if (flag === '1' || flag === 'true' || flag === 'yes') return true;
   if (flag === '0' || flag === 'false' || flag === 'no') return false;
-  const hasTbc =
-    Boolean(readEnv('TBC_CLIENT_ID')) && Boolean(readEnv('TBC_CLIENT_SECRET'));
-  return !hasTbc;
+  const hasFlitt =
+    Boolean(readEnv('FLITT_MERCHANT_ID')) && Boolean(readEnv('FLITT_SECRET_KEY'));
+  return !hasFlitt;
 }
 
-export function getTbcConfig() {
+export function getFlittConfig() {
   return {
-    clientId: readEnv('TBC_CLIENT_ID'),
-    clientSecret: readEnv('TBC_CLIENT_SECRET'),
-    apiKey: readEnv('TBC_API_KEY'),
-    webhookSecret: readEnv('TBC_WEBHOOK_SECRET') || readEnv('TBC_CLIENT_SECRET'),
-    sandbox: isTbcSandbox(),
-    origin: getTbcApiOrigin(),
+    merchantId: Number(readEnv('FLITT_MERCHANT_ID', '0')),
+    secretKey: readEnv('FLITT_SECRET_KEY'),
+    apiOrigin: readEnv('FLITT_API_ORIGIN', 'https://pay.flitt.com').replace(/\/$/, ''),
   };
 }
 

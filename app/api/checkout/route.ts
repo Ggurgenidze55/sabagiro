@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     if (message === 'NO_ITEMS') {
       return NextResponse.json({ error: 'No valid tickets in cart' }, { status: 400 });
     }
-    if (message === 'TBC_NO_REDIRECT') {
+    if (message === 'FLITT_NO_REDIRECT') {
       return NextResponse.json(
         { error: 'Payment provider could not start checkout. Try again later.' },
         { status: 502 },
