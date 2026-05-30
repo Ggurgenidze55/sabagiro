@@ -585,48 +585,69 @@
         align-items: center;
         justify-content: space-between;
         padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
-        border-top: 1px solid rgba(176, 168, 154, 0.1);
-        font-size: 0.78rem;
-        letter-spacing: 0.22em;
-        opacity: 0.42;
-        backdrop-filter: blur(4px);
+        padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+        border-top: 1px solid rgba(176, 168, 154, 0.12);
+        backdrop-filter: blur(8px);
         background: rgba(10, 10, 10, 0.35);
+        overflow: visible;
       }
 
       .footer__brand {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.35rem;
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.35em;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid rgba(176, 168, 154, 0.22);
+        border-radius: 3px;
+        font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+        letter-spacing: 0.42em;
         text-transform: uppercase;
+        line-height: 1.4;
       }
 
-      .footer__credit {
-        font-size: 0.72rem;
-        letter-spacing: 0.2em;
-        color: rgba(200, 255, 0, 0.5);
+      .footer__credit,
+      .footer__copyright,
+      .footer__sep {
+        color: rgba(176, 168, 154, 0.58);
+        font-size: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
       }
 
-      .footer__copyright {
-        font-size: 0.72rem;
-        letter-spacing: 0.22em;
-        opacity: 0.85;
+      .footer__sep {
+        opacity: 0.65;
       }
 
       .social {
         display: flex;
-        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: clamp(0.5rem, 1.5vw, 0.85rem);
         list-style: none;
       }
 
       .social a {
-        color: var(--concrete);
+        display: inline-block;
+        padding: 0.4rem 0.75rem;
+        border: 1px solid rgba(176, 168, 154, 0.22);
+        border-radius: 3px;
+        font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+        letter-spacing: 0.42em;
+        text-transform: uppercase;
+        line-height: 1.4;
+        color: rgba(176, 168, 154, 0.58);
         text-decoration: none;
-        transition: color 0.2s;
+        transition:
+          color 0.2s,
+          border-color 0.2s,
+          box-shadow 0.2s;
       }
 
       .social a:hover {
         color: var(--acid);
+        border-color: rgba(200, 255, 0, 0.35);
+        text-shadow: 0 0 24px rgba(200, 255, 0, 0.35);
       }
 
       @media (max-width: 899px) {
@@ -889,8 +910,8 @@
             <li data-nav="guest"><a href="/register" class="hoverable">Register</a></li>
             <li data-nav="user" hidden><a href="/account" class="hoverable">Account</a></li>
             <li data-nav="admin" hidden><a href="/admin" class="hoverable">Admin</a></li>
-            <li><a href="/about" class="hoverable">About</a></li>
-            <li><a href="/contact" class="hoverable">Contact</a></li>
+            <li data-nav="guest"><a href="/about" class="hoverable">About</a></li>
+            <li data-nav="guest"><a href="/contact" class="hoverable">Contact</a></li>
           </ul>
         </nav>
         <span class="nav-meta">Tbilisi · GE</span>
@@ -991,6 +1012,7 @@
       <footer class="footer" id="contact">
         <div class="footer__brand">
           <span class="footer__credit">Tsverebiani Kaci</span>
+          <span class="footer__sep" aria-hidden="true">·</span>
           <span class="footer__copyright">© Sabagiro 2026</span>
         </div>
         <ul class="social">

@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { SiteChrome } from '@/components/SiteChrome';
 import { FreeTicketGenerator } from '@/components/FreeTicketGenerator';
-import { LogoutButton } from '@/components/LogoutButton';
 import { TicketQrCard } from '@/components/TicketQrCard';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
@@ -93,14 +92,13 @@ export default async function AccountPage() {
             {user.firstName} {user.lastName} · {user.email} · {user.phone}
           </p>
         </div>
-        <div className="dash-head__actions">
-          {user.role === 'ADMIN' ? (
+        {user.role === 'ADMIN' ? (
+          <div className="dash-head__actions">
             <Link href="/admin" className="btn">
               Admin
             </Link>
-          ) : null}
-          <LogoutButton />
-        </div>
+          </div>
+        ) : null}
       </div>
 
       {user.role !== 'ADMIN' ? (

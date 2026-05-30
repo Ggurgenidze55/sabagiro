@@ -21,6 +21,10 @@
   --text-xs: 0.75rem;
   --text-sm: 0.82rem;
   --text-md: 0.95rem;
+  /* Homepage hero copy — reused in footer */
+  --hero-tagline-color: rgba(176, 168, 154, 0.58);
+  --hero-tagline-tracking: 0.42em;
+  --hero-chip-border: rgba(176, 168, 154, 0.22);
 }
 
 html {
@@ -243,7 +247,7 @@ button {
   }
 }
 
-/* Homepage-style footer (all app pages) */
+/* Footer — same palette & chip style as homepage hero tagline */
 .footer {
   position: relative;
   z-index: 10;
@@ -253,51 +257,70 @@ button {
   justify-content: space-between;
   gap: 0.75rem 1.25rem;
   padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
-  border-top: 1px solid rgba(176, 168, 154, 0.1);
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
-  opacity: 0.42;
-  text-transform: uppercase;
-  backdrop-filter: blur(4px);
+  padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(176, 168, 154, 0.12);
+  backdrop-filter: blur(8px);
   background: rgba(10, 10, 10, 0.35);
   margin-top: auto;
+  overflow: visible;
 }
 
 .footer__brand {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--hero-chip-border);
+  border-radius: 3px;
+  font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+  letter-spacing: var(--hero-tagline-tracking);
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 
-.footer__credit {
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  color: rgba(200, 255, 0, 0.5);
-  text-transform: none;
+.footer__credit,
+.footer__copyright,
+.footer__sep {
+  color: var(--hero-tagline-color);
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
 }
 
-.footer__copyright {
-  font-size: 0.72rem;
-  letter-spacing: 0.22em;
-  opacity: 0.85;
+.footer__sep {
+  opacity: 0.65;
 }
 
 .social {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 1.5rem;
+  align-items: center;
+  gap: clamp(0.5rem, 1.5vw, 0.85rem);
   list-style: none;
 }
 
 .social a {
-  color: var(--concrete);
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--hero-chip-border);
+  border-radius: 3px;
+  font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+  letter-spacing: var(--hero-tagline-tracking);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--hero-tagline-color);
   text-decoration: none;
-  transition: color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .social a:hover {
   color: var(--acid);
+  border-color: rgba(200, 255, 0, 0.35);
+  text-shadow: 0 0 24px rgba(200, 255, 0, 0.35);
 }
 
 .page-title {
@@ -838,6 +861,51 @@ button {
   color: var(--concrete-light);
 }
 
+.account-subnav {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+}
+
+.account-subnav__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  list-style: none;
+  font-size: var(--text-sm);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.account-subnav__list a {
+  color: rgba(176, 168, 154, 0.85);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.account-subnav__list a:hover,
+.account-subnav__list a[aria-current='page'] {
+  color: var(--acid);
+}
+
+.account-subnav__logout-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: var(--text-sm);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(176, 168, 154, 0.85);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.account-subnav__logout-btn:hover {
+  color: var(--acid);
+}
+
 .dash-head {
   display: flex;
   flex-wrap: wrap;
@@ -1328,6 +1396,10 @@ button {
   background: rgba(8, 8, 8, 0.98);
   border: 1px solid rgba(176, 168, 154, 0.28);
   box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.45);
+}
+
+.admin-actions__drop--fixed {
+  z-index: 200;
 }
 
 .admin-actions__drop--wide {
@@ -1854,7 +1926,7 @@ body.nav-lock {
 
 .admin-users-scroll {
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible;
 }
 
 .ticket-access-notice {
@@ -2094,11 +2166,6 @@ body.nav-lock {
 
   .tier-list__price {
     justify-self: start;
-  }
-
-  .admin-actions__drop {
-    right: auto;
-    left: 0;
   }
 
   .admin-users-scroll > table {

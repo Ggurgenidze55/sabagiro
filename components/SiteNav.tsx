@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import type { SessionNavUser } from '@/lib/auth';
-import { LogoutButton } from '@/components/LogoutButton';
 import { showCartInNav } from '@/lib/ticket-access';
 
 type SiteNavProps = {
@@ -38,13 +37,13 @@ export function SiteNav({ user, current }: SiteNavProps) {
         {user ? (
           <>
             <li>
-              <Link href="/account" aria-current={current === 'account' ? 'page' : undefined}>
-                Tickets
-              </Link>
-            </li>
-            <li>
-              <Link href="/account/settings" aria-current={current === 'settings' ? 'page' : undefined}>
-                Settings
+              <Link
+                href="/account"
+                aria-current={
+                  current === 'account' || current === 'settings' ? 'page' : undefined
+                }
+              >
+                Account
               </Link>
             </li>
             {user.role === 'ADMIN' ? (
@@ -52,9 +51,6 @@ export function SiteNav({ user, current }: SiteNavProps) {
                 <Link href="/admin">Admin</Link>
               </li>
             ) : null}
-            <li className="site-nav__action">
-              <LogoutButton />
-            </li>
           </>
         ) : (
           <>
@@ -64,18 +60,22 @@ export function SiteNav({ user, current }: SiteNavProps) {
             <li>
               <Link href="/register">Register</Link>
             </li>
+            <li>
+              <Link href="/about" prefetch aria-current={current === 'about' ? 'page' : undefined}>
+                About
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/contact"
+                prefetch
+                aria-current={current === 'contact' ? 'page' : undefined}
+              >
+                Contact
+              </Link>
+            </li>
           </>
         )}
-        <li>
-          <Link href="/about" prefetch aria-current={current === 'about' ? 'page' : undefined}>
-            About
-          </Link>
-        </li>
-        <li>
-          <Link href="/contact" prefetch aria-current={current === 'contact' ? 'page' : undefined}>
-            Contact
-          </Link>
-        </li>
     </ul>
   );
 }
