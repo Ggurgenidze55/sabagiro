@@ -269,6 +269,12 @@ button {
   text-transform: none;
 }
 
+.footer__copyright {
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  opacity: 0.85;
+}
+
 .social {
   display: flex;
   flex-wrap: wrap;
