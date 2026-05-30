@@ -1174,10 +1174,28 @@ button {
   margin-top: 0;
 }
 
-.admin-users-panel {
+.admin-users-panel,
+.admin-generate-panel {
   border: 1px solid rgba(176, 168, 154, 0.15);
   padding: clamp(1.1rem, 3vw, 1.5rem);
   background: rgba(10, 10, 10, 0.45);
+}
+
+.admin-generate-panel .form-stack {
+  max-width: 28rem;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.admin-generate-panel .admin-qr-result {
+  margin: 1.5rem auto 0;
+  max-width: 20rem;
+  text-align: center;
+}
+
+.admin-generate-panel .admin-qr-result .ticket-card__qr {
+  display: block;
+  margin: 0.75rem auto 0;
 }
 
 .admin-users-toolbar {
