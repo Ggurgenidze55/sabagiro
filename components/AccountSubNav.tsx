@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogoutButton } from '@/components/LogoutButton';
 
 export type AccountSubNavCurrent = 'account' | 'settings' | 'about' | 'contact';
 
@@ -43,9 +42,6 @@ export function AccountSubNav({ current: currentOverride }: { current?: AccountS
           <Link href="/contact" aria-current={current === 'contact' ? 'page' : undefined}>
             Contact
           </Link>
-        </li>
-        <li className="account-subnav__logout">
-          <LogoutButton variant="nav" />
         </li>
       </ul>
     </nav>

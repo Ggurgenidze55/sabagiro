@@ -146,6 +146,7 @@ button {
   flex-wrap: wrap;
   gap: 0.75rem;
   padding: 1.1rem clamp(1rem, 4vw, 2.5rem);
+  flex-shrink: 0;
   border-bottom: 1px solid rgba(176, 168, 154, 0.12);
   backdrop-filter: blur(8px);
   background: rgba(10, 10, 10, 0.35);
@@ -862,8 +863,8 @@ button {
 }
 
 .account-subnav {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin: 0 0 1rem;
+  padding-bottom: 0.65rem;
   border-bottom: 1px solid rgba(176, 168, 154, 0.12);
 }
 
@@ -1533,9 +1534,14 @@ button {
   text-transform: uppercase;
 }
 
-.site-nav__action .btn {
+.site-nav__action .btn,
+.site-nav__action .account-subnav__logout-btn {
   padding: 0.35rem 0.65rem;
   font-size: var(--text-2xs);
+}
+
+.site-nav__action .account-subnav__logout-btn {
+  letter-spacing: 0.28em;
 }
 
 .notice-banner {
@@ -1811,14 +1817,19 @@ button {
 /* —— Mobile navigation —— */
 .mobile-nav {
   position: relative;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   display: flex;
   align-items: center;
   justify-content: center;
   min-width: 0;
+  min-height: 0;
 }
 
 @media (min-width: 769px) {
+  .site-header {
+    flex-wrap: nowrap;
+  }
+
   .mobile-nav__panel {
     display: flex;
     justify-content: center;

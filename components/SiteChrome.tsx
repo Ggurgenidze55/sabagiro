@@ -1,25 +1,9 @@
 import Link from 'next/link';
-import type { AccountSubNavCurrent } from '@/components/AccountSubNav';
-import { AccountSubNavGate } from '@/components/AccountSubNavGate';
 import { SiteAmbientLayers } from '@/components/SiteAmbientLayers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { MobileNav } from '@/components/MobileNav';
 import { SiteNav } from '@/components/SiteNav';
 import { getSessionNavUser } from '@/lib/auth';
-
-function accountSubNavCurrent(
-  current?: SiteChromeProps['current'],
-): AccountSubNavCurrent | undefined {
-  if (
-    current === 'account' ||
-    current === 'settings' ||
-    current === 'about' ||
-    current === 'contact'
-  ) {
-    return current;
-  }
-  return undefined;
-}
 
 type SiteChromeProps = {
   children: React.ReactNode;
@@ -51,10 +35,7 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
           </MobileNav>
           <span className="site-header__meta">Tbilisi · GE</span>
         </header>
-        <main className="site-main">
-          {user ? <AccountSubNavGate current={accountSubNavCurrent(current)} /> : null}
-          {children}
-        </main>
+        <main className="site-main">{children}</main>
         <SiteFooter />
       </div>
     </div>

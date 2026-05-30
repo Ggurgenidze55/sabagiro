@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LogoutButton } from '@/components/LogoutButton';
 import type { SessionNavUser } from '@/lib/auth';
 import { showCartInNav } from '@/lib/ticket-access';
 
@@ -51,6 +52,9 @@ export function SiteNav({ user, current }: SiteNavProps) {
                 <Link href="/admin">Admin</Link>
               </li>
             ) : null}
+            <li className="site-nav__action">
+              <LogoutButton variant="nav" />
+            </li>
           </>
         ) : (
           <>

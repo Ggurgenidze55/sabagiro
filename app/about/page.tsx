@@ -1,4 +1,5 @@
 import { AboutPageContent } from '@/components/AboutPageContent';
+import { AccountSubNavGate } from '@/components/AccountSubNavGate';
 import { SiteChrome } from '@/components/SiteChrome';
 
 export const metadata = {
@@ -10,6 +11,7 @@ export const metadata = {
 export default function AboutPage() {
   return (
     <SiteChrome current="about">
+      <AccountSubNavGate current="about" />
       <AboutPageContent />
     </SiteChrome>
   );
