@@ -1,17 +1,23 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
+import { getSessionUser } from '@/lib/auth';
+import { canPurchaseTickets } from '@/lib/verification';
 
 export const metadata = {
   title: 'Location — Sabagiro',
   description: 'Sabagiro club location — Tbilisi, Georgia.',
 };
 
-export default function LocationPage() {
+export default async function LocationPage() {
+  const user = await getSessionUser();
+
   return (
     <SiteChrome>
       <h1 className="page-title">LOCATION</h1>
       <p className="page-lead">Tbilisi · Georgia · Doors 23:00</p>
+      <TicketAccessNotice user={user} />
 
       <div className="location-block">
         <figure className="location-map">
@@ -41,9 +47,15 @@ export default function LocationPage() {
             </li>
           </ul>
           <div className="cart-actions" style={{ marginTop: '1.5rem' }}>
-            <Link href="/events" className="btn">
-              BUY TICKETS
-            </Link>
+            {user && canPurchaseTickets(user) ? (
+              <Link href="/events" className="btn">
+                BUY TICKETS
+              </Link>
+            ) : (
+              <Link href={user ? '/account' : '/register'} className="btn">
+                {user ? 'ანგარიში' : 'რეგისტრაცია'}
+              </Link>
+            )}
             <Link href="/" className="btn btn--ghost">
               Home
             </Link>

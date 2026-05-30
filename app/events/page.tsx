@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
+import { getSessionUser } from '@/lib/auth';
 import { formatGel, listTicketProducts } from '@/lib/products';
 
 export const revalidate = 30;
@@ -10,12 +12,14 @@ export const metadata = {
 };
 
 export default async function EventsPage() {
+  const user = await getSessionUser();
   const products = await listTicketProducts();
 
   return (
     <SiteChrome current="events">
       <h1 className="page-title">EVENTS</h1>
       <p className="page-lead">Upcoming nights · Tickets · Tbilisi</p>
+      <TicketAccessNotice user={user} className="events-page__access" />
 
       {products.length === 0 ? (
         <p className="cart-empty">

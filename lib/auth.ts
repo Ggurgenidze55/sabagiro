@@ -70,7 +70,7 @@ export async function clearSessionCookie() {
   cookies().set(SESSION_COOKIE, '', { httpOnly: true, path: '/', maxAge: 0 });
 }
 
-export type SessionNavUser = Pick<SessionUser, 'id' | 'email' | 'role'>;
+export type SessionNavUser = Pick<SessionUser, 'id' | 'email' | 'role' | 'verificationStatus'>;
 
 export async function getSessionNavUser(): Promise<SessionNavUser | null> {
   const token = cookies().get(SESSION_COOKIE)?.value;
@@ -82,11 +82,13 @@ export async function getSessionNavUser(): Promise<SessionNavUser | null> {
     if (!userId || typeof userId !== 'string') return null;
     if (payload.role !== 'ADMIN' && payload.role !== 'USER') return null;
 
-    return {
-      id: userId,
-      email: typeof payload.email === 'string' ? payload.email : '',
-      role: payload.role,
-    };
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, role: true, verificationStatus: true },
+    });
+    if (!user) return null;
+
+    return user;
   } catch {
     return null;
   }

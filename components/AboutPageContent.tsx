@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
-import { PoweredByCredit } from '@/components/PoweredByCredit';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 const PILLARS = [
@@ -149,8 +148,6 @@ export function AboutPageContent() {
           Home
         </Link>
       </footer>
-
-      <PoweredByCredit className="about-powered about-reveal" />
     </div>
   );
 }

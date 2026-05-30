@@ -593,6 +593,20 @@
         background: rgba(10, 10, 10, 0.35);
       }
 
+      .footer__brand {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.35rem;
+        text-transform: uppercase;
+      }
+
+      .footer__credit {
+        font-size: 0.72rem;
+        letter-spacing: 0.2em;
+        color: rgba(200, 255, 0, 0.5);
+      }
+
       .social {
         display: flex;
         gap: 1.5rem;
@@ -863,7 +877,7 @@
           </div>
           <ul class="nav">
             <li><a href="/events" class="hoverable">Events</a></li>
-            <li><a href="/cart" class="hoverable">Cart</a></li>
+            <li data-nav="cart" hidden><a href="/cart" class="hoverable">Cart</a></li>
             <li><a href="/location" class="hoverable">Location</a></li>
             <li data-nav="guest"><a href="/login" class="hoverable">Log in</a></li>
             <li data-nav="guest"><a href="/register" class="hoverable">Register</a></li>
@@ -969,7 +983,10 @@
       </main>
 
       <footer class="footer" id="contact">
-        <span>© Sabagiro 2025</span>
+        <div class="footer__brand">
+          <span>© Sabagiro 2026</span>
+          <span class="footer__credit">წვერიანი კაცი</span>
+        </div>
         <ul class="social">
           <li><a href="https://www.instagram.com/sabagirolisi?igsh=aXhzcGM1aHA2aWRk" class="hoverable" target="_blank" rel="noopener noreferrer">Instagram</a></li>
           <li><a href="https://ra.co" class="hoverable" target="_blank" rel="noopener noreferrer">RA</a></li>
@@ -992,14 +1009,19 @@
           })
           .then(function (data) {
             var loggedIn = !!(data && data.user);
+            var canCart =
+              loggedIn &&
+              (data.user.role === 'ADMIN' || data.user.verificationStatus === 'VERIFIED');
             setNavGroup('[data-nav="guest"]', !loggedIn);
             setNavGroup('[data-nav="user"]', loggedIn);
             setNavGroup('[data-nav="admin"]', loggedIn && data.user.role === 'ADMIN');
+            setNavGroup('[data-nav="cart"]', canCart);
           })
           .catch(function () {
             setNavGroup('[data-nav="guest"]', true);
             setNavGroup('[data-nav="user"]', false);
             setNavGroup('[data-nav="admin"]', false);
+            setNavGroup('[data-nav="cart"]', false);
           });
       })();
     </script>

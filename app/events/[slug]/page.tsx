@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
+import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
+import { getAddToCartLabel } from '@/lib/ticket-access';
 import { getSessionUser } from '@/lib/auth';
 import { normalizeEventSlug } from '@/lib/events';
 import {
@@ -86,12 +88,7 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="event-page__notices">
-          {user && !canPurchaseTickets(user) ? (
-            <p className="notice-banner notice-banner--inline">
-              Ticket purchase requires a verified account. Status: {user.verificationStatus}.
-              Check your account page after admin review.
-            </p>
-          ) : null}
+          <TicketAccessNotice user={user} />
 
           {user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
             <p className="notice-banner notice-banner--inline">
@@ -121,7 +118,8 @@ export default async function EventPage({ params }: PageProps) {
             <AddToCartButton
               product={product}
               disabled={
-                (user && !canPurchaseTickets(user)) ||
+                !user ||
+                !canPurchaseTickets(user) ||
                 product.ticketsRemaining === 0 ||
                 cannotBuyMore
               }
@@ -132,9 +130,7 @@ export default async function EventPage({ params }: PageProps) {
                     ? showLimitDetails
                       ? 'LIMIT REACHED'
                       : 'UNAVAILABLE'
-                    : user && !canPurchaseTickets(user)
-                      ? 'VERIFICATION REQUIRED'
-                      : undefined
+                    : getAddToCartLabel(user)
               }
             />
           )}

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { SessionNavUser } from '@/lib/auth';
 import { LogoutButton } from '@/components/LogoutButton';
+import { showCartInNav } from '@/lib/ticket-access';
 
 type SiteNavProps = {
   user: SessionNavUser | null;
@@ -8,6 +9,8 @@ type SiteNavProps = {
 };
 
 export function SiteNav({ user, current }: SiteNavProps) {
+  const showCart = showCartInNav(user);
+
   return (
     <ul className="site-nav">
         <li>
@@ -20,11 +23,13 @@ export function SiteNav({ user, current }: SiteNavProps) {
             Events
           </Link>
         </li>
-        <li>
-          <Link href="/cart" prefetch aria-current={current === 'cart' ? 'page' : undefined}>
-            Cart
-          </Link>
-        </li>
+        {showCart ? (
+          <li>
+            <Link href="/cart" prefetch aria-current={current === 'cart' ? 'page' : undefined}>
+              Cart
+            </Link>
+          </li>
+        ) : null}
         <li>
           <Link href="/location" prefetch>
             Location

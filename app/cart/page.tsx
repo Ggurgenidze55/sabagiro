@@ -1,6 +1,8 @@
 import { CartView } from '@/components/CartView';
+import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
+import { canPurchaseTickets } from '@/lib/verification';
 import {
   countAllPurchasedByEvent,
   getTicketLimitPerEvent,
@@ -25,6 +27,8 @@ export default async function CartPage() {
   }
   const showLimitDetails = Boolean(user?.freeTicketsEnabled);
 
+  const canCheckout = user && canPurchaseTickets(user);
+
   return (
     <SiteChrome current="cart">
       <h1 className="page-title">CART</h1>
@@ -33,12 +37,15 @@ export default async function CartPage() {
           ? `Purchase limit: ${purchaseLimitPerEvent} paid ticket(s) per event`
           : 'Review before checkout'}
       </p>
+      <TicketAccessNotice user={user} />
+      {canCheckout ? (
       <CartView
         purchaseLimitPerEvent={purchaseLimitPerEvent}
         purchasedCountBySlug={purchasedCountBySlug}
         remainingBySlug={remainingBySlug}
         showLimitDetails={showLimitDetails}
       />
+      ) : null}
     </SiteChrome>
   );
 }

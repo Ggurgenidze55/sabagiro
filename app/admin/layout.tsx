@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { SiteAmbientLayers } from '@/components/SiteAmbientLayers';
+import { SiteFooter } from '@/components/SiteFooter';
 import { MobileNav } from '@/components/MobileNav';
 import { getSessionUser } from '@/lib/auth';
 
@@ -16,7 +18,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (user.role !== 'ADMIN') redirect('/account');
 
   return (
-    <div className="site-shell">
+    <div className="site-page">
+      <SiteAmbientLayers />
+      <div className="site-page__stack">
       <header className="site-header admin-header">
         <Link href="/" className="site-brand">
           <span className="site-brand__text">SABAGIRO ADMIN</span>
@@ -45,6 +49,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </MobileNav>
       </header>
       <main className="site-main">{children}</main>
+      <SiteFooter />
+      </div>
     </div>
   );
 }

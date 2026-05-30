@@ -173,7 +173,7 @@ export function CartView({
       }
     if (!res.ok) {
       if (data.code === 'NOT_VERIFIED') {
-        setError('Your account must be verified before buying tickets. Check /account.');
+        setError('ბილეთის ყიდვისთვის საჭიროა ვერიფიკაცია. შეამოწმე ანგარიში.');
       } else if (data.code === 'ALREADY_OWNED' || data.code === 'TICKET_LIMIT') {
         setError(data.error || 'Ticket limit reached');
       } else {
