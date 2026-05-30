@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { dispatchEmail } from '@/lib/email/dispatch';
 import { createFreeTicketForVerifiedUser, deliverTicketEmail } from '@/lib/tickets';
 import { remainingFreeTicketsForEvent } from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
@@ -43,9 +44,11 @@ export async function POST(request: Request) {
       },
     });
 
-    await deliverTicketEmail(ticket);
+    const email = await dispatchEmail('account:free-ticket', () => deliverTicketEmail(ticket), {
+      required: true,
+    });
 
-    return NextResponse.json({ ok: true, ticket });
+    return NextResponse.json({ ok: true, ticket, email });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';
     if (message === 'UNAUTHORIZED') {
@@ -59,6 +62,12 @@ export async function POST(request: Request) {
     }
     if (message === 'INVALID_PRODUCT') {
       return NextResponse.json({ error: 'Invalid event' }, { status: 400 });
+    }
+    if (message === 'EMAIL_NOT_SENT') {
+      return NextResponse.json(
+        { error: 'Ticket created but email could not be sent. Check your inbox in account.', code: 'EMAIL_FAILED' },
+        { status: 502 },
+      );
     }
     return NextResponse.json({ error: formatValidationError(e) }, { status: 400 });
   }

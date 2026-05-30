@@ -15,7 +15,7 @@ export async function POST(request: Request) {
       personalId: body.personalId,
     });
 
-    const ticket = await createTicketForUser({
+    const { ticket, email } = await createTicketForUser({
       user,
       productSlug: body.productSlug,
       source: 'ADMIN',
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, ticket });
+    return NextResponse.json({ ok: true, ticket, email });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';
     const status =

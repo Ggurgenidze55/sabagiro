@@ -4,7 +4,7 @@ import { LogoutButton } from '@/components/LogoutButton';
 
 type SiteNavProps = {
   user: SessionNavUser | null;
-  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact';
+  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact' | 'about';
 };
 
 export function SiteNav({ user, current }: SiteNavProps) {
@@ -18,11 +18,6 @@ export function SiteNav({ user, current }: SiteNavProps) {
         <li>
           <Link href="/events" prefetch aria-current={current === 'events' ? 'page' : undefined}>
             Events
-          </Link>
-        </li>
-        <li>
-          <Link href="/contact" prefetch aria-current={current === 'contact' ? 'page' : undefined}>
-            Contact
           </Link>
         </li>
         <li>
@@ -66,6 +61,16 @@ export function SiteNav({ user, current }: SiteNavProps) {
             </li>
           </>
         )}
+        <li>
+          <Link href="/about" prefetch aria-current={current === 'about' ? 'page' : undefined}>
+            About
+          </Link>
+        </li>
+        <li>
+          <Link href="/contact" prefetch aria-current={current === 'contact' ? 'page' : undefined}>
+            Contact
+          </Link>
+        </li>
     </ul>
   );
 }

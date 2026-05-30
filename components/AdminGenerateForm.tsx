@@ -7,8 +7,9 @@ type EventOption = { slug: string; title: string };
 
 export function AdminGenerateForm() {
   const [events, setEvents] = useState<EventOption[]>([]);
+  const [productSlug, setProductSlug] = useState('');
   const [error, setError] = useState('');
-  const [result, setResult] = useState<{ qrToken: string; productName: string } | null>(null);
+  const [result, setResult] = useState<{ qrToken: string; productName: string; emailSent: boolean } | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -16,7 +17,12 @@ export function AdminGenerateForm() {
       .then((r) => r.json())
       .then((d) => {
         if (d.events) {
-          setEvents(d.events.map((e: { slug: string; title: string }) => ({ slug: e.slug, title: e.title })));
+          const list = d.events.map((e: { slug: string; title: string }) => ({
+            slug: e.slug,
+            title: e.title,
+          }));
+          setEvents(list);
+          setProductSlug((prev) => prev || list[0]?.slug || '');
         }
       })
       .catch(() => setError('Could not load events'));
@@ -28,17 +34,32 @@ export function AdminGenerateForm() {
     setResult(null);
     setQrImage(null);
     const fd = new FormData(e.currentTarget);
+    const body = Object.fromEntries(fd.entries());
+    body.productSlug = productSlug;
+
     const res = await fetch('/api/admin/tickets/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.fromEntries(fd.entries())),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || 'Failed');
       return;
     }
-    setResult({ qrToken: data.ticket.qrToken, productName: data.ticket.productName });
+    const emailSent = Boolean(data.email?.sent);
+    setResult({
+      qrToken: data.ticket.qrToken,
+      productName: data.ticket.productName,
+      emailSent,
+    });
+    if (!emailSent) {
+      setError(
+        data.email?.skipped
+          ? 'Ticket created — email skipped (RESEND_API_KEY not set)'
+          : data.email?.error || 'Ticket created but email failed to send',
+      );
+    }
     const QRCode = (await import('qrcode')).default;
     setQrImage(await QRCode.toDataURL(scanUrl(data.ticket.qrToken), { width: 280, margin: 1 }));
   }
@@ -48,7 +69,12 @@ export function AdminGenerateForm() {
       <form className="form-stack" onSubmit={onSubmit}>
         <label className="form-field">
           <span>Event ticket</span>
-          <select name="productSlug" required defaultValue={events[0]?.slug}>
+          <select
+            name="productSlug"
+            required
+            value={productSlug}
+            onChange={(e) => setProductSlug(e.target.value)}
+          >
             {events.length === 0 ? (
               <option value="">No events — create one in Events</option>
             ) : (
@@ -81,14 +107,15 @@ export function AdminGenerateForm() {
           <input name="phone" required />
         </label>
         {error ? <p className="form-error">{error}</p> : null}
-        <button type="submit" className="btn" disabled={events.length === 0 || !events[0]?.slug}>
+        <button type="submit" className="btn" disabled={events.length === 0 || !productSlug}>
           GENERATE TICKET + QR
         </button>
       </form>
       {result && qrImage ? (
         <div className="admin-qr-result">
           <p className="form-ok">
-            {result.productName} — ticket created. Email sent if Resend is configured.
+            {result.productName} — ticket created.
+            {result.emailSent ? ' Email sent.' : ' Check email settings above.'}
           </p>
           <img src={qrImage} alt="Generated QR" className="ticket-card__qr" width={280} height={280} />
           <a href={scanUrl(result.qrToken)} className="ticket-card__link">

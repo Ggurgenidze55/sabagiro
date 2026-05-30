@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { Ticket, TicketSource, User } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
+import type { SendEmailResult } from '@/lib/email/client';
 import { sendTicketEmail } from '@/lib/email/index';
 import { qrDataUrl, scanUrl } from '@/lib/qr';
 
@@ -60,13 +61,22 @@ export async function createTicketForUser(opts: {
     },
   });
 
-  await sendTicketEmail({
+  const emailResult = await sendTicketEmail({
     to: holder.email,
     ticket,
     scanLink: scanUrl(ticket.qrToken),
   });
 
-  return ticket;
+  if (!emailResult.sent) {
+    console.error('[ticket] email not sent', {
+      ticketId: ticket.id,
+      to: holder.email,
+      error: emailResult.error,
+      skipped: emailResult.skipped,
+    });
+  }
+
+  return { ticket, email: emailResult };
 }
 
 export async function createFreeTicketForVerifiedUser(opts: {
@@ -125,12 +135,20 @@ export async function createFreeTicketForVerifiedUser(opts: {
   });
 }
 
-export async function deliverTicketEmail(ticket: Ticket) {
-  await sendTicketEmail({
+export async function deliverTicketEmail(ticket: Ticket): Promise<SendEmailResult> {
+  const result = await sendTicketEmail({
     to: ticket.holderEmail,
     ticket,
     scanLink: scanUrl(ticket.qrToken),
   });
+  if (!result.sent) {
+    console.error('[ticket] deliver email failed', {
+      ticketId: ticket.id,
+      to: ticket.holderEmail,
+      error: result.error,
+    });
+  }
+  return result;
 }
 
 export async function findOrCreateUserForAdmin(input: Holder & { role?: 'USER' }) {

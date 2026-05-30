@@ -1,4 +1,5 @@
 import { z, type ZodError } from 'zod';
+import { CONTACT_TOPICS, normalizeContactTopic } from '@/lib/contact-topic';
 
 /** Zod `.optional()` still validates `""` — treat blank as missing. */
 function emptyToUndefined(val: unknown) {
@@ -119,7 +120,10 @@ export const clubEventSchema = z.object({
 export const contactFormSchema = z.object({
   name: z.string().trim().min(2).max(120),
   email: z.string().trim().email().max(200),
-  topic: z.enum(['tickets', 'events', 'press', 'other']).default('other'),
+  topic: z.preprocess(
+    (v) => normalizeContactTopic(v),
+    z.enum(CONTACT_TOPICS),
+  ),
   message: z.string().trim().min(10).max(5000),
   company: z.string().optional(),
 });

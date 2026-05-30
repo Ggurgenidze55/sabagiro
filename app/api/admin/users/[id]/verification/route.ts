@@ -2,7 +2,12 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { sendAccountRejectedEmail, sendAccountVerifiedEmail } from '@/lib/email/index';
+import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
+import {
+  sendAccountPendingEmail,
+  sendAccountRejectedEmail,
+  sendAccountVerifiedEmail,
+} from '@/lib/email/index';
 import { verificationStatusSchema } from '@/lib/validators';
 
 type Params = { params: { id: string } };
@@ -26,15 +31,25 @@ export async function PATCH(request: Request, { params }: Params) {
       },
     });
 
+    let email: EmailDispatchMeta | null = null;
+
     if (previous.verificationStatus !== status) {
       if (status === 'VERIFIED') {
-        await sendAccountVerifiedEmail({ to: user.email, firstName: user.firstName });
+        email = await dispatchEmail('admin:verify', () =>
+          sendAccountVerifiedEmail({ to: user.email, firstName: user.firstName }),
+        );
       } else if (status === 'REJECTED') {
-        await sendAccountRejectedEmail({ to: user.email, firstName: user.firstName });
+        email = await dispatchEmail('admin:reject', () =>
+          sendAccountRejectedEmail({ to: user.email, firstName: user.firstName }),
+        );
+      } else if (status === 'PENDING') {
+        email = await dispatchEmail('admin:pending', () =>
+          sendAccountPendingEmail({ to: user.email, firstName: user.firstName }),
+        );
       }
     }
 
-    return NextResponse.json({ user });
+    return NextResponse.json({ user, email });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';
     const status =

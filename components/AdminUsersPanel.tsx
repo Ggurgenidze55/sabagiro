@@ -44,7 +44,15 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     setUsers((list) =>
       list.map((u) => (u.id === userId ? { ...u, verificationStatus: status } : u)),
     );
-    setMsg('Verification status updated');
+    if (data.email?.sent) {
+      setMsg(`Status updated — email sent to user`);
+    } else if (data.email?.skipped) {
+      setMsg('Status updated (email skipped — RESEND_API_KEY not set)');
+    } else if (data.email && !data.email.sent) {
+      setError(data.email.error || 'Status updated but email failed');
+    } else {
+      setMsg('Verification status updated');
+    }
   }
 
   async function deleteUser(user: AdminUserRow) {

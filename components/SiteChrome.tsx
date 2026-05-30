@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { getSessionNavUser } from '@/lib/auth';
 import { MobileNav } from '@/components/MobileNav';
 import { SiteNav } from '@/components/SiteNav';
+import { PoweredByCredit } from '@/components/PoweredByCredit';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 type SiteChromeProps = {
   children: React.ReactNode;
-  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact';
+  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact' | 'about';
 };
 
 export async function SiteChrome({ children, current }: SiteChromeProps) {
@@ -33,10 +34,14 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
       </header>
       <main className="site-main">{children}</main>
       <footer className="site-footer">
+        <div className="site-footer__row">
         <span>© Sabagiro · Tbilisi · GE</span>
         <div className="site-footer__links">
           <Link href="/events" className="site-footer__link">
             Events
+          </Link>
+          <Link href="/about" className="site-footer__link">
+            About
           </Link>
           <Link href="/contact" className="site-footer__link">
             Contact
@@ -53,6 +58,8 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
             Instagram
           </a>
         </div>
+        </div>
+        <PoweredByCredit className="site-footer__powered" />
       </footer>
     </div>
   );

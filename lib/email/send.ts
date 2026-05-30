@@ -1,9 +1,12 @@
 import type { Ticket } from '@prisma/client';
 import { sendEmail, type SendEmailResult } from '@/lib/email/client';
-import { getContactInboxEmails } from '@/lib/contact-inbox';
+import type { ContactTopic } from '@/lib/contact-topic';
+import { getContactInboxEmailsForTopic } from '@/lib/contact-inbox';
 import {
+  accountPendingEmail,
   accountRejectedEmail,
   accountVerifiedEmail,
+  freeTicketsEnabledEmail,
   contactFormAckEmail,
   contactFormNotificationEmail,
   passwordChangedEmail,
@@ -35,6 +38,23 @@ export function sendAccountRejectedEmail(opts: {
   firstName: string;
 }): Promise<SendEmailResult> {
   const msg = accountRejectedEmail({ firstName: opts.firstName });
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendAccountPendingEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
+  const msg = accountPendingEmail({ firstName: opts.firstName });
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendFreeTicketsEnabledEmail(opts: {
+  to: string;
+  firstName: string;
+  quota: number;
+}): Promise<SendEmailResult> {
+  const msg = freeTicketsEnabledEmail(opts);
   return sendEmail({ to: opts.to, ...msg });
 }
 
@@ -88,12 +108,12 @@ export function sendProfileEmailChangedNotification(opts: {
 export function sendContactFormNotification(opts: {
   name: string;
   email: string;
-  topic: string;
+  topic: ContactTopic;
   message: string;
 }): Promise<SendEmailResult> {
   const msg = contactFormNotificationEmail(opts);
   return sendEmail({
-    to: getContactInboxEmails(),
+    to: getContactInboxEmailsForTopic(opts.topic),
     replyTo: opts.email,
     ...msg,
   });

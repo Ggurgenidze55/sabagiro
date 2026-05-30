@@ -1,3 +1,4 @@
+import { contactTopicLabel, type ContactTopic } from '@/lib/contact-topic';
 import { escapeHtml, renderEmailLayout } from '@/lib/email/layout';
 import { siteUrl } from '@/lib/site-url';
 
@@ -41,6 +42,49 @@ export function accountVerifiedEmail(opts: {
       ctaHref: siteUrl('/events'),
     }),
     text: `Hi ${opts.firstName}, your Sabagiro account is verified. Buy tickets: ${siteUrl('/events')}`,
+  };
+}
+
+export function accountPendingEmail(opts: {
+  firstName: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const bodyHtml = `
+    <p>Hi ${name}, your Sabagiro account is back under review.</p>
+    <p>Ticket checkout stays locked until verification is complete. We will email you again when your status changes.</p>
+  `;
+  return {
+    subject: 'Sabagiro — account under review',
+    html: renderEmailLayout({
+      preheader: 'Verification pending',
+      title: 'Review in progress',
+      bodyHtml,
+      ctaLabel: 'ACCOUNT',
+      ctaHref: siteUrl('/account'),
+    }),
+    text: `Hi ${opts.firstName}, your Sabagiro account is pending verification again. Account: ${siteUrl('/account')}`,
+  };
+}
+
+export function freeTicketsEnabledEmail(opts: {
+  firstName: string;
+  quota: number;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const bodyHtml = `
+    <p>Hi ${name}, you can now generate <strong>${opts.quota}</strong> complimentary ticket(s) per event from your Sabagiro account.</p>
+    <p>Open an event page while logged in and use the free ticket form. Each ticket is emailed with a QR code.</p>
+  `;
+  return {
+    subject: 'Sabagiro — complimentary tickets enabled',
+    html: renderEmailLayout({
+      preheader: 'Free tickets are available on your account',
+      title: 'Free tickets enabled',
+      bodyHtml,
+      ctaLabel: 'BROWSE EVENTS',
+      ctaHref: siteUrl('/events'),
+    }),
+    text: `Hi ${opts.firstName}, you can generate ${opts.quota} free ticket(s) per event. Events: ${siteUrl('/events')}`,
   };
 }
 
@@ -171,27 +215,20 @@ export function profileEmailChangedEmail(opts: {
   };
 }
 
-const CONTACT_TOPIC_LABELS: Record<string, string> = {
-  tickets: 'Tickets & orders',
-  events: 'Events & lineup',
-  press: 'Press & partnerships',
-  other: 'Other',
-};
-
 export function contactFormNotificationEmail(opts: {
   name: string;
   email: string;
-  topic: string;
+  topic: ContactTopic;
   message: string;
 }): { subject: string; html: string; text: string } {
-  const topicLabel = CONTACT_TOPIC_LABELS[opts.topic] ?? opts.topic;
+  const topicLabel = contactTopicLabel(opts.topic);
   const bodyHtml = `
     <p><strong>From:</strong> ${escapeHtml(opts.name)} &lt;${escapeHtml(opts.email)}&gt;</p>
     <p><strong>Topic:</strong> ${escapeHtml(topicLabel)}</p>
     <p style="margin-top:16px;white-space:pre-wrap;line-height:1.55">${escapeHtml(opts.message)}</p>
   `;
   return {
-    subject: `Sabagiro contact — ${topicLabel}`,
+    subject: `Sabagiro contact [${opts.topic}]`,
     html: renderEmailLayout({
       preheader: `Message from ${opts.name}`,
       title: 'New contact message',

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
+import { sendFreeTicketsEnabledEmail } from '@/lib/email/send';
 import { formatValidationError, ticketPolicySchema } from '@/lib/validators';
 
 type Params = { params: { id: string } };
@@ -34,7 +36,23 @@ export async function PATCH(request: Request, { params }: Params) {
       },
     });
 
-    return NextResponse.json({ user });
+    let email: EmailDispatchMeta | null = null;
+    const freeJustEnabled =
+      body.freeTicketsEnabled &&
+      body.freeTicketsQuota >= 1 &&
+      (!existing.freeTicketsEnabled || existing.freeTicketsQuota < 1);
+
+    if (freeJustEnabled && user.verificationStatus === 'VERIFIED') {
+      email = await dispatchEmail('admin:free-tickets', () =>
+        sendFreeTicketsEnabledEmail({
+          to: user.email,
+          firstName: user.firstName,
+          quota: user.freeTicketsQuota,
+        }),
+      );
+    }
+
+    return NextResponse.json({ user, email });
   } catch (e) {
     const message =
       e instanceof Error && (e.message === 'UNAUTHORIZED' || e.message === 'FORBIDDEN')

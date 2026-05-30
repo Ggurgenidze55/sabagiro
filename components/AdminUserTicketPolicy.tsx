@@ -47,7 +47,13 @@ export function AdminUserTicketPolicy({ user, onUpdated }: AdminUserTicketPolicy
         freeTicketsQuota,
         freeTicketsUsed: data.user?.freeTicketsUsed ?? user.freeTicketsUsed,
       });
-      setMsg('Policy saved');
+      if (data.email?.sent) {
+        setMsg('Policy saved — user notified by email');
+      } else if (data.email?.skipped) {
+        setMsg('Policy saved (email skipped — RESEND not configured)');
+      } else {
+        setMsg('Policy saved');
+      }
     } catch {
       setError('Network error');
     } finally {

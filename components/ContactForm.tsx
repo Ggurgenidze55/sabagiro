@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import type { ContactTopic } from '@/lib/contact-topic';
+import { CONTACT_TOPICS, contactTopicLabel } from '@/lib/contact-topic';
 
 export function ContactForm() {
+  const [topic, setTopic] = useState<ContactTopic>('tickets');
   const [error, setError] = useState('');
   const [ok, setOk] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,7 +21,7 @@ export function ContactForm() {
     const payload = {
       name: String(fd.get('name') ?? ''),
       email: String(fd.get('email') ?? ''),
-      topic: String(fd.get('topic') ?? 'other'),
+      topic,
       message: String(fd.get('message') ?? ''),
       company: String(fd.get('company') ?? ''),
     };
@@ -37,6 +40,7 @@ export function ContactForm() {
       }
 
       form.reset();
+      setTopic('tickets');
       setOk(true);
     } catch (err) {
       const detail = err instanceof Error ? err.message : '';
@@ -75,11 +79,17 @@ export function ContactForm() {
       </label>
       <label className="form-field">
         <span>Topic</span>
-        <select name="topic" defaultValue="tickets">
-          <option value="tickets">Tickets & orders</option>
-          <option value="events">Events & lineup</option>
-          <option value="press">Press & partnerships</option>
-          <option value="other">Other</option>
+        <select
+          name="topic"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value as ContactTopic)}
+          required
+        >
+          {CONTACT_TOPICS.map((id) => (
+            <option key={id} value={id}>
+              {contactTopicLabel(id)}
+            </option>
+          ))}
         </select>
       </label>
       <label className="form-field">
