@@ -40,20 +40,18 @@ struct SabagiroWebView: UIViewRepresentable {
       self.model = model
     }
 
-    private func shouldNavigateInApp(_ url: URL) -> Bool {
-      guard url.scheme == "http" || url.scheme == "https" else { return false }
-      let host = url.host?.lowercased() ?? ""
-      if host == "sabagiro.vercel.app" || host.hasSuffix(".vercel.app") {
-        return true
-      }
-      if AppConfig.allowsLocalhost && (host == "localhost" || host == "127.0.0.1") {
-        return true
-      }
-      return false
+    private func applyPaymentFlowState(for url: URL) {
+      guard let change = AppConfig.paymentFlowStateChange(for: url) else { return }
+      model.paymentCheckoutActive = change
     }
 
     private func openInSameWebView(_ webView: WKWebView, url: URL) {
+      applyPaymentFlowState(for: url)
       webView.load(URLRequest(url: url))
+    }
+
+    private func shouldStayInApp(_ url: URL) -> Bool {
+      AppConfig.shouldStayInApp(url: url, paymentCheckoutActive: model.paymentCheckoutActive)
     }
 
     override func observeValue(
@@ -74,12 +72,18 @@ struct SabagiroWebView: UIViewRepresentable {
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+      if let url = webView.url {
+        applyPaymentFlowState(for: url)
+      }
       Task { @MainActor in
         model.isLoading = true
       }
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+      if let url = webView.url {
+        applyPaymentFlowState(for: url)
+      }
       Task { @MainActor in
         model.isLoading = false
         model.estimatedProgress = 1
@@ -98,7 +102,7 @@ struct SabagiroWebView: UIViewRepresentable {
       for navigationAction: WKNavigationAction,
       windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
-      if let url = navigationAction.request.url, shouldNavigateInApp(url) {
+      if let url = navigationAction.request.url, shouldStayInApp(url) {
         openInSameWebView(webView, url: url)
       }
       return nil
@@ -114,15 +118,17 @@ struct SabagiroWebView: UIViewRepresentable {
         return
       }
 
+      applyPaymentFlowState(for: url)
+
       if ["tel", "mailto", "maps"].contains(url.scheme ?? "") {
         UIApplication.shared.open(url)
         decisionHandler(.cancel)
         return
       }
 
-      // target="_blank" / window.open — must load in-place (`.allow` alone does nothing).
+      // target="_blank" / window.open — load in the same WebView.
       if navigationAction.targetFrame == nil {
-        if shouldNavigateInApp(url) {
+        if shouldStayInApp(url) {
           openInSameWebView(webView, url: url)
           decisionHandler(.cancel)
           return
@@ -134,7 +140,7 @@ struct SabagiroWebView: UIViewRepresentable {
         }
       }
 
-      if shouldNavigateInApp(url) {
+      if shouldStayInApp(url) {
         decisionHandler(.allow)
         return
       }

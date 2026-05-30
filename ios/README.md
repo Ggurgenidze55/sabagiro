@@ -1,6 +1,6 @@
 # Sabagiro iOS app
 
-Native shell around **https://sabagiro.vercel.app** (WKWebView). Same site as the browser — tickets, login, shop.
+Native shell around **https://www.sabagiro.ge** (WKWebView). Tickets, login, cart, **Flitt payment** — all inside the app (no Safari for checkout).
 
 ## Open in Xcode
 
@@ -19,6 +19,12 @@ open Sabagiro.xcodeproj
 5. **Product → Run** (▶) or `Cmd + R`.
 
 First time: iPhone → **Settings → General → VPN & Device Management** → trust the developer app.
+
+## Payments in the app
+
+Checkout opens **pay.flitt.com** in the same WebView (not external Safari). After payment, Flitt returns to **sabagiro.ge/payment/return** → account.
+
+Allowed hosts: `sabagiro.ge`, `vercel.app`, `flitt.com`, plus bank 3DS pages while checkout is active.
 
 ## Local website in DEBUG
 

@@ -7,6 +7,8 @@ final class WebViewModel: ObservableObject {
   @Published var isLoading = true
   @Published var estimatedProgress: Double = 0
   @Published var canGoBack = false
+  /// Flitt + 3DS — allow bank URLs in the same WebView until back on Sabagiro.
+  @Published var paymentCheckoutActive = false
 
   let webView: WKWebView
 
