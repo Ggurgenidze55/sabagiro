@@ -8,7 +8,25 @@ export const metadata = { title: 'Users — Admin' };
 export default async function AdminUsersPage() {
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { tickets: true } } },
+    include: {
+      _count: { select: { tickets: true } },
+      tickets: {
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          productName: true,
+          productSlug: true,
+          status: true,
+          scannedAt: true,
+          source: true,
+          tierLabel: true,
+          priceGel: true,
+          eventDate: true,
+          qrToken: true,
+          createdAt: true,
+        },
+      },
+    },
   });
 
   return (
@@ -33,6 +51,19 @@ export default async function AdminUsersPage() {
           verificationStatus: u.verificationStatus,
           role: u.role,
           ticketCount: u._count.tickets,
+          tickets: u.tickets.map((t) => ({
+            id: t.id,
+            productName: t.productName,
+            productSlug: t.productSlug,
+            status: t.status,
+            scannedAt: t.scannedAt?.toISOString() ?? null,
+            source: t.source,
+            tierLabel: t.tierLabel,
+            priceGel: t.priceGel,
+            eventDate: t.eventDate,
+            qrToken: t.qrToken,
+            createdAt: t.createdAt.toISOString(),
+          })),
           ticketLimitPerEvent: u.ticketLimitPerEvent,
           freeTicketsEnabled: u.freeTicketsEnabled,
           freeTicketsQuota: u.freeTicketsQuota,

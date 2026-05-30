@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { AdminUserActionsMenu } from '@/components/AdminUserActionsMenu';
+import { AdminUserTicketsList } from '@/components/AdminUserTicketsList';
+import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
 
 export type AdminUserRow = {
   id: string;
@@ -15,6 +17,7 @@ export type AdminUserRow = {
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   role: string;
   ticketCount: number;
+  tickets: AdminUserTicketRow[];
   ticketLimitPerEvent: number;
   freeTicketsEnabled: boolean;
   freeTicketsQuota: number;
@@ -53,6 +56,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [page, setPage] = useState(1);
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const searchNorm = normalizeSearch(search);
 
@@ -67,7 +71,12 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
 
   useEffect(() => {
     setPage(1);
+    setExpandedUserId(null);
   }, [searchNorm, statusFilter]);
+
+  useEffect(() => {
+    setExpandedUserId(null);
+  }, [page]);
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
@@ -202,79 +211,100 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                 </td>
               </tr>
             ) : (
-              pageUsers.map((u) => (
-                <tr key={u.id}>
-                  <td>
-                    {u.firstName} {u.lastName}
-                    <br />
-                    <span className="table-sub">{u.personalId}</span>
-                  </td>
-                  <td>
-                    {u.email}
-                    <br />
-                    <span className="table-sub">{u.phone}</span>
-                  </td>
-                  <td className="user-social">
-                    {u.facebookUrl ? (
-                      <a href={u.facebookUrl} target="_blank" rel="noopener noreferrer">
-                        Facebook
-                      </a>
-                    ) : (
-                      <span className="table-sub">—</span>
-                    )}
-                    <br />
-                    {u.instagramUrl ? (
-                      <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
-                        Instagram
-                      </a>
-                    ) : (
-                      <span className="table-sub">—</span>
-                    )}
-                  </td>
-                  <td>
-                    <span
-                      className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}
-                    >
-                      {u.verificationStatus}
-                    </span>
-                  </td>
-                  <td>{u.ticketCount}</td>
-                  <td>
-                    {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
-                      <>
-                        <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+              pageUsers.map((u) => {
+                const expanded = expandedUserId === u.id;
+                return (
+                  <Fragment key={u.id}>
+                    <tr className={expanded ? 'admin-users-row--expanded' : undefined}>
+                      <td>
+                        {u.firstName} {u.lastName}
                         <br />
-                        <span className="table-sub">
-                          Free:{' '}
-                          {u.freeTicketsEnabled
-                            ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
-                            : 'off'}
+                        <span className="table-sub">{u.personalId}</span>
+                      </td>
+                      <td>
+                        {u.email}
+                        <br />
+                        <span className="table-sub">{u.phone}</span>
+                      </td>
+                      <td className="user-social">
+                        {u.facebookUrl ? (
+                          <a href={u.facebookUrl} target="_blank" rel="noopener noreferrer">
+                            Facebook
+                          </a>
+                        ) : (
+                          <span className="table-sub">—</span>
+                        )}
+                        <br />
+                        {u.instagramUrl ? (
+                          <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
+                            Instagram
+                          </a>
+                        ) : (
+                          <span className="table-sub">—</span>
+                        )}
+                      </td>
+                      <td>
+                        <span
+                          className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}
+                        >
+                          {u.verificationStatus}
                         </span>
-                      </>
-                    ) : (
-                      <span className="table-sub">—</span>
-                    )}
-                  </td>
-                  <td className="table-actions table-actions--menu">
-                    <AdminUserActionsMenu
-                      user={u}
-                      confirmDelete={confirmDeleteId === u.id}
-                      deleting={deletingId === u.id}
-                      onVerify={() => void setStatus(u.id, 'VERIFIED')}
-                      onReject={() => void setStatus(u.id, 'REJECTED')}
-                      onPending={() => void setStatus(u.id, 'PENDING')}
-                      onDelete={() => requestDelete(u)}
-                      onCancelDelete={() => setConfirmDeleteId(null)}
-                      onConfirmDelete={() => void deleteUser(u)}
-                      onUpdated={(patch) =>
-                        setUsers((list) =>
-                          list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
-                        )
-                      }
-                    />
-                  </td>
-                </tr>
-              ))
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="admin-users-tickets-btn"
+                          aria-expanded={expanded}
+                          onClick={() => setExpandedUserId(expanded ? null : u.id)}
+                        >
+                          {u.tickets.length} {expanded ? '▴' : '▾'}
+                        </button>
+                      </td>
+                      <td>
+                        {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                          <>
+                            <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+                            <br />
+                            <span className="table-sub">
+                              Free:{' '}
+                              {u.freeTicketsEnabled
+                                ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
+                                : 'off'}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="table-sub">—</span>
+                        )}
+                      </td>
+                      <td className="table-actions table-actions--menu">
+                        <AdminUserActionsMenu
+                          user={u}
+                          confirmDelete={confirmDeleteId === u.id}
+                          deleting={deletingId === u.id}
+                          onVerify={() => void setStatus(u.id, 'VERIFIED')}
+                          onReject={() => void setStatus(u.id, 'REJECTED')}
+                          onPending={() => void setStatus(u.id, 'PENDING')}
+                          onDelete={() => requestDelete(u)}
+                          onCancelDelete={() => setConfirmDeleteId(null)}
+                          onConfirmDelete={() => void deleteUser(u)}
+                          onUpdated={(patch) =>
+                            setUsers((list) =>
+                              list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
+                            )
+                          }
+                        />
+                      </td>
+                    </tr>
+                    {expanded ? (
+                      <tr className="admin-users-details-row">
+                        <td colSpan={7}>
+                          <AdminUserTicketsList tickets={u.tickets} />
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })
             )}
           </tbody>
         </table>

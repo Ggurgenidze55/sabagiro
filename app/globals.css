@@ -1266,6 +1266,63 @@ button {
   opacity: 0.65;
 }
 
+.admin-users-tickets-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: 0.12em;
+  color: var(--acid);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.admin-users-tickets-btn:hover {
+  color: var(--concrete-light);
+}
+
+.admin-users-row--expanded td {
+  background: rgba(200, 255, 0, 0.04);
+}
+
+.admin-users-details-row td {
+  padding: 0 0 1.25rem;
+  vertical-align: top;
+  background: rgba(8, 8, 8, 0.65);
+  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+}
+
+.admin-user-tickets {
+  padding: 1rem 0.75rem 0.25rem;
+}
+
+.admin-user-tickets__summary {
+  margin: 0 0 0.75rem;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.admin-user-tickets__empty {
+  margin: 0;
+  padding: 0.5rem 0;
+  font-size: var(--text-sm);
+  opacity: 0.55;
+}
+
+.admin-user-tickets__scroll {
+  margin: 0;
+}
+
+.data-table--compact th,
+.data-table--compact td {
+  padding: 0.5rem 0.65rem;
+  font-size: var(--text-2xs);
+}
+
 .settings-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
