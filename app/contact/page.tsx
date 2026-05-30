@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ContactForm } from '@/components/ContactForm';
-import { AccountSubNavGate } from '@/components/AccountSubNavGate';
 import { SiteChrome } from '@/components/SiteChrome';
 import { isEmailConfigured } from '@/lib/email/config';
 import { getContactInboxEmails } from '@/lib/contact-inbox';
@@ -17,7 +16,6 @@ export default function ContactPage() {
 
   return (
     <SiteChrome current="contact">
-      <AccountSubNavGate current="contact" />
       <h1 className="page-title">CONTACT</h1>
       <p className="page-lead">Tickets · Events · Press · Tbilisi</p>
 

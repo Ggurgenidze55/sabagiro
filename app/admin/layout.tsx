@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+import { AccountSubNavGate } from '@/components/AccountSubNavGate';
 import { SiteAmbientLayers } from '@/components/SiteAmbientLayers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { MobileNav } from '@/components/MobileNav';
@@ -48,7 +49,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </ul>
         </MobileNav>
       </header>
-      <main className="site-main">{children}</main>
+      <main className="site-main">
+        <AccountSubNavGate />
+        {children}
+      </main>
       <SiteFooter />
       </div>
     </div>

@@ -6,11 +6,12 @@ import { LogoutButton } from '@/components/LogoutButton';
 
 export type AccountSubNavCurrent = 'account' | 'settings' | 'about' | 'contact';
 
-function resolveCurrent(pathname: string): AccountSubNavCurrent {
+function resolveCurrent(pathname: string): AccountSubNavCurrent | undefined {
   if (pathname.startsWith('/account/settings')) return 'settings';
   if (pathname === '/about' || pathname.startsWith('/about/')) return 'about';
   if (pathname === '/contact' || pathname.startsWith('/contact/')) return 'contact';
-  return 'account';
+  if (pathname === '/account' || pathname.startsWith('/account/')) return 'account';
+  return undefined;
 }
 
 export function AccountSubNav({ current: currentOverride }: { current?: AccountSubNavCurrent }) {

@@ -2,7 +2,7 @@ import { AccountSubNav, type AccountSubNavCurrent } from '@/components/AccountSu
 import { getSessionUser } from '@/lib/auth';
 
 type AccountSubNavGateProps = {
-  current: AccountSubNavCurrent;
+  current?: AccountSubNavCurrent;
 };
 
 export async function AccountSubNavGate({ current }: AccountSubNavGateProps) {
