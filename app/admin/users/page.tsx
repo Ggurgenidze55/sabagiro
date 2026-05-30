@@ -12,13 +12,16 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <>
-      <h1 className="page-title">USERS</h1>
-      <p className="page-lead" style={{ marginBottom: '1.5rem' }}>
-        Review Facebook &amp; Instagram links, then verify users so they can buy tickets.
-      </p>
-      <AdminUsersPanel
-        users={users.map((u) => ({
+    <div className="centered-page">
+      <header className="centered-page__intro">
+        <h1 className="page-title">USERS</h1>
+        <p className="page-lead">
+          Review Facebook &amp; Instagram links, then verify users so they can buy tickets.
+        </p>
+      </header>
+      <div className="centered-page__body admin-users-panel">
+        <AdminUsersPanel
+          users={users.map((u) => ({
           id: u.id,
           firstName: u.firstName,
           lastName: u.lastName,
@@ -35,7 +38,8 @@ export default async function AdminUsersPage() {
           freeTicketsQuota: u.freeTicketsQuota,
           freeTicketsUsed: u.freeTicketsUsed,
         }))}
-      />
-    </>
+        />
+      </div>
+    </div>
   );
 }
