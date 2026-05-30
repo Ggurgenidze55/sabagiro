@@ -6,10 +6,14 @@ export const metadata = { title: 'Events — Admin' };
 
 export default function AdminEventsPage() {
   return (
-    <>
-      <h1 className="page-title">EVENTS</h1>
-      <p className="page-lead">Create events for homepage + ticket sales</p>
-      <AdminEventsPanel />
-    </>
+    <div className="centered-page">
+      <header className="centered-page__intro">
+        <h1 className="page-title">EVENTS</h1>
+        <p className="page-lead">Create events for homepage + ticket sales</p>
+      </header>
+      <div className="centered-page__body">
+        <AdminEventsPanel />
+      </div>
+    </div>
   );
 }

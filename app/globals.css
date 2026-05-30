@@ -1120,6 +1120,7 @@ button {
   color: #ff0044;
 }
 
+.centered-page,
 .settings-page {
   display: flex;
   flex-direction: column;
@@ -1127,6 +1128,7 @@ button {
   width: 100%;
 }
 
+.centered-page__intro,
 .settings-page__intro {
   width: 100%;
   max-width: 56rem;
@@ -1134,14 +1136,42 @@ button {
   text-align: center;
 }
 
+.centered-page__intro .page-title,
 .settings-page__intro .page-title {
   margin-bottom: 0.5rem;
 }
 
+.centered-page__intro .page-lead,
 .settings-page__intro .page-lead {
   max-width: 36rem;
   margin-left: auto;
   margin-right: auto;
+}
+
+.centered-page__body {
+  width: 100%;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.admin-events {
+  width: 100%;
+  border: 1px solid rgba(176, 168, 154, 0.15);
+  padding: clamp(1.1rem, 3vw, 1.5rem);
+  background: rgba(10, 10, 10, 0.45);
+}
+
+.admin-events .form-stack {
+  max-width: none;
+  width: 100%;
+}
+
+.admin-events .event-date-picker {
+  max-width: none;
+}
+
+.admin-events__section:first-child .section-title {
+  margin-top: 0;
 }
 
 .settings-grid {
@@ -1425,8 +1455,14 @@ button {
   max-width: 100%;
 }
 
+.admin-events__section + .admin-events__section {
+  margin-top: 2.5rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid rgba(176, 168, 154, 0.12);
+}
+
 .admin-events__section {
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
 }
 
 .event-date-picker {

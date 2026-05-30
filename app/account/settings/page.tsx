@@ -13,8 +13,8 @@ export default async function AccountSettingsPage() {
 
   return (
     <SiteChrome current="settings">
-      <div className="settings-page">
-        <header className="settings-page__intro">
+      <div className="centered-page">
+        <header className="centered-page__intro">
           <h1 className="page-title">SETTINGS</h1>
           <p className="page-lead">
             Email, phone, and password can be updated. Name/personal ID are locked after registration
