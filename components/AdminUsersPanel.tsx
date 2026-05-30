@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AdminUserTicketPolicy } from '@/components/AdminUserTicketPolicy';
+import { AdminUserActionsMenu } from '@/components/AdminUserActionsMenu';
 
 export type AdminUserRow = {
   id: string;
@@ -76,17 +76,12 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     }
   }
 
-  function onDeleteClick(user: AdminUserRow) {
+  function requestDelete(user: AdminUserRow) {
     if (user.role === 'ADMIN') return;
-
     if (user.verificationStatus === 'VERIFIED') {
-      if (confirmDeleteId === user.id) return;
       setConfirmDeleteId(user.id);
-      setError('');
-      setMsg('');
       return;
     }
-
     void deleteUser(user);
   }
 
@@ -95,142 +90,89 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
       {error ? <p className="form-error">{error}</p> : null}
       {msg ? <p className="form-ok">{msg}</p> : null}
       <div className="table-scroll admin-users-scroll">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Contact</th>
-            <th>Social</th>
-            <th>Status</th>
-            <th>Tickets</th>
-            <th>Limits</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id}>
-              <td>
-                {u.firstName} {u.lastName}
-                <br />
-                <span className="table-sub">{u.personalId}</span>
-              </td>
-              <td>
-                {u.email}
-                <br />
-                <span className="table-sub">{u.phone}</span>
-              </td>
-              <td className="user-social">
-                {u.facebookUrl ? (
-                  <a href={u.facebookUrl} target="_blank" rel="noopener noreferrer">
-                    Facebook
-                  </a>
-                ) : (
-                  <span className="table-sub">—</span>
-                )}
-                <br />
-                {u.instagramUrl ? (
-                  <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
-                    Instagram
-                  </a>
-                ) : (
-                  <span className="table-sub">—</span>
-                )}
-              </td>
-              <td>
-                <span className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}>
-                  {u.verificationStatus}
-                </span>
-              </td>
-              <td>{u.ticketCount}</td>
-              <td>
-                {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
-                  <>
-                    <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
-                    <br />
-                    <span className="table-sub">
-                      Free: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'off'}
-                    </span>
-                  </>
-                ) : (
-                  <span className="table-sub">—</span>
-                )}
-              </td>
-              <td className="table-actions">
-                {u.role !== 'ADMIN' ? (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      onClick={() => setStatus(u.id, 'VERIFIED')}
-                    >
-                      Verify
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      onClick={() => setStatus(u.id, 'REJECTED')}
-                    >
-                      Reject
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn--ghost"
-                      onClick={() => setStatus(u.id, 'PENDING')}
-                    >
-                      Pending
-                    </button>
-                    {confirmDeleteId === u.id ? (
-                      <div className="delete-confirm">
-                        <p className="delete-confirm__text">
-                          Verified user — confirm deletion?
-                        </p>
-                        <div className="delete-confirm__actions">
-                          <button
-                            type="button"
-                            className="btn btn--danger"
-                            disabled={deletingId === u.id}
-                            onClick={() => void deleteUser(u)}
-                          >
-                            {deletingId === u.id ? '…' : 'Yes, delete'}
-                          </button>
-                          <button
-                            type="button"
-                            className="btn btn--ghost"
-                            disabled={deletingId === u.id}
-                            onClick={() => setConfirmDeleteId(null)}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn btn--danger"
-                        disabled={deletingId === u.id}
-                        onClick={() => onDeleteClick(u)}
-                      >
-                        {deletingId === u.id ? '…' : 'Delete'}
-                      </button>
-                    )}
-                    <AdminUserTicketPolicy
-                      user={u}
-                      onUpdated={(patch) =>
-                        setUsers((list) =>
-                          list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
-                        )
-                      }
-                    />
-                  </>
-                ) : (
-                  <span className="table-sub">ADMIN</span>
-                )}
-              </td>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Contact</th>
+              <th>Social</th>
+              <th>Status</th>
+              <th>Tickets</th>
+              <th>Limits</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>
+                  {u.firstName} {u.lastName}
+                  <br />
+                  <span className="table-sub">{u.personalId}</span>
+                </td>
+                <td>
+                  {u.email}
+                  <br />
+                  <span className="table-sub">{u.phone}</span>
+                </td>
+                <td className="user-social">
+                  {u.facebookUrl ? (
+                    <a href={u.facebookUrl} target="_blank" rel="noopener noreferrer">
+                      Facebook
+                    </a>
+                  ) : (
+                    <span className="table-sub">—</span>
+                  )}
+                  <br />
+                  {u.instagramUrl ? (
+                    <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
+                      Instagram
+                    </a>
+                  ) : (
+                    <span className="table-sub">—</span>
+                  )}
+                </td>
+                <td>
+                  <span className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}>
+                    {u.verificationStatus}
+                  </span>
+                </td>
+                <td>{u.ticketCount}</td>
+                <td>
+                  {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                    <>
+                      <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+                      <br />
+                      <span className="table-sub">
+                        Free: {u.freeTicketsEnabled ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}` : 'off'}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="table-sub">—</span>
+                  )}
+                </td>
+                <td className="table-actions table-actions--menu">
+                  <AdminUserActionsMenu
+                    user={u}
+                    confirmDelete={confirmDeleteId === u.id}
+                    deleting={deletingId === u.id}
+                    onVerify={() => void setStatus(u.id, 'VERIFIED')}
+                    onReject={() => void setStatus(u.id, 'REJECTED')}
+                    onPending={() => void setStatus(u.id, 'PENDING')}
+                    onDelete={() => requestDelete(u)}
+                    onCancelDelete={() => setConfirmDeleteId(null)}
+                    onConfirmDelete={() => void deleteUser(u)}
+                    onUpdated={(patch) =>
+                      setUsers((list) =>
+                        list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
+                      )
+                    }
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </>
   );
