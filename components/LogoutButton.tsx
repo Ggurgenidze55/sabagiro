@@ -12,7 +12,7 @@ export function LogoutButton({ variant = 'button' }: LogoutButtonProps) {
 
   if (variant === 'nav') {
     return (
-      <button type="button" className="account-subnav__logout-btn" onClick={logout}>
+      <button type="button" className="site-nav__logout-btn" onClick={logout}>
         Log out
       </button>
     );

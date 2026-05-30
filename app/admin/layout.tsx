@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
-import { LogoutButton } from '@/components/LogoutButton';
+import { AdminSiteNav } from '@/components/AdminSiteNav';
 import { SiteAmbientLayers } from '@/components/SiteAmbientLayers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { MobileNav } from '@/components/MobileNav';
@@ -27,29 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span className="site-brand__text">SABAGIRO ADMIN</span>
         </Link>
         <MobileNav label="Admin">
-          <ul className="site-nav">
-            <li>
-              <Link href="/admin">Overview</Link>
-            </li>
-            <li>
-              <Link href="/admin/events">Events</Link>
-            </li>
-            <li>
-              <Link href="/admin/users">Users</Link>
-            </li>
-            <li>
-              <Link href="/admin/tickets">Tickets</Link>
-            </li>
-            <li>
-              <Link href="/admin/generate">Generate QR</Link>
-            </li>
-            <li>
-              <Link href="/account">My account</Link>
-            </li>
-            <li className="site-nav__action">
-              <LogoutButton variant="nav" />
-            </li>
-          </ul>
+          <AdminSiteNav />
         </MobileNav>
       </header>
       <main className="site-main">{children}</main>
