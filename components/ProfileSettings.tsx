@@ -64,8 +64,8 @@ export function ProfileSettings({ user }: { user: User }) {
 
   return (
     <div className="settings-grid">
-      <section>
-        <h2 className="section-title">Profile</h2>
+      <section className="settings-grid__col">
+        <h2 className="section-title settings-grid__title">Profile</h2>
         <p className="form-foot form-foot--note">
           First name, last name, and personal ID are set at registration and cannot be changed.
         </p>
@@ -99,8 +99,8 @@ export function ProfileSettings({ user }: { user: User }) {
           </button>
         </form>
       </section>
-      <section>
-        <h2 className="section-title">Password</h2>
+      <section className="settings-grid__col">
+        <h2 className="section-title settings-grid__title">Password</h2>
         <form className="form-stack" onSubmit={savePassword}>
           <label className="form-field">
             <span>Current password</span>
