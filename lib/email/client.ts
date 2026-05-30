@@ -2,7 +2,7 @@ import { Resend } from 'resend';
 import { getEmailFrom, isEmailConfigured } from '@/lib/email/config';
 
 export type SendEmailInput = {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text?: string;
@@ -43,10 +43,12 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
     return { sent: false, skipped: true };
   }
 
+  const recipients = Array.isArray(input.to) ? input.to : [input.to];
+
   try {
     const { data, error } = await client.emails.send({
       from,
-      to: input.to,
+      to: recipients,
       replyTo: input.replyTo,
       subject: input.subject,
       html: input.html,
@@ -64,6 +66,7 @@ export async function sendEmail(input: SendEmailInput): Promise<SendEmailResult>
       return { sent: false, error: error.message || 'Send failed' };
     }
 
+    console.info('[email] sent', { to: recipients, subject: input.subject, id: data?.id });
     return { sent: true, id: data?.id };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Send failed';

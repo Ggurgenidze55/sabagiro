@@ -1,9 +1,10 @@
 import type { Ticket } from '@prisma/client';
 import { sendEmail, type SendEmailResult } from '@/lib/email/client';
-import { getContactInboxEmail } from '@/lib/contact-inbox';
+import { getContactInboxEmails } from '@/lib/contact-inbox';
 import {
   accountRejectedEmail,
   accountVerifiedEmail,
+  contactFormAckEmail,
   contactFormNotificationEmail,
   passwordChangedEmail,
   passwordResetEmail,
@@ -92,8 +93,16 @@ export function sendContactFormNotification(opts: {
 }): Promise<SendEmailResult> {
   const msg = contactFormNotificationEmail(opts);
   return sendEmail({
-    to: getContactInboxEmail(),
+    to: getContactInboxEmails(),
     replyTo: opts.email,
     ...msg,
   });
+}
+
+export function sendContactFormAck(opts: {
+  to: string;
+  name: string;
+}): Promise<SendEmailResult> {
+  const msg = contactFormAckEmail({ name: opts.name });
+  return sendEmail({ to: opts.to, ...msg });
 }

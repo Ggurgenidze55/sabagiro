@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isEmailConfigured } from '@/lib/email/config';
-import { sendContactFormNotification } from '@/lib/email/send';
-import { getContactInboxEmail } from '@/lib/contact-inbox';
+import { sendContactFormAck, sendContactFormNotification } from '@/lib/email/send';
+import { getContactInboxEmails } from '@/lib/contact-inbox';
 import { contactFormSchema, formatValidationError } from '@/lib/validators';
 
 export async function POST(request: Request) {
@@ -30,13 +30,30 @@ export async function POST(request: Request) {
     });
 
     if (!result.sent) {
+      console.error('[contact] Resend failed', result.error);
       return NextResponse.json(
-        { error: result.error || 'Could not send message. Try info@sabagiro.ge' },
+        {
+          error:
+            result.error ||
+            'Could not send message. Email info@sabagiro.ge or info.sabagiro@gmail.com directly.',
+        },
         { status: 502 },
       );
     }
 
-    return NextResponse.json({ ok: true, inbox: getContactInboxEmail() });
+    void sendContactFormAck({ to: body.email, name: body.name }).then((ack) => {
+      if (!ack.sent) {
+        console.warn('[contact] auto-reply failed', ack.error);
+      }
+    });
+
+    const inboxes = getContactInboxEmails();
+    return NextResponse.json({
+      ok: true,
+      inboxes,
+      id: result.id,
+      hint: 'Check inbox and spam. A copy was sent to your email too.',
+    });
   } catch (e) {
     return NextResponse.json({ error: formatValidationError(e) }, { status: 400 });
   }

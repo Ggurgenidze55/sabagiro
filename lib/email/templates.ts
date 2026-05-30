@@ -203,6 +203,27 @@ export function contactFormNotificationEmail(opts: {
   };
 }
 
+export function contactFormAckEmail(opts: {
+  name: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.name);
+  const bodyHtml = `
+    <p>Hi ${name}, we received your message.</p>
+    <p>We usually reply within 1–2 days. For urgent ticket issues at the door, use the email on your ticket QR.</p>
+  `;
+  return {
+    subject: 'Sabagiro — we got your message',
+    html: renderEmailLayout({
+      preheader: 'Message received',
+      title: 'Thanks for contacting us',
+      bodyHtml,
+      ctaHref: siteUrl('/events'),
+      ctaLabel: 'VIEW EVENTS',
+    }),
+    text: `Hi ${opts.name}, we received your Sabagiro contact form message. We'll reply by email soon.`,
+  };
+}
+
 export function testEmail(): { subject: string; html: string; text: string } {
   const bodyHtml = `
     <p>Resend is connected. Sabagiro transactional email is ready.</p>

@@ -83,5 +83,15 @@ Status check: `GET /api/admin/email/status` (admin session required).
 | Forgot password | Reset link |
 | Password changed | Confirmation |
 | Email changed | Notification |
+| Contact form | To club inbox(es) + auto-reply to sender |
+
+### Contact form env
+
+```
+CONTACT_INBOX_EMAIL=info@sabagiro.ge,info.sabagiro@gmail.com
+EMAIL_FROM=Sabagiro <info@sabagiro.ge>
+```
+
+Use a verified `EMAIL_FROM` on `sabagiro.ge` (not `onboarding@resend.dev` in production).
 
 Without `RESEND_API_KEY`, emails are skipped (logged only) — tickets still appear in `/account`.

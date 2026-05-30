@@ -47,7 +47,9 @@ export function ContactForm() {
   if (ok) {
     return (
       <div className="contact-form contact-form--ok">
-        <p className="form-ok">Message sent. We will reply to your email as soon as we can.</p>
+        <p className="form-ok">
+          Message sent. Check your inbox (and spam) for a confirmation. We reply within 1–2 days.
+        </p>
         <button type="button" className="btn btn--ghost" onClick={() => setOk(false)}>
           Send another message
         </button>

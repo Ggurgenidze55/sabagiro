@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { ContactForm } from '@/components/ContactForm';
 import { SiteChrome } from '@/components/SiteChrome';
 import { isEmailConfigured } from '@/lib/email/config';
-import { getContactInboxEmail } from '@/lib/contact-inbox';
+import { getContactInboxEmails } from '@/lib/contact-inbox';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 export const metadata = {
@@ -11,7 +11,7 @@ export const metadata = {
 };
 
 export default function ContactPage() {
-  const inbox = getContactInboxEmail();
+  const inboxes = getContactInboxEmails();
   const emailReady = isEmailConfigured();
 
   return (
@@ -23,12 +23,14 @@ export default function ContactPage() {
         <section className="contact-info">
           <h2 className="section-title">Direct</h2>
           <ul className="contact-info__list">
-            <li>
-              <span className="contact-info__label">Email</span>
-              <a href={`mailto:${inbox}`} className="contact-info__value">
-                {inbox}
-              </a>
-            </li>
+            {inboxes.map((addr) => (
+              <li key={addr}>
+                <span className="contact-info__label">Email</span>
+                <a href={`mailto:${addr}`} className="contact-info__value">
+                  {addr}
+                </a>
+              </li>
+            ))}
             <li>
               <span className="contact-info__label">Instagram</span>
               <a
@@ -56,7 +58,7 @@ export default function ContactPage() {
           {!emailReady ? (
             <p className="notice-banner notice-banner--inline contact-info__notice">
               Form delivery needs <code>RESEND_API_KEY</code> on the server. You can still email us
-              directly at {inbox}.
+              directly: {inboxes.join(' · ')}.
             </p>
           ) : null}
         </section>
@@ -64,7 +66,8 @@ export default function ContactPage() {
         <section className="contact-form-panel">
           <h2 className="section-title">Send a message</h2>
           <p className="page-lead contact-form-panel__hint">
-            We reply from {inbox}. For urgent door access, use the email on your ticket.
+            Messages go to {inboxes.join(' and ')}. You get a confirmation copy — check spam if
+            missing. For urgent door access, use the email on your ticket QR.
           </p>
           <ContactForm />
         </section>
