@@ -223,10 +223,20 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: inherit;
   color: rgba(176, 168, 154, 0.85);
   cursor: default;
   letter-spacing: inherit;
   text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.site-nav__drop-toggle:hover {
+  color: var(--acid);
 }
 
 .site-nav__drop--active .site-nav__drop-toggle {
@@ -962,13 +972,15 @@ button {
 }
 
 .site-nav__logout-btn {
-  background: none;
-  border: none;
+  display: inline;
   padding: 0;
+  border: 0;
+  background: none;
   font: inherit;
   font-size: inherit;
   letter-spacing: inherit;
   text-transform: uppercase;
+  text-decoration: none;
   color: rgba(176, 168, 154, 0.85);
   cursor: pointer;
   transition: color 0.2s;
@@ -1605,15 +1617,6 @@ button {
   text-transform: uppercase;
 }
 
-.site-nav__action .btn,
-.site-nav__action .site-nav__logout-btn {
-  padding: 0.35rem 0.65rem;
-  font-size: var(--text-2xs);
-}
-
-.site-nav__action .site-nav__logout-btn {
-  letter-spacing: 0.28em;
-}
 
 .notice-banner {
   margin-bottom: 1.25rem;
@@ -2136,32 +2139,64 @@ body.nav-lock {
   }
 
   .mobile-nav__panel .site-nav__drop-toggle {
-    display: block;
-    margin-bottom: 0.35rem;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 0;
+    min-height: 44px;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-nav__panel .site-nav__drop:hover .site-nav__drop-menu,
+  .mobile-nav__panel .site-nav__drop:focus-within .site-nav__drop-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
   }
 
   .mobile-nav__panel .site-nav__drop-menu {
     position: static;
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
     transform: none;
     min-width: 0;
     width: 100%;
-    margin: 0 0 0.25rem;
-    padding: 0.15rem 0 0.15rem 0.75rem;
+    margin: 0;
+    padding: 0 0 0 0.75rem;
     background: transparent;
     border: 0;
     box-shadow: none;
+    max-height: 0;
+    overflow: hidden;
+    transition:
+      opacity 0.15s ease,
+      max-height 0.2s ease,
+      visibility 0.15s;
+  }
+
+  .mobile-nav__panel .site-nav__drop--open .site-nav__drop-menu {
+    opacity: 1;
+    visibility: visible;
+    max-height: 24rem;
+    margin: 0 0 0.35rem;
+    padding: 0.15rem 0 0.35rem 0.75rem;
   }
 
   .mobile-nav__panel .site-nav__drop-menu a {
-    padding: 0.2rem 0;
+    display: block;
+    padding: 0.35rem 0;
     font-size: var(--text-sm);
+    letter-spacing: 0.2em;
   }
 
-  .mobile-nav__panel .site-nav__action .btn {
+  .mobile-nav__panel .site-nav__logout-btn {
+    display: block;
     width: 100%;
     min-height: 44px;
+    padding: 0.15rem 0;
+    text-align: left;
     font-size: var(--text-sm);
   }
 

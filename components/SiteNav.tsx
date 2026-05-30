@@ -53,7 +53,7 @@ export function SiteNav({ user, current }: SiteNavProps) {
               Contact
             </Link>
           </li>
-          <li className="site-nav__action">
+          <li>
             <LogoutButton variant="nav" />
           </li>
         </>

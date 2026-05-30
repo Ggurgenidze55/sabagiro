@@ -15,7 +15,7 @@ export function AdminSiteNav() {
       <li>
         <Link href="/contact">Contact</Link>
       </li>
-      <li className="site-nav__action">
+      <li>
         <LogoutButton variant="nav" />
       </li>
     </ul>
