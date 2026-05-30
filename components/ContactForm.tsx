@@ -9,11 +9,12 @@ export function ContactForm() {
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
     setError('');
     setOk(false);
     setLoading(true);
 
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const payload = {
       name: String(fd.get('name') ?? ''),
       email: String(fd.get('email') ?? ''),
@@ -29,18 +30,23 @@ export function ContactForm() {
         body: JSON.stringify(payload),
       });
       const data = await res.json().catch(() => ({}));
-      setLoading(false);
 
       if (!res.ok) {
         setError(data.error || 'Could not send message');
         return;
       }
 
+      form.reset();
       setOk(true);
-      e.currentTarget.reset();
-    } catch {
+    } catch (err) {
+      const detail = err instanceof Error ? err.message : '';
+      setError(
+        detail
+          ? `Could not send (${detail}). Try info@sabagiro.ge`
+          : 'Network error — try again or email info@sabagiro.ge',
+      );
+    } finally {
       setLoading(false);
-      setError('Network error — try again or email info@sabagiro.ge');
     }
   }
 
