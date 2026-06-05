@@ -60,8 +60,8 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
             <Image
               src="/club/sabagiro-mark.png"
               alt="Sabagiro"
-              width={116}
-              height={64}
+              width={126}
+              height={67}
               className="mobile-nav__logo"
             />
           </Link>

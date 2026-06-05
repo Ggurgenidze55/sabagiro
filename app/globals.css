@@ -192,6 +192,7 @@ button {
 
 .site-brand {
   flex-shrink: 0;
+  line-height: 0;
 }
 
 .site-nav {
@@ -307,9 +308,11 @@ button {
 }
 
 .site-brand__logo {
+  display: block;
   width: auto;
-  height: 2rem;
+  height: clamp(2rem, 5.5vw, 2.35rem);
   object-fit: contain;
+  object-position: left center;
 }
 
 .site-main {
@@ -484,6 +487,23 @@ button {
   line-height: 1.7;
 }
 
+.product-card__lineup {
+  margin: 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  color: color-mix(in srgb, var(--card-accent, var(--acid)) 70%, var(--concrete));
+  line-height: 1.7;
+}
+
+.product-card__venue-tag {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  line-height: 1.7;
+}
+
 .product-card__price {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
@@ -531,6 +551,15 @@ button {
 .event-page__lineup {
   margin: 0.15rem 0 0;
   font-size: var(--text-sm);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--event-accent) 70%, var(--concrete));
+  line-height: 1.7;
+}
+
+.event-page__venue-tag {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-xs);
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: rgba(212, 204, 196, 0.55);
@@ -2337,12 +2366,15 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  line-height: 0;
 }
 
 .mobile-nav__logo {
+  display: block;
   width: auto;
-  height: 2rem;
+  height: clamp(2rem, 5.5vw, 2.35rem);
   object-fit: contain;
+  object-position: left center;
   opacity: 0.96;
 }
 
@@ -2613,7 +2645,7 @@ body.nav-lock {
   }
 
   .site-brand__logo {
-    height: 1.65rem;
+    height: clamp(1.85rem, 6vw, 2.1rem);
   }
 
   .admin-header .site-brand__text {

@@ -35,7 +35,11 @@ export default async function EventsPage() {
             >
               {product.tag ? <span className="product-card__tag">{product.tag}</span> : null}
               <h2 className="product-card__title">{product.name}</h2>
-              <p className="product-card__meta">{product.description}</p>
+              {product.lineup ? <p className="product-card__lineup">{product.lineup}</p> : null}
+              {product.venueTag ? <p className="product-card__venue-tag">{product.venueTag}</p> : null}
+              {!product.lineup && !product.venueTag ? (
+                <p className="product-card__meta">{product.description}</p>
+              ) : null}
               <p className="product-card__price">
                 {product.isFreeEntry
                   ? 'Free entry'

@@ -14,6 +14,8 @@ export type Product = {
   type: ProductType;
   accent: string;
   tag?: string;
+  lineup?: string;
+  venueTag?: string;
   eventDate?: string;
   isFreeEntry?: boolean;
   tiers?: TierAvailability[];

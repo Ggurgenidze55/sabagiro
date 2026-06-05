@@ -30,6 +30,8 @@ export function eventToProduct(event: ClubEvent): Product {
     priceGel: event.isFreeEntry ? 0 : event.priceGel,
     type: 'ticket',
     accent: event.accent,
+    lineup: event.lineup || undefined,
+    venueTag: event.tag || undefined,
     tag: `${event.dateLabel} · ${event.dayLabel}`,
     eventDate: event.eventDate ?? undefined,
     isFreeEntry: event.isFreeEntry,

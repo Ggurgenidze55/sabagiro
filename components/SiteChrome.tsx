@@ -24,8 +24,8 @@ export async function SiteChrome({ children, current, mainClassName }: SiteChrom
             <img
               src="/club/sabagiro-mark.png"
               alt="Sabagiro"
-              width={116}
-              height={64}
+              width={126}
+              height={67}
               className="site-brand__logo"
               fetchPriority="high"
               decoding="async"

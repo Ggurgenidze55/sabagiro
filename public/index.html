@@ -211,12 +211,15 @@
         align-items: center;
         text-decoration: none;
         flex-shrink: 0;
+        line-height: 0;
       }
 
       .header-brand__logo {
-        height: clamp(1.65rem, 5vw, 2rem);
+        display: block;
+        height: clamp(2rem, 5.5vw, 2.35rem);
         width: auto;
         object-fit: contain;
+        object-position: left center;
       }
 
       .nav-toggle {
@@ -674,7 +677,7 @@
       .event-lineup {
         font-size: 0.72rem;
         letter-spacing: 0.12em;
-        opacity: 0.5;
+        color: color-mix(in srgb, var(--ev-accent) 70%, var(--concrete));
         margin-top: 0.25rem;
       }
 
@@ -682,7 +685,7 @@
         font-size: 0.7rem;
         letter-spacing: 0.2em;
         text-transform: uppercase;
-        color: color-mix(in srgb, var(--ev-accent) 70%, var(--concrete));
+        opacity: 0.5;
         margin-top: 0.15rem;
       }
 
@@ -1197,8 +1200,8 @@
             class="header-brand__logo"
             src="/club/sabagiro-mark.png"
             alt="Sabagiro"
-            width="116"
-            height="64"
+            width="126"
+            height="67"
             decoding="async"
           />
         </a>
@@ -1213,8 +1216,8 @@
                 class="nav-panel__logo"
                 src="/club/sabagiro-mark.png"
                 alt="Sabagiro"
-                width="116"
-                height="64"
+                width="126"
+                height="67"
                 decoding="async"
               />
             </a>
@@ -1295,7 +1298,7 @@
           <ul class="events-list" id="events-list">
             <li class="events-loading">Loading events…</li>
           </ul>
-          <script type="application/json" id="homepage-events-data">{"season":"Summer 2025","events":[{"slug":"asdasd","title":"asd","lineup":"dqwe","tag":"1213","dayLabel":"SAT","dateLabel":"01 JAN","accent":"#f9c108","isFeatured":true,"shopUrl":"/shop/asdasd"},{"slug":"rindiko-vashaaa","title":"Grand Opening","lineup":"Rindi, vaska,","tag":"ravici ar vici","dayLabel":"SAT","dateLabel":"19 June","accent":"#07e9a5","isFeatured":false,"shopUrl":"/shop/rindiko-vashaaa"},{"slug":"wave-1-3-4-price-test","title":"wave 1 3 4 price test","lineup":"traki, prochi","tag":"","dayLabel":"SAT","dateLabel":"01 JAN","accent":"#ff0000","isFeatured":false,"shopUrl":"/shop/wave-1-3-4-price-test"},{"slug":"12","title":"12","lineup":"asd","tag":"","dayLabel":"SAT","dateLabel":"01 JAN","accent":"#ff0095","isFeatured":false,"shopUrl":"/shop/12"}]}</script>
+          <script type="application/json" id="homepage-events-data">{"season":"Summer 2026","events":[{"slug":"phaza-0","title":"Phaza 0","lineup":"AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT","tag":"Sabagiro, Garden, AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT, Lisi, Event, Night club","dayLabel":"SAT","dateLabel":"27 JUN","accent":"#11ff00","isFeatured":false,"isFreeEntry":true,"shopUrl":"/events/phaza-0"}]}</script>
           <script>
             (function renderHomepageEventsEarly() {
               function esc(s) {

@@ -78,16 +78,29 @@ async function main() {
   writeFileSync(snapshotPath, `${json}\n`, 'utf8');
   console.log(`[homepage-events] wrote ${snapshotPath} (${payload.events.length} events)`);
 
-  let html = readFileSync(indexPath, 'utf8');
-  if (!html.includes(marker)) {
-    console.warn('[homepage-events] marker not found in index.html — skip inline embed');
-    await prisma.$disconnect();
-    return;
-  }
+  const embedJson = (html) => {
+    if (html.includes(marker)) {
+      return html.replace(marker, json);
+    }
+    const inlinePattern =
+      /(<script type="application\/json" id="homepage-events-data">)[\s\S]*?(<\/script>)/;
+    if (inlinePattern.test(html)) {
+      return html.replace(inlinePattern, `$1${json}$2`);
+    }
+    return null;
+  };
 
-  html = html.replace(marker, json);
-  writeFileSync(indexPath, html, 'utf8');
-  console.log('[homepage-events] embedded snapshot in public/index.html');
+  for (const relPath of ['public/index.html', 'public/index.full.html']) {
+    const filePath = join(root, relPath);
+    let html = readFileSync(filePath, 'utf8');
+    const next = embedJson(html);
+    if (!next) {
+      console.warn(`[homepage-events] no embed target in ${relPath}`);
+      continue;
+    }
+    writeFileSync(filePath, next, 'utf8');
+    console.log(`[homepage-events] embedded snapshot in ${relPath}`);
+  }
   await prisma.$disconnect();
 }
 
