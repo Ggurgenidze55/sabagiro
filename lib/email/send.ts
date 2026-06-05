@@ -15,7 +15,8 @@ import {
   ticketPurchaseEmail,
   welcomeRegistrationEmail,
 } from '@/lib/email/templates';
-import { qrImageUrl } from '@/lib/qr';
+import { TICKET_QR_CID } from '@/lib/email/theme';
+import { qrPngBase64 } from '@/lib/qr';
 
 export function sendWelcomeRegistrationEmail(opts: {
   to: string;
@@ -64,6 +65,7 @@ export async function sendTicketEmail(payload: {
   scanLink: string;
 }): Promise<SendEmailResult> {
   const { ticket, scanLink, to } = payload;
+  const qrContent = await qrPngBase64(ticket.qrToken);
   const msg = ticketPurchaseEmail({
     ticketId: ticket.id,
     productName: ticket.productName,
@@ -73,9 +75,20 @@ export async function sendTicketEmail(payload: {
     priceGel: ticket.priceGel,
     tierLabel: ticket.tierLabel,
     scanLink,
-    qrImageUrl: qrImageUrl(ticket.qrToken),
+    qrCid: TICKET_QR_CID,
   });
-  return sendEmail({ to, ...msg });
+  return sendEmail({
+    to,
+    ...msg,
+    attachments: [
+      {
+        filename: 'ticket-qr.png',
+        content: qrContent,
+        contentType: 'image/png',
+        inlineContentId: TICKET_QR_CID,
+      },
+    ],
+  });
 }
 
 export function sendPasswordResetEmail(opts: {

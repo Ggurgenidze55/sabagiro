@@ -1,5 +1,6 @@
 import { contactTopicLabel, type ContactTopic } from '@/lib/contact-topic';
 import { escapeHtml, renderEmailLayout } from '@/lib/email/layout';
+import { EMAIL_ACID, EMAIL_MUTED } from '@/lib/email/theme';
 import { siteUrl } from '@/lib/site-url';
 
 export function welcomeRegistrationEmail(opts: {
@@ -29,7 +30,7 @@ export function accountVerifiedEmail(opts: {
 }): { subject: string; html: string; text: string } {
   const name = escapeHtml(opts.firstName);
   const bodyHtml = `
-    <p>Hi ${name}, your account is <strong style="color:#f9c108">verified</strong>.</p>
+    <p>Hi ${name}, your account is <strong style="color:${EMAIL_ACID}">verified</strong>.</p>
     <p>You can now buy event tickets. Your QR tickets will be emailed after each successful payment and always available in your account.</p>
   `;
   return {
@@ -118,21 +119,26 @@ export function ticketPurchaseEmail(opts: {
   priceGel: number;
   tierLabel: string;
   scanLink: string;
-  qrImageUrl: string;
+  qrCid: string;
 }): { subject: string; html: string; text: string } {
   const holder = escapeHtml(`${opts.holderFirstName} ${opts.holderLastName}`);
   const tier = opts.tierLabel ? ` · ${escapeHtml(opts.tierLabel)}` : '';
-  const qrUrl = escapeHtml(opts.qrImageUrl);
+  const qrCid = escapeHtml(opts.qrCid);
   const bodyHtml = `
     <!-- sabagiro-ticket:${escapeHtml(opts.ticketId)} -->
-    <p>Your ticket for <strong>${escapeHtml(opts.productName)}</strong> is ready.</p>
-    <p style="margin:8px 0 0">${holder}<br />ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
-    <p style="margin:20px 0 12px">
-      <a href="${escapeHtml(opts.scanLink)}" style="display:inline-block;line-height:0">
-        <img src="${qrUrl}" alt="Ticket QR code" width="260" height="260" style="display:block;width:260px;height:260px;border:4px solid #f9c108;background:#ffffff" />
-      </a>
+    <p style="margin:0 0 16px">Your ticket for <strong style="color:${EMAIL_ACID}">${escapeHtml(opts.productName)}</strong> is below.</p>
+    <p style="margin:0 0 20px;line-height:0">
+      <img
+        src="cid:${qrCid}"
+        alt="Ticket QR code for ${escapeHtml(opts.productName)}"
+        width="280"
+        height="280"
+        style="display:block;width:280px;max-width:100%;height:auto;border:4px solid ${EMAIL_ACID};background:#ffffff"
+      />
     </p>
-    <p style="font-size:14px;color:#8a827a;margin:0">Show this QR at the door. You can also open it from your account.</p>
+    <p style="margin:0 0 4px;font-weight:700;color:${EMAIL_ACID};letter-spacing:0.04em">${holder}</p>
+    <p style="margin:0 0 16px">ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>.</p>
   `;
   return {
     subject: `Sabagiro ticket — ${opts.productName}`,
@@ -140,8 +146,6 @@ export function ticketPurchaseEmail(opts: {
       preheader: `Ticket for ${opts.productName} — ${opts.holderFirstName}`,
       title: 'Your ticket',
       bodyHtml,
-      ctaLabel: 'OPEN TICKET',
-      ctaHref: opts.scanLink,
     }),
     text: `Ticket: ${opts.productName}. Holder: ${opts.holderFirstName} ${opts.holderLastName}. QR: ${opts.scanLink}`,
   };
@@ -157,7 +161,7 @@ export function passwordResetEmail(opts: {
   const bodyHtml = `
     <p>Hi ${name}, we received a request to reset your Sabagiro password.</p>
     <p>This link expires in <strong>${opts.expiresMinutes} minutes</strong>. If you did not request this, you can ignore this email.</p>
-    <p style="word-break:break-all;font-size:14px;color:#8a827a">${url}</p>
+    <p style="word-break:break-all;font-size:14px;color:${EMAIL_MUTED}">${url}</p>
   `;
   return {
     subject: 'Sabagiro — reset your password',
