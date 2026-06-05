@@ -6,6 +6,8 @@ import { SectionDivider } from '@/components/SectionDivider';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
 
+type TicketTierRow = { label: string; quantity: number; priceGel: number };
+
 type ClubEventRow = {
   id: string;
   slug: string;
@@ -23,6 +25,7 @@ type ClubEventRow = {
   isFeatured: boolean;
   published: boolean;
   sortOrder: number;
+  ticketTiers?: TicketTierRow[];
 };
 
 type TierFormRow = { label: string; quantity: number; priceGel: number };
@@ -51,9 +54,21 @@ const defaultForm = {
   sortOrder: 0,
 };
 
+function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
+  if (ev.ticketTiers?.length) {
+    return ev.ticketTiers.map((t) => ({
+      label: t.label,
+      quantity: t.quantity,
+      priceGel: t.priceGel,
+    }));
+  }
+  return [{ label: 'Standard', quantity: 100, priceGel: ev.priceGel }];
+}
+
 export function AdminEventsPanel() {
   const [events, setEvents] = useState<ClubEventRow[]>([]);
   const [season, setSeason] = useState('Summer 2025');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(defaultForm);
   const [tiers, setTiers] = useState<TierFormRow[]>(defaultTiers);
   const [error, setError] = useState('');
@@ -61,6 +76,7 @@ export function AdminEventsPanel() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const eventDateRef = useRef<HTMLInputElement>(null);
+  const eventFormRef = useRef<HTMLFormElement>(null);
 
   function openEventCalendar() {
     const input = eventDateRef.current;
@@ -128,7 +144,42 @@ export function AdminEventsPanel() {
     }
   }
 
-  async function createEvent(e: React.FormEvent) {
+  function resetEventForm() {
+    setEditingId(null);
+    setForm(defaultForm);
+    setTiers(defaultTiers);
+    setImageFile(null);
+  }
+
+  function startEdit(ev: ClubEventRow) {
+    setEditingId(ev.id);
+    setError('');
+    setMsg('');
+    setImageFile(null);
+    setForm({
+      title: ev.title,
+      slug: ev.slug,
+      about: ev.about,
+      imagePath: ev.imagePath,
+      lineup: ev.lineup,
+      tag: ev.tag,
+      dayLabel: ev.dayLabel,
+      dateLabel: ev.dateLabel,
+      eventDate: ev.eventDate ?? '',
+      accent: ev.accent,
+      priceGel: ev.priceGel,
+      isFreeEntry: ev.isFreeEntry,
+      isFeatured: ev.isFeatured,
+      published: ev.published,
+      sortOrder: ev.sortOrder,
+    });
+    setTiers(ev.isFreeEntry ? [{ label: 'Free entry', quantity: 9999, priceGel: 0 }] : tiersFromEvent(ev));
+    requestAnimationFrame(() => {
+      eventFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  async function saveEvent(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setMsg('');
@@ -175,20 +226,19 @@ export function AdminEventsPanel() {
     };
     if (!String(form.slug).trim()) delete payload.slug;
 
-    const res = await fetch('/api/admin/events', {
-      method: 'POST',
+    const res = await fetch(editingId ? `/api/admin/events/${editingId}` : '/api/admin/events', {
+      method: editingId ? 'PATCH' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || 'Failed to create');
+      setError(data.error || (editingId ? 'Failed to update' : 'Failed to create'));
       return;
     }
-    setForm(defaultForm);
-    setTiers(defaultTiers);
-    setImageFile(null);
-    setMsg('Event created — visible on homepage & events');
+    const wasEdit = Boolean(editingId);
+    resetEventForm();
+    setMsg(wasEdit ? 'Event updated' : 'Event created — visible on homepage & events');
     load();
   }
 
@@ -213,6 +263,7 @@ export function AdminEventsPanel() {
   async function removeEvent(id: string) {
     if (!confirm('Delete this event?')) return;
     await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
+    if (editingId === id) resetEventForm();
     load();
   }
 
@@ -233,8 +284,16 @@ export function AdminEventsPanel() {
 
       <section className="admin-events__section">
         <SectionDivider index={2} />
-        <h2 className="section-title">New event</h2>
-        <form className="form-stack" onSubmit={createEvent}>
+        <h2 className="section-title">{editingId ? 'Edit event' : 'New event'}</h2>
+        {editingId ? (
+          <p className="page-lead" style={{ marginBottom: '1rem' }}>
+            Editing <strong>{form.title}</strong> ·{' '}
+            <button type="button" className="btn btn--ghost" onClick={resetEventForm}>
+              Cancel edit
+            </button>
+          </p>
+        ) : null}
+        <form ref={eventFormRef} className="form-stack" onSubmit={saveEvent}>
           <label className="form-field">
             <span>Title</span>
             <input
@@ -276,6 +335,9 @@ export function AdminEventsPanel() {
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
             />
             {imageFile ? <p className="form-file-name">{imageFile.name}</p> : null}
+            {form.imagePath && !imageFile ? (
+              <p className="form-foot">Current image: {form.imagePath}</p>
+            ) : null}
           </label>
           <label className="form-field">
             <span>Lineup</span>
@@ -440,7 +502,7 @@ export function AdminEventsPanel() {
           {error ? <p className="form-error">{error}</p> : null}
           {msg ? <p className="form-ok">{msg}</p> : null}
           <button type="submit" className="btn" disabled={uploadingImage}>
-            {uploadingImage ? 'UPLOADING IMAGE…' : 'CREATE EVENT'}
+            {uploadingImage ? 'UPLOADING IMAGE…' : editingId ? 'SAVE CHANGES' : 'CREATE EVENT'}
           </button>
         </form>
       </section>
@@ -511,6 +573,9 @@ export function AdminEventsPanel() {
               ),
               actions: (
                 <div className="table-actions">
+                  <button type="button" className="btn btn--ghost" onClick={() => startEdit(ev)}>
+                    Edit
+                  </button>
                   <button type="button" className="btn btn--ghost" onClick={() => toggleFreeEntry(ev)}>
                     {ev.isFreeEntry ? 'Paid' : 'Free entry'}
                   </button>
