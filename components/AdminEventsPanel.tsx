@@ -1,5 +1,8 @@
 'use client';
 
+import { ResponsiveTable } from '@/components/ResponsiveTable';
+import { SectionDivider } from '@/components/SectionDivider';
+
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
 
@@ -16,6 +19,7 @@ type ClubEventRow = {
   eventDate: string | null;
   accent: string;
   priceGel: number;
+  isFreeEntry: boolean;
   isFeatured: boolean;
   published: boolean;
   sortOrder: number;
@@ -39,8 +43,9 @@ const defaultForm = {
   dayLabel: '',
   dateLabel: '',
   eventDate: '',
-  accent: '#c8ff00',
+  accent: '#f9c108',
   priceGel: 45,
+  isFreeEntry: false,
   isFeatured: false,
   published: true,
   sortOrder: 0,
@@ -157,9 +162,12 @@ export function AdminEventsPanel() {
       dayLabel: labels?.dayLabel ?? form.dayLabel,
       dateLabel: labels?.dateLabel ?? form.dateLabel,
       imagePath,
-      priceGel: Number(tiers[0]?.priceGel ?? form.priceGel),
+      priceGel: form.isFreeEntry ? 0 : Number(tiers[0]?.priceGel ?? form.priceGel),
+      isFreeEntry: form.isFreeEntry,
       sortOrder: Number(form.sortOrder),
-      tiers: tiers.map((t) => ({
+      tiers: form.isFreeEntry
+        ? [{ label: 'Free entry', quantity: 9999, priceGel: 0 }]
+        : tiers.map((t) => ({
         label: t.label,
         quantity: Number(t.quantity),
         priceGel: Number(t.priceGel),
@@ -193,6 +201,15 @@ export function AdminEventsPanel() {
     load();
   }
 
+  async function toggleFreeEntry(ev: ClubEventRow) {
+    await fetch(`/api/admin/events/${ev.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isFreeEntry: !ev.isFreeEntry }),
+    });
+    load();
+  }
+
   async function removeEvent(id: string) {
     if (!confirm('Delete this event?')) return;
     await fetch(`/api/admin/events/${id}`, { method: 'DELETE' });
@@ -215,6 +232,7 @@ export function AdminEventsPanel() {
       </section>
 
       <section className="admin-events__section">
+        <SectionDivider index={2} />
         <h2 className="section-title">New event</h2>
         <form className="form-stack" onSubmit={createEvent}>
           <label className="form-field">
@@ -314,7 +332,8 @@ export function AdminEventsPanel() {
               <input
                 type="number"
                 min={0}
-                value={form.priceGel}
+                value={form.isFreeEntry ? 0 : form.priceGel}
+                disabled={form.isFreeEntry}
                 onChange={(e) => setForm({ ...form, priceGel: Number(e.target.value) })}
               />
             </label>
@@ -327,6 +346,20 @@ export function AdminEventsPanel() {
               />
             </label>
           </div>
+          <label className="form-check">
+            <input
+              type="checkbox"
+              checked={form.isFreeEntry}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  isFreeEntry: e.target.checked,
+                  priceGel: e.target.checked ? 0 : form.priceGel,
+                })
+              }
+            />
+            Free entry — only users with free ticket generator (no paid checkout)
+          </label>
           <label className="form-check">
             <input
               type="checkbox"
@@ -344,7 +377,7 @@ export function AdminEventsPanel() {
             Published
           </label>
 
-          <div className="tier-editor">
+          <div className="tier-editor" hidden={form.isFreeEntry}>
             <h3 className="section-title">Ticket waves (qty + price per wave)</h3>
             {tiers.map((tier, index) => (
               <div key={index} className="form-row tier-editor__row">
@@ -413,6 +446,7 @@ export function AdminEventsPanel() {
       </section>
 
       <section className="admin-events__section">
+        <SectionDivider index={3} />
         <h2 className="section-title">All events</h2>
         <p className="page-lead" style={{ marginBottom: '1rem' }}>
           If homepage links show 404, click to fix old slugs (spaces → hyphens).
@@ -438,21 +472,19 @@ export function AdminEventsPanel() {
         >
           FIX EVENT SLUGS
         </button>
-        <div className="table-scroll">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Date</th>
-              <th>Price</th>
-              <th>Status</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {events.map((ev) => (
-              <tr key={ev.id}>
-                <td>
+        <ResponsiveTable
+          columns={[
+            { id: 'title', header: 'Title', mobileSummary: true },
+            { id: 'date', header: 'Date', mobileSummary: true },
+            { id: 'price', header: 'Price' },
+            { id: 'status', header: 'Status' },
+            { id: 'actions', header: 'Actions' },
+          ]}
+          rows={events.map((ev) => ({
+            id: ev.id,
+            cells: {
+              title: (
+                <>
                   {ev.title}
                   <br />
                   <span className="table-sub">/events/{ev.slug}</span>
@@ -462,28 +494,37 @@ export function AdminEventsPanel() {
                       <span className="table-sub">image: yes</span>
                     </>
                   ) : null}
-                </td>
-                <td>
+                </>
+              ),
+              date: (
+                <>
                   {ev.dayLabel} {ev.dateLabel}
-                </td>
-                <td>{ev.priceGel} ₾</td>
-                <td>
+                </>
+              ),
+              price: ev.isFreeEntry ? 'Free entry' : `${ev.priceGel} ₾`,
+              status: (
+                <>
                   {ev.published ? 'Live' : 'Hidden'}
+                  {ev.isFreeEntry ? ' · Free' : ''}
                   {ev.isFeatured ? ' · ★' : ''}
-                </td>
-                <td className="table-actions">
+                </>
+              ),
+              actions: (
+                <div className="table-actions">
+                  <button type="button" className="btn btn--ghost" onClick={() => toggleFreeEntry(ev)}>
+                    {ev.isFreeEntry ? 'Paid' : 'Free entry'}
+                  </button>
                   <button type="button" className="btn btn--ghost" onClick={() => togglePublished(ev)}>
                     {ev.published ? 'Hide' : 'Publish'}
                   </button>
                   <button type="button" className="btn btn--ghost" onClick={() => removeEvent(ev.id)}>
                     Delete
                   </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        </div>
+                </div>
+              ),
+            },
+          }))}
+        />
       </section>
     </div>
   );

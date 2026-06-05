@@ -151,8 +151,9 @@ model ClubEvent {
   dayLabel    String
   dateLabel   String
   eventDate   String?
-  accent      String            @default("#c8ff00")
+  accent      String            @default("#f9c108")
   priceGel    Int               @default(45)
+  isFreeEntry Boolean           @default(false)
   isFeatured  Boolean           @default(false)
   published   Boolean           @default(true)
   sortOrder   Int               @default(0)

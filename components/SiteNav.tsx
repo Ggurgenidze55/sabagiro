@@ -3,7 +3,7 @@ import { NavDropdown } from '@/components/NavDropdown';
 import { LogoutButton } from '@/components/LogoutButton';
 import type { SessionNavUser } from '@/lib/auth';
 import { ACCOUNT_MENU_ITEMS, ADMIN_MENU_ITEMS } from '@/lib/nav-menus';
-import { showCartInNav } from '@/lib/ticket-access';
+import { showCartInNav, showFreeTicketsInNav } from '@/lib/ticket-access';
 
 type SiteNavProps = {
   user: SessionNavUser | null;
@@ -12,6 +12,7 @@ type SiteNavProps = {
 
 export function SiteNav({ user, current }: SiteNavProps) {
   const showCart = showCartInNav(user);
+  const showFreeTickets = showFreeTicketsInNav(user);
 
   return (
     <ul className="site-nav">
@@ -29,6 +30,13 @@ export function SiteNav({ user, current }: SiteNavProps) {
         <li>
           <Link href="/cart" prefetch aria-current={current === 'cart' ? 'page' : undefined}>
             Cart
+          </Link>
+        </li>
+      ) : null}
+      {showFreeTickets ? (
+        <li>
+          <Link href="/account/free-tickets" prefetch>
+            Free tickets
           </Link>
         </li>
       ) : null}

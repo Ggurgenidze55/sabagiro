@@ -9,6 +9,7 @@ export type HomepageEventItem = {
   dateLabel: string;
   accent: string;
   isFeatured: boolean;
+  isFreeEntry: boolean;
   shopUrl: string;
 };
 
@@ -30,6 +31,7 @@ export async function getHomepageEventsPayload(): Promise<HomepageEventsPayload>
       dateLabel: e.dateLabel,
       accent: e.accent,
       isFeatured: e.isFeatured,
+      isFreeEntry: e.isFreeEntry,
       shopUrl: `/events/${encodeURI(e.slug)}`,
     })),
   };

@@ -15,6 +15,7 @@ export type Product = {
   accent: string;
   tag?: string;
   eventDate?: string;
+  isFreeEntry?: boolean;
   tiers?: TierAvailability[];
   ticketsRemaining?: number;
   priceFromGel?: number;
@@ -27,7 +28,7 @@ const merchProducts: Product[] = [
     description: 'Heavy cotton · Screen print logo · Unisex',
     priceGel: 65,
     type: 'merch',
-    accent: '#c8ff00',
+    accent: '#f9c108',
     tag: 'MERCH',
   },
   {
@@ -45,9 +46,17 @@ async function eventToProductWithTiers(slug: string) {
   const event = await getPublishedEventBySlug(slug);
   if (!event) return undefined;
 
-  const avail = await getEventTierAvailability(slug);
   const base = eventToProduct(event);
+  if (event.isFreeEntry) {
+    return {
+      ...base,
+      priceGel: 0,
+      priceFromGel: 0,
+      ticketsRemaining: undefined,
+    };
+  }
 
+  const avail = await getEventTierAvailability(slug);
   return {
     ...base,
     priceGel: avail?.currentTierPrice ?? base.priceGel,

@@ -8,9 +8,10 @@ import { getSessionNavUser } from '@/lib/auth';
 type SiteChromeProps = {
   children: React.ReactNode;
   current?: 'events' | 'cart' | 'account' | 'settings' | 'contact' | 'about';
+  mainClassName?: string;
 };
 
-export async function SiteChrome({ children, current }: SiteChromeProps) {
+export async function SiteChrome({ children, current, mainClassName }: SiteChromeProps) {
   const user = await getSessionNavUser();
 
   return (
@@ -21,10 +22,10 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
           <Link href="/" className="site-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/club/sabagiro-logo-white.png"
+              src="/club/sabagiro-mark.png"
               alt="Sabagiro"
-              width={120}
-              height={89}
+              width={116}
+              height={64}
               className="site-brand__logo"
               fetchPriority="high"
               decoding="async"
@@ -35,7 +36,7 @@ export async function SiteChrome({ children, current }: SiteChromeProps) {
           </MobileNav>
           <span className="site-header__meta">Tbilisi · GE</span>
         </header>
-        <main className="site-main">{children}</main>
+        <main className={['site-main', mainClassName].filter(Boolean).join(' ')}>{children}</main>
         <SiteFooter />
       </div>
     </div>

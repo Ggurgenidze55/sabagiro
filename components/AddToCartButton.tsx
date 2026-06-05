@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Product } from '@/lib/products';
 import { readCart, writeCart } from '@/lib/cart';
 
@@ -18,6 +19,23 @@ export function AddToCartButton({
 }: AddToCartButtonProps) {
   const router = useRouter();
   const [added, setAdded] = useState(false);
+  const [inCart, setInCart] = useState(false);
+
+  const syncInCart = useCallback(() => {
+    setInCart(readCart().some((line) => line.slug === product.slug));
+  }, [product.slug]);
+
+  useEffect(() => {
+    syncInCart();
+    window.addEventListener('storage', syncInCart);
+    window.addEventListener('sabagiro-cart-change', syncInCart);
+    window.addEventListener('focus', syncInCart);
+    return () => {
+      window.removeEventListener('storage', syncInCart);
+      window.removeEventListener('sabagiro-cart-change', syncInCart);
+      window.removeEventListener('focus', syncInCart);
+    };
+  }, [syncInCart]);
 
   if (product.type === 'merch') {
     return (
@@ -28,24 +46,33 @@ export function AddToCartButton({
   }
 
   function handleClick() {
-    if (disabled) return;
+    if (disabled || inCart) return;
     const lines = readCart();
     const existing = lines.find((l) => l.slug === product.slug);
     if (existing) {
+      router.push('/cart');
       return;
-    } else {
-      lines.push({
-        slug: product.slug,
-        name: product.name,
-        priceGel: product.priceGel,
-        qty: 1,
-        accent: product.accent,
-        type: product.type,
-      });
     }
+    lines.push({
+      slug: product.slug,
+      name: product.name,
+      priceGel: product.priceGel,
+      qty: 1,
+      accent: product.accent,
+      type: product.type,
+    });
     writeCart(lines);
+    setInCart(true);
     setAdded(true);
     setTimeout(() => router.push('/cart'), 400);
+  }
+
+  if (inCart) {
+    return (
+      <Link href="/cart" className="btn" style={{ marginTop: '0.5rem' }}>
+        IN CART →
+      </Link>
+    );
   }
 
   return (

@@ -47,6 +47,15 @@ export async function POST(request: Request) {
     if (message === 'UNAUTHORIZED') {
       return NextResponse.json({ error: message }, { status: 401 });
     }
+    if (message === 'FREE_ENTRY_ONLY') {
+      return NextResponse.json(
+        {
+          error: 'This event is free entry — use Free tickets in your account, not checkout.',
+          code: 'FREE_ENTRY_ONLY',
+        },
+        { status: 403 },
+      );
+    }
     if (message === 'SOLD_OUT') {
       return NextResponse.json({ error: 'Not enough tickets left for this event' }, { status: 409 });
     }

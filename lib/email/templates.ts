@@ -29,7 +29,7 @@ export function accountVerifiedEmail(opts: {
 }): { subject: string; html: string; text: string } {
   const name = escapeHtml(opts.firstName);
   const bodyHtml = `
-    <p>Hi ${name}, your account is <strong style="color:#c8ff00">verified</strong>.</p>
+    <p>Hi ${name}, your account is <strong style="color:#f9c108">verified</strong>.</p>
     <p>You can now buy event tickets. Your QR tickets will be emailed after each successful payment and always available in your account.</p>
   `;
   return {
@@ -129,7 +129,7 @@ export function ticketPurchaseEmail(opts: {
     <p style="margin:8px 0 0">${holder}<br />ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
     <p style="margin:20px 0 12px">
       <a href="${escapeHtml(opts.scanLink)}" style="display:inline-block;line-height:0">
-        <img src="${qrUrl}" alt="Ticket QR code" width="260" height="260" style="display:block;width:260px;height:260px;border:4px solid #c8ff00;background:#ffffff" />
+        <img src="${qrUrl}" alt="Ticket QR code" width="260" height="260" style="display:block;width:260px;height:260px;border:4px solid #f9c108;background:#ffffff" />
       </a>
     </p>
     <p style="font-size:14px;color:#8a827a;margin:0">Show this QR at the door. You can also open it from your account.</p>

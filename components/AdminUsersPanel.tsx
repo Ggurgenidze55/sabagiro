@@ -190,7 +190,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
           : `Showing ${rangeStart}–${rangeEnd} of ${filtered.length}${users.length !== filtered.length ? ` (${users.length} total)` : ''}`}
       </p>
 
-      <div className="table-scroll admin-users-scroll">
+      <div className="table-scroll admin-users-scroll admin-users-desktop">
         <table className="data-table">
           <thead>
             <tr>
@@ -309,6 +309,116 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
           </tbody>
         </table>
       </div>
+
+      <ul className="admin-users-mobile" role="list">
+        {pageUsers.length === 0 ? (
+          <li className="admin-users-empty">No users on this page. Try another filter or search.</li>
+        ) : (
+          pageUsers.map((u) => {
+            const expanded = expandedUserId === u.id;
+            return (
+              <li key={u.id} className={`admin-user-card${expanded ? ' is-open' : ''}`}>
+                <button
+                  type="button"
+                  className="admin-user-card__summary"
+                  aria-expanded={expanded}
+                  onClick={() => setExpandedUserId(expanded ? null : u.id)}
+                >
+                  <span className="admin-user-card__summary-main">
+                    <span className="admin-user-card__name">
+                      {u.firstName} {u.lastName}
+                    </span>
+                    <span className="table-sub">{u.personalId}</span>
+                    <span
+                      className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}
+                    >
+                      {u.verificationStatus}
+                    </span>
+                  </span>
+                  <span className="admin-user-card__tickets-count">
+                    {u.tickets.length} tickets
+                  </span>
+                  <span className="responsive-table__caret" aria-hidden="true">
+                    {expanded ? '▴' : '▾'}
+                  </span>
+                </button>
+                {expanded ? (
+                  <div className="admin-user-card__body">
+                    <dl className="responsive-table__details">
+                      <div className="responsive-table__field">
+                        <dt>Contact</dt>
+                        <dd>
+                          {u.email}
+                          <br />
+                          <span className="table-sub">{u.phone}</span>
+                        </dd>
+                      </div>
+                      <div className="responsive-table__field">
+                        <dt>Social</dt>
+                        <dd className="user-social">
+                          {u.facebookUrl ? (
+                            <a href={u.facebookUrl} target="_blank" rel="noopener noreferrer">
+                              Facebook
+                            </a>
+                          ) : (
+                            <span className="table-sub">—</span>
+                          )}
+                          <br />
+                          {u.instagramUrl ? (
+                            <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
+                              Instagram
+                            </a>
+                          ) : (
+                            <span className="table-sub">—</span>
+                          )}
+                        </dd>
+                      </div>
+                      <div className="responsive-table__field">
+                        <dt>Limits</dt>
+                        <dd>
+                          {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                            <>
+                              <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+                              <br />
+                              <span className="table-sub">
+                                Free:{' '}
+                                {u.freeTicketsEnabled
+                                  ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
+                                  : 'off'}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="table-sub">—</span>
+                          )}
+                        </dd>
+                      </div>
+                    </dl>
+                    <AdminUserTicketsList tickets={u.tickets} />
+                    <div className="admin-user-card__actions table-actions table-actions--menu">
+                      <AdminUserActionsMenu
+                        user={u}
+                        confirmDelete={confirmDeleteId === u.id}
+                        deleting={deletingId === u.id}
+                        onVerify={() => void setStatus(u.id, 'VERIFIED')}
+                        onReject={() => void setStatus(u.id, 'REJECTED')}
+                        onPending={() => void setStatus(u.id, 'PENDING')}
+                        onDelete={() => requestDelete(u)}
+                        onCancelDelete={() => setConfirmDeleteId(null)}
+                        onConfirmDelete={() => void deleteUser(u)}
+                        onUpdated={(patch) =>
+                          setUsers((list) =>
+                            list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                ) : null}
+              </li>
+            );
+          })
+        )}
+      </ul>
 
       {filtered.length > PAGE_SIZE ? (
         <nav className="admin-users-pagination" aria-label="Users pages">

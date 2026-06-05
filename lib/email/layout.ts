@@ -22,12 +22,12 @@ export function renderEmailLayout(opts: LayoutOpts): string {
   const accountUrl = siteUrl('/account');
   const eventsUrl = siteUrl('/events');
   const homeUrl = siteUrl('/');
-  const logoUrl = siteUrl('/club/sabagiro-logo-white.png');
+  const logoUrl = siteUrl('/club/sabagiro-logo.png');
 
   const cta =
     opts.ctaLabel && opts.ctaHref
       ? `<p style="margin:28px 0 0">
-          <a href="${escapeHtml(opts.ctaHref)}" style="display:inline-block;background:#c8ff00;color:#0a0a0a;text-decoration:none;font-weight:700;letter-spacing:0.12em;padding:14px 22px;font-size:14px">${escapeHtml(opts.ctaLabel)}</a>
+          <a href="${escapeHtml(opts.ctaHref)}" style="display:inline-block;background:#f9c108;color:#0a0a0a;text-decoration:none;font-weight:700;letter-spacing:0.12em;padding:14px 22px;font-size:14px">${escapeHtml(opts.ctaLabel)}</a>
         </p>`
       : '';
 
@@ -65,9 +65,9 @@ export function renderEmailLayout(opts: LayoutOpts): string {
               <hr style="border:none;border-top:1px solid #2a2a2a;margin:28px 0 20px" />
               <p style="margin:0;font-size:14px;color:#8a827a;line-height:1.5">
                 Underground · Tbilisi<br />
-                <a href="${escapeHtml(accountUrl)}" style="color:#c8ff00">Your account</a>
+                <a href="${escapeHtml(accountUrl)}" style="color:#f9c108">Your account</a>
                 ·
-                <a href="${escapeHtml(eventsUrl)}" style="color:#c8ff00">Events</a>
+                <a href="${escapeHtml(eventsUrl)}" style="color:#f9c108">Events</a>
               </p>
             </td>
           </tr>

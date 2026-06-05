@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
+import { extraHolderCount, holderFormTicketNumber } from '@/lib/ticket-holders';
 import { formatGel } from '@/lib/products';
 
 type HolderDraft = {
@@ -133,12 +134,14 @@ export function CartView({
     setCheckingOut(true);
 
     const ticketItems = ticketLines.map((line) => {
+      const purchased = purchasedCountBySlug[line.slug] ?? 0;
+      const required = extraHolderCount(line.qty, purchased);
       const holders: HolderDraft[] = [];
-      for (let i = 1; i < line.qty; i++) {
-        const draft = holderDrafts[getHolderKey(line.slug, i)];
+      for (let slot = 0; slot < required; slot++) {
+        const draft = holderDrafts[getHolderKey(line.slug, slot)];
         if (!hasValidHolder(draft)) {
           throw new Error(
-            `Please complete holder details for extra ticket #${i + 1} in ${line.name}.`,
+            `Please complete holder details for ticket #${holderFormTicketNumber(slot, purchased)} in ${line.name}.`,
           );
         }
         holders.push({
@@ -173,7 +176,7 @@ export function CartView({
       }
     if (!res.ok) {
       if (data.code === 'NOT_VERIFIED') {
-        setError('ბილეთის ყიდვისთვის საჭიროა ვერიფიკაცია. შეამოწმე ანგარიში.');
+        setError('Verification is required to buy tickets. Check your account status.');
       } else if (data.code === 'ALREADY_OWNED' || data.code === 'TICKET_LIMIT') {
         setError(data.error || 'Ticket limit reached');
       } else {
@@ -293,17 +296,20 @@ export function CartView({
                 </button>
               </td>
             </tr>
-            {line.type === 'ticket' && line.qty > 1
-              ? Array.from({ length: line.qty - 1 }).map((_, idx) => {
-                  const extraIndex = idx + 1;
-                  const key = getHolderKey(line.slug, extraIndex);
+            {line.type === 'ticket'
+              ? Array.from({ length: extraHolderCount(line.qty, purchasedCountBySlug[line.slug] ?? 0) }).map(
+                  (_, idx) => {
+                  const slot = idx;
+                  const purchased = purchasedCountBySlug[line.slug] ?? 0;
+                  const ticketNum = holderFormTicketNumber(slot, purchased);
+                  const key = getHolderKey(line.slug, slot);
                   const draft = holderDrafts[key];
                   return (
-                    <tr key={`${line.slug}-holder-${extraIndex}`}>
+                    <tr key={`${line.slug}-holder-${slot}`}>
                       <td colSpan={4}>
                         <div className="notice-banner notice-banner--inline" style={{ maxWidth: '100%' }}>
                           <p className="table-sub" style={{ marginBottom: '0.6rem' }}>
-                            Extra ticket #{extraIndex + 1} holder details (required)
+                            Ticket #{ticketNum} holder details (required)
                           </p>
                           <div className="form-row">
                             <label className="form-field">
@@ -311,7 +317,7 @@ export function CartView({
                               <input
                                 value={draft?.firstName ?? ''}
                                 onChange={(e) =>
-                                  updateHolderField(line.slug, extraIndex, 'firstName', e.target.value)
+                                  updateHolderField(line.slug, slot, 'firstName', e.target.value)
                                 }
                                 required
                               />
@@ -321,7 +327,7 @@ export function CartView({
                               <input
                                 value={draft?.lastName ?? ''}
                                 onChange={(e) =>
-                                  updateHolderField(line.slug, extraIndex, 'lastName', e.target.value)
+                                  updateHolderField(line.slug, slot, 'lastName', e.target.value)
                                 }
                                 required
                               />
@@ -331,7 +337,7 @@ export function CartView({
                               <input
                                 value={draft?.personalId ?? ''}
                                 onChange={(e) =>
-                                  updateHolderField(line.slug, extraIndex, 'personalId', e.target.value)
+                                  updateHolderField(line.slug, slot, 'personalId', e.target.value)
                                 }
                                 pattern="\d{11}"
                                 inputMode="numeric"
@@ -344,7 +350,7 @@ export function CartView({
                                 type="email"
                                 value={draft?.email ?? ''}
                                 onChange={(e) =>
-                                  updateHolderField(line.slug, extraIndex, 'email', e.target.value)
+                                  updateHolderField(line.slug, slot, 'email', e.target.value)
                                 }
                                 required
                               />
@@ -354,7 +360,7 @@ export function CartView({
                               <input
                                 value={draft?.phone ?? ''}
                                 onChange={(e) =>
-                                  updateHolderField(line.slug, extraIndex, 'phone', e.target.value)
+                                  updateHolderField(line.slug, slot, 'phone', e.target.value)
                                 }
                                 required
                               />

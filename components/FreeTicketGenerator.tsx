@@ -24,7 +24,7 @@ export function FreeTicketGenerator({ quota, usedByEvent }: FreeTicketGeneratorP
   }, [usedByEvent]);
 
   useEffect(() => {
-    fetch('/api/events')
+    fetch('/api/account/free-tickets/events')
       .then((r) => r.json())
       .then((d) => {
         if (d.events) {
@@ -36,7 +36,7 @@ export function FreeTicketGenerator({ quota, usedByEvent }: FreeTicketGeneratorP
           setSelectedSlug((prev) => prev || list[0]?.slug || '');
         }
       })
-      .catch(() => setError('Could not load events'));
+      .catch(() => setError('Could not load free-entry events'));
   }, []);
 
   const remainingForSelected = useMemo(() => {
@@ -83,11 +83,11 @@ export function FreeTicketGenerator({ quota, usedByEvent }: FreeTicketGeneratorP
 
   return (
     <section style={{ marginBottom: '2.5rem' }}>
-      <h2 className="section-title">Free Ticket Generator</h2>
+      <h2 className="section-title section-title--flush">Free Ticket Generator</h2>
       <p className="page-lead" style={{ marginBottom: '0.5rem' }}>
-        Limit: {quota} free ticket(s) per event.
+        Free-entry events only · {quota} ticket(s) per event.
       </p>
-      <p className="page-lead" style={{ marginBottom: '1rem', color: 'var(--acid, #c8ff00)' }}>
+      <p className="page-lead" style={{ marginBottom: '1rem', color: 'var(--acid, #f9c108)' }}>
         {selectedSlug
           ? `Remaining for selected event: ${remainingForSelected} / ${quota}`
           : `Remaining: ${quota} / ${quota}`}
@@ -102,7 +102,7 @@ export function FreeTicketGenerator({ quota, usedByEvent }: FreeTicketGeneratorP
             onChange={(e) => setSelectedSlug(e.target.value)}
           >
             {events.length === 0 ? (
-              <option value="">No events available</option>
+              <option value="">No free-entry events published</option>
             ) : (
               events.map((ev) => {
                 const used = localUsedByEvent[ev.slug] ?? 0;

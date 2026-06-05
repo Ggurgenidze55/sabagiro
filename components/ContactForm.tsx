@@ -94,7 +94,7 @@ export function ContactForm() {
       </label>
       <label className="form-field">
         <span>Message</span>
-        <textarea name="message" required minLength={10} maxLength={5000} rows={6} />
+        <textarea name="message" required minLength={10} maxLength={5000} rows={3} />
       </label>
       <label className="contact-form__honeypot" aria-hidden="true">
         <span>Company</span>

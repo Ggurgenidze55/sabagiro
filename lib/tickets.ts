@@ -111,6 +111,7 @@ export async function createFreeTicketForVerifiedUser(opts: {
 
     const product = await getProduct(opts.productSlug);
     if (!product || product.type !== 'ticket') throw new Error('INVALID_PRODUCT');
+    if (!product.isFreeEntry) throw new Error('NOT_FREE_ENTRY');
 
     const ticket = await tx.ticket.create({
       data: {

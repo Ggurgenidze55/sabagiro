@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { AddToCartButton } from '@/components/AddToCartButton';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
-import { getAddToCartLabel } from '@/lib/ticket-access';
+import { canGenerateFreeTicketsForEvent, getAddToCartLabel } from '@/lib/ticket-access';
 import { getSessionUser } from '@/lib/auth';
 import { normalizeEventSlug } from '@/lib/events';
 import {
@@ -48,6 +48,8 @@ export default async function EventPage({ params }: PageProps) {
     user && product.type === 'ticket' && purchaseRemaining <= 0,
   );
   const showLimitDetails = Boolean(user?.freeTicketsEnabled);
+  const isFreeEntry = Boolean(product.isFreeEntry);
+  const canUseFreeGenerator = canGenerateFreeTicketsForEvent(user, isFreeEntry);
   const aboutText = product.about?.trim() || product.description;
 
   return (
@@ -80,17 +82,31 @@ export default async function EventPage({ params }: PageProps) {
         ) : null}
 
         <div className="event-page__price-card">
-          <span className="event-page__price-label">Ticket</span>
-          <p className="event-page__price">{formatGel(product.priceGel)}</p>
-          {product.ticketsRemaining === 0 ? (
+          <span className="event-page__price-label">{isFreeEntry ? 'Entry' : 'Ticket'}</span>
+          <p className="event-page__price">{isFreeEntry ? 'Free' : formatGel(product.priceGel)}</p>
+          {!isFreeEntry && product.ticketsRemaining === 0 ? (
             <p className="event-page__stock">Sold out</p>
           ) : null}
         </div>
 
         <div className="event-page__notices">
-          <TicketAccessNotice user={user} />
+          {isFreeEntry ? (
+            <p className="notice-banner notice-banner--inline">
+              Free entry event — complimentary tickets for invited guests only.
+              {canUseFreeGenerator ? (
+                <>
+                  {' '}
+                  Use your free ticket generator to get a QR pass.
+                </>
+              ) : user && canPurchaseTickets(user) ? (
+                <> Your account does not have free ticket access.</>
+              ) : null}
+            </p>
+          ) : (
+            <TicketAccessNotice user={user} />
+          )}
 
-          {user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
+          {!isFreeEntry && user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
             <p className="notice-banner notice-banner--inline">
               Purchase limit reached for this event ({purchaseLimit}).
               <Link href="/account" className="btn btn--ghost event-page__notice-btn">
@@ -99,7 +115,8 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {user &&
+          {!isFreeEntry &&
+          user &&
           canPurchaseTickets(user) &&
           !cannotBuyMore &&
           purchaseLimit > 1 &&
@@ -112,7 +129,19 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="event-page__actions">
-          {product.ticketsRemaining === 0 ? (
+          {isFreeEntry ? (
+            canUseFreeGenerator ? (
+              <Link href="/account/free-tickets" className="btn">
+                Generate free ticket →
+              </Link>
+            ) : (
+              <p className="form-error event-page__sold-out">
+                {!user
+                  ? 'Log in with a free-ticket account to enter.'
+                  : 'Free ticket generator not enabled on your account.'}
+              </p>
+            )
+          ) : product.ticketsRemaining === 0 ? (
             <p className="form-error event-page__sold-out">Sold out</p>
           ) : (
             <AddToCartButton

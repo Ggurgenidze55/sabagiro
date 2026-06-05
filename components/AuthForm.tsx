@@ -118,7 +118,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </p>
       ) : null}
       {passwordResetDone && mode === 'login' ? (
-        <p className="form-foot" style={{ color: '#c8ff00' }}>
+        <p className="form-foot" style={{ color: '#f9c108' }}>
           Password updated. You can log in now.
         </p>
       ) : null}

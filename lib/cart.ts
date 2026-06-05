@@ -23,6 +23,9 @@ export function readCart(): CartLine[] {
 
 export function writeCart(lines: CartLine[]): void {
   localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('sabagiro-cart-change'));
+  }
 }
 
 export function cartTotal(lines: CartLine[]): number {

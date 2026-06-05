@@ -15,62 +15,64 @@ export default function ContactPage() {
   const emailReady = isEmailConfigured();
 
   return (
-    <SiteChrome current="contact">
-      <h1 className="page-title">CONTACT</h1>
-      <p className="page-lead">Tickets · Events · Press · Tbilisi</p>
+    <SiteChrome current="contact" mainClassName="site-main--contact">
+      <div className="contact-page">
+        <header className="contact-page__header">
+          <h1 className="page-title">CONTACT</h1>
+          <p className="page-lead">Tickets · Events · Press · Tbilisi</p>
+        </header>
 
-      <div className="contact-layout">
-        <section className="contact-info">
-          <h2 className="section-title">Direct</h2>
-          <ul className="contact-info__list">
-            {inboxes.map((addr) => (
-              <li key={addr}>
-                <span className="contact-info__label">Email</span>
-                <a href={`mailto:${addr}`} className="contact-info__value">
-                  {addr}
+        <div className="contact-layout">
+          <section className="contact-info">
+            <h2 className="section-title section-title--flush">Direct</h2>
+            <ul className="contact-info__list">
+              {inboxes.map((addr) => (
+                <li key={addr}>
+                  <span className="contact-info__label">Email</span>
+                  <a href={`mailto:${addr}`} className="contact-info__value">
+                    {addr}
+                  </a>
+                </li>
+              ))}
+              <li>
+                <span className="contact-info__label">Instagram</span>
+                <a
+                  href={INSTAGRAM_URL}
+                  className="contact-info__value"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  @sabagirolisi
                 </a>
               </li>
-            ))}
-            <li>
-              <span className="contact-info__label">Instagram</span>
-              <a
-                href={INSTAGRAM_URL}
-                className="contact-info__value"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                @sabagirolisi
-              </a>
-            </li>
-            <li>
-              <span className="contact-info__label">Location</span>
-              <Link href="/location" className="contact-info__value">
-                Venue & map
-              </Link>
-            </li>
-            <li>
-              <span className="contact-info__label">Tickets</span>
-              <Link href="/events" className="contact-info__value">
-                Upcoming events
-              </Link>
-            </li>
-          </ul>
-          {!emailReady ? (
-            <p className="notice-banner notice-banner--inline contact-info__notice">
-              Form delivery needs <code>RESEND_API_KEY</code> on the server. You can still email us
-              directly: {inboxes.join(' · ')}.
-            </p>
-          ) : null}
-        </section>
+              <li>
+                <span className="contact-info__label">Location</span>
+                <Link href="/location" className="contact-info__value">
+                  Venue & map
+                </Link>
+              </li>
+              <li>
+                <span className="contact-info__label">Tickets</span>
+                <Link href="/events" className="contact-info__value">
+                  Upcoming events
+                </Link>
+              </li>
+            </ul>
+            {!emailReady ? (
+              <p className="notice-banner notice-banner--inline contact-info__notice">
+                Form needs <code>RESEND_API_KEY</code> — email {inboxes[0]} directly.
+              </p>
+            ) : null}
+          </section>
 
-        <section className="contact-form-panel">
-          <h2 className="section-title">Send a message</h2>
-          <p className="page-lead contact-form-panel__hint">
-            Messages go to {inboxes.join(' and ')}. You get a confirmation copy — check spam if
-            missing. For urgent door access, use the email on your ticket QR.
-          </p>
-          <ContactForm />
-        </section>
+          <section className="contact-form-panel">
+            <h2 className="section-title section-title--flush">Send a message</h2>
+            <p className="contact-form-panel__hint">
+              To {inboxes.join(' & ')} · confirmation copy · reply 1–2 days
+            </p>
+            <ContactForm />
+          </section>
+        </div>
       </div>
     </SiteChrome>
   );

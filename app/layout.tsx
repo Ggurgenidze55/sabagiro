@@ -1,22 +1,9 @@
 import type { Metadata } from 'next';
-import { Bebas_Neue, Share_Tech_Mono } from 'next/font/google';
 import { SiteAnalytics } from '@/components/SiteAnalytics';
+import { bebasNeue, shareTechMono } from '@/lib/site-fonts';
+import { shareImageOpenGraph, shareImageTwitter } from '@/lib/share-image';
 import { getSiteBaseUrl } from '@/lib/site-url';
 import './globals.css';
-
-const bebasNeue = Bebas_Neue({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-display',
-});
-
-const shareTechMono = Share_Tech_Mono({
-  weight: '400',
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-mono',
-});
 
 const siteUrl = getSiteBaseUrl();
 const siteDescription =
@@ -37,20 +24,13 @@ export const metadata: Metadata = {
     siteName: 'Sabagiro',
     title: 'Sabagiro — Underground · Tbilisi',
     description: siteDescription,
-    images: [
-      {
-        url: '/club/sabagiro-logo-white.png',
-        width: 462,
-        height: 343,
-        alt: 'Sabagiro',
-      },
-    ],
+    images: shareImageOpenGraph(),
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Sabagiro — Underground · Tbilisi',
     description: siteDescription,
-    images: ['/club/sabagiro-logo-white.png'],
+    images: shareImageTwitter(),
   },
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
@@ -59,9 +39,12 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: '/club/sabagiro-logo-white.png',
-    shortcut: '/club/sabagiro-logo-white.png',
-    apple: '/club/sabagiro-logo-white.png',
+    icon: [
+      { url: '/club/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/club/favicon-16.png', sizes: '16x16', type: 'image/png' },
+    ],
+    shortcut: '/club/favicon.png',
+    apple: '/club/apple-touch-icon.png',
   },
 };
 
@@ -74,7 +57,7 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${bebasNeue.variable} ${shareTechMono.variable}`}>
-      <body>
+      <body className={shareTechMono.className}>
         {children}
         <SiteAnalytics />
       </body>

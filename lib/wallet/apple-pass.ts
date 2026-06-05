@@ -8,15 +8,15 @@ import { scanUrl } from '@/lib/qr';
 import { siteUrl } from '@/lib/site-url';
 
 const PASS_MODEL = join(process.cwd(), 'wallet/apple/SabagiroTicket.pass');
-const LOGO_SVG = join(process.cwd(), 'public/club/sabagiro-logo-white.svg');
+const LOGO_PNG = join(process.cwd(), 'public/club/sabagiro-logo.png');
 
 async function walletIcons() {
-  const svg = await readFile(LOGO_SVG);
+  const png = await readFile(LOGO_PNG);
   const [icon, icon2x, logo, logo2x] = await Promise.all([
-    sharp(svg).resize(29, 29).png().toBuffer(),
-    sharp(svg).resize(58, 58).png().toBuffer(),
-    sharp(svg).resize(160, 50, { fit: 'inside' }).png().toBuffer(),
-    sharp(svg).resize(320, 100, { fit: 'inside' }).png().toBuffer(),
+    sharp(png).resize(29, 29, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
+    sharp(png).resize(58, 58, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
+    sharp(png).resize(160, 50, { fit: 'inside', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
+    sharp(png).resize(320, 100, { fit: 'inside', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
   ]);
   return { icon, icon2x, logo, logo2x };
 }

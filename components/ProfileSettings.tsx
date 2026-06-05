@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { SectionDivider } from '@/components/SectionDivider';
 
 type User = {
   email: string;
@@ -99,6 +100,7 @@ export function ProfileSettings({ user }: { user: User }) {
           </button>
         </form>
       </section>
+      <SectionDivider index={2} className="settings-grid__rule" />
       <section className="settings-grid__col">
         <h2 className="section-title settings-grid__title">Password</h2>
         <form className="form-stack" onSubmit={savePassword}>

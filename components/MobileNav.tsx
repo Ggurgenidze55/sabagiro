@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useId, useState, type ReactNode } from 'react';
+import { createContext, useEffect, useId, useState, type ReactNode } from 'react';
+
+/** True while the fullscreen mobile nav panel is open. */
+export const MobileNavPanelOpenContext = createContext(false);
 
 type MobileNavProps = {
   children: ReactNode;
@@ -55,10 +58,10 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
         <div className="mobile-nav__head">
           <Link href="/" className="mobile-nav__logo-link" onClick={() => setOpen(false)}>
             <Image
-              src="/club/sabagiro-logo-white.png"
+              src="/club/sabagiro-mark.png"
               alt="Sabagiro"
-              width={120}
-              height={89}
+              width={116}
+              height={64}
               className="mobile-nav__logo"
             />
           </Link>
@@ -71,14 +74,17 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
             ✕
           </button>
         </div>
-        <div
-          onClick={(e) => {
-            const target = e.target as HTMLElement;
-            if (target.closest('a')) setOpen(false);
-          }}
-        >
-        {children}
-        </div>
+        <MobileNavPanelOpenContext.Provider value={open}>
+          <div
+            className="mobile-nav__links"
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (target.closest('a')) setOpen(false);
+            }}
+          >
+            {children}
+          </div>
+        </MobileNavPanelOpenContext.Provider>
       </div>
     </div>
   );

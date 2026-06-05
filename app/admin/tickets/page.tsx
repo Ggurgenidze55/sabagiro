@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { SoldTicketsTable } from '@/components/SoldTicketsTable';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -15,44 +15,21 @@ export default async function AdminTicketsPage() {
   return (
     <>
       <h1 className="page-title">SOLD TICKETS</h1>
-      <div className="table-scroll">
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Holder</th>
-            <th>Personal ID</th>
-            <th>Email / Phone</th>
-            <th>Price</th>
-            <th>Status</th>
-            <th>Scan</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tickets.map((t) => (
-            <tr key={t.id}>
-              <td>{t.productName}</td>
-              <td>
-                {t.holderFirstName} {t.holderLastName}
-              </td>
-              <td>{t.holderPersonalId}</td>
-              <td>
-                {t.holderEmail}
-                <br />
-                {t.holderPhone}
-              </td>
-              <td>{t.priceGel} ₾</td>
-              <td>{t.status}</td>
-              <td>
-                <Link href={`/scan/${t.qrToken}`} className="ticket-card__link">
-                  QR scan →
-                </Link>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      </div>
+      <SoldTicketsTable
+        tickets={tickets.map((t) => ({
+          id: t.id,
+          productName: t.productName,
+          holderFirstName: t.holderFirstName,
+          holderLastName: t.holderLastName,
+          holderPersonalId: t.holderPersonalId,
+          holderEmail: t.holderEmail,
+          holderPhone: t.holderPhone,
+          accountEmail: t.user?.email ?? null,
+          priceGel: t.priceGel,
+          status: t.status,
+          qrToken: t.qrToken,
+        }))}
+      />
     </>
   );
 }

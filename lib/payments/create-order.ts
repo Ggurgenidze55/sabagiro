@@ -3,9 +3,11 @@ import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
 import { allocateTierPrices, getEventTierAvailability } from '@/lib/ticket-tiers';
 import {
+  countPurchasedTicketsForEvent,
   purchaseLimitApplies,
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
+import { extraHolderCount } from '@/lib/ticket-holders';
 import { ORDER_TTL_MINUTES } from '@/lib/payments/config';
 import type { CheckoutLineItem } from '@/lib/payments/types';
 
@@ -24,6 +26,7 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
   for (const item of items) {
     const product = await getProduct(item.slug);
     if (!product || product.type !== 'ticket') continue;
+    if (product.isFreeEntry) throw new Error('FREE_ENTRY_ONLY');
 
     if (purchaseLimitApplies(user)) {
       const remaining = await remainingPurchaseSlots(user, item.slug);
@@ -39,7 +42,9 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
 
     const { prices, labels } = allocateTierPrices(avail.tiers, item.qty);
     const extraHolders = item.holders ?? [];
-    if (item.qty > 1 && extraHolders.length < item.qty - 1) {
+    const existingPurchased = await countPurchasedTicketsForEvent(user.id, item.slug);
+    const requiredHolders = extraHolderCount(item.qty, existingPurchased);
+    if (extraHolders.length < requiredHolders) {
       throw new Error('HOLDER_REQUIRED');
     }
 

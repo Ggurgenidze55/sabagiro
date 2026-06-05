@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { createTicketForUser } from '@/lib/tickets';
 import { getEventTierAvailability } from '@/lib/ticket-tiers';
 import {
+  countPurchasedTicketsForEvent,
   purchaseLimitApplies,
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
@@ -64,10 +65,13 @@ export async function fulfillPaidOrder(orderId: string): Promise<string[]> {
       const prices = parsePrices(item);
       const labels = parseLabels(item);
       const extraHolders = parseHolders(item);
+      const existingPurchased = await countPurchasedTicketsForEvent(user.id, item.productSlug);
+      let holderIdx = 0;
 
       for (let i = 0; i < item.quantity; i++) {
-        const holder = i === 0 ? undefined : extraHolders[i - 1];
-        if (i > 0 && !holder) throw new Error('HOLDER_REQUIRED');
+        const usesBuyer = existingPurchased === 0 && i === 0;
+        const holder = usesBuyer ? undefined : extraHolders[holderIdx++];
+        if (!usesBuyer && !holder) throw new Error('HOLDER_REQUIRED');
 
         const { ticket } = await createTicketForUser({
           user,

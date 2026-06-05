@@ -45,7 +45,7 @@ export function ForgotPasswordForm() {
         <input name="email" type="email" required autoComplete="email" />
       </label>
       {error ? <p className="form-error">{error}</p> : null}
-      {message ? <p className="form-foot" style={{ color: '#c8ff00' }}>{message}</p> : null}
+      {message ? <p className="form-foot" style={{ color: '#f9c108' }}>{message}</p> : null}
       <button type="submit" className="btn" disabled={loading}>
         {loading ? '…' : 'SEND RESET LINK'}
       </button>

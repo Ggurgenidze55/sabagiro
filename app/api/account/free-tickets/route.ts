@@ -19,6 +19,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!user.freeTicketsEnabled) {
+      return NextResponse.json(
+        { error: 'Free ticket generator is not enabled on your account.', code: 'NO_FREE_TICKETS' },
+        { status: 403 },
+      );
+    }
+
     const body = freeTicketGenerateSchema.parse(await request.json());
     const remainingForEvent = await remainingFreeTicketsForEvent(user, body.productSlug);
 
@@ -62,6 +69,15 @@ export async function POST(request: Request) {
     }
     if (message === 'INVALID_PRODUCT') {
       return NextResponse.json({ error: 'Invalid event' }, { status: 400 });
+    }
+    if (message === 'NOT_FREE_ENTRY') {
+      return NextResponse.json(
+        {
+          error: 'This event is not free entry — use the shop for paid tickets.',
+          code: 'NOT_FREE_ENTRY',
+        },
+        { status: 403 },
+      );
     }
     if (message === 'EMAIL_NOT_SENT') {
       return NextResponse.json(

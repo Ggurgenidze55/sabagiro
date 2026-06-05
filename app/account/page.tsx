@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { SectionDivider } from '@/components/SectionDivider';
 import { SiteChrome } from '@/components/SiteChrome';
-import { FreeTicketGenerator } from '@/components/FreeTicketGenerator';
 import { TicketQrCard } from '@/components/TicketQrCard';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
@@ -63,26 +63,6 @@ export default async function AccountPage() {
 
   const purchaseLimit = getTicketLimitPerEvent(user);
 
-  const freeUsedRows =
-    user.freeTicketsEnabled && user.verificationStatus === 'VERIFIED' && user.role !== 'ADMIN'
-      ? await prisma.ticket.groupBy({
-          by: ['productSlug'],
-          where: {
-            userId: user.id,
-            source: 'FREE',
-            status: { not: 'CANCELLED' },
-          },
-          _count: { _all: true },
-        })
-      : [];
-
-  const freeUsedByEvent = Object.fromEntries(
-    freeUsedRows.map((row) => [row.productSlug, row._count._all]),
-  ) as Record<string, number>;
-
-  const showFreeTicketGenerator =
-    user.role !== 'ADMIN' && user.verificationStatus === 'VERIFIED' && user.freeTicketsEnabled;
-
   return (
     <SiteChrome current="account">
       <div className="dash-head">
@@ -129,11 +109,8 @@ export default async function AccountPage() {
         </div>
       ) : null}
 
-      {showFreeTicketGenerator ? (
-        <FreeTicketGenerator quota={user.freeTicketsQuota} usedByEvent={freeUsedByEvent} />
-      ) : null}
-
-      <h2 className="section-title">My tickets</h2>
+      <SectionDivider />
+      <h2 className="section-title section-title--flush">My tickets</h2>
       {tickets.length === 0 ? (
         <p className="cart-empty">
           No tickets yet. <Link href="/events">Browse events</Link>

@@ -37,12 +37,18 @@ export default async function EventsPage() {
               <h2 className="product-card__title">{product.name}</h2>
               <p className="product-card__meta">{product.description}</p>
               <p className="product-card__price">
-                {product.ticketsRemaining === 0
-                  ? 'Sold out'
-                  : formatGel(product.priceFromGel ?? product.priceGel)}
+                {product.isFreeEntry
+                  ? 'Free entry'
+                  : product.ticketsRemaining === 0
+                    ? 'Sold out'
+                    : formatGel(product.priceFromGel ?? product.priceGel)}
               </p>
               <Link href={`/events/${product.slug}`} className="btn btn--ghost">
-                {product.ticketsRemaining === 0 ? 'VIEW' : 'GET TICKETS'}
+                {product.isFreeEntry
+                  ? 'FREE ENTRY'
+                  : product.ticketsRemaining === 0
+                    ? 'VIEW'
+                    : 'GET TICKETS'}
               </Link>
             </article>
           ))}

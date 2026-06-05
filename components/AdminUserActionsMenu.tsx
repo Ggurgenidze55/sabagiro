@@ -188,7 +188,10 @@ export function AdminUserActionsMenu({
               position: 'fixed',
               top: coords.top,
               left: coords.left,
+              right: 'auto',
               minWidth: coords.minWidth,
+              maxWidth: 'min(20rem, calc(100vw - 1.25rem))',
+              width: 'max-content',
               maxHeight: coords.maxHeight,
               overflowY: 'auto',
               visibility: 'visible',
@@ -197,6 +200,7 @@ export function AdminUserActionsMenu({
               position: 'fixed',
               top: -9999,
               left: 0,
+              right: 'auto',
               visibility: 'hidden',
             }
       }

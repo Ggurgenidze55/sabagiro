@@ -28,6 +28,7 @@ function mapEvents(events) {
     dateLabel: e.dateLabel,
     accent: e.accent,
     isFeatured: e.isFeatured,
+    isFreeEntry: e.isFreeEntry,
     shopUrl: `/events/${encodeURIComponent(e.slug)}`,
   }));
 }

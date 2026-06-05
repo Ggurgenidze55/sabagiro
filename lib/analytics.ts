@@ -1,3 +1,4 @@
+import { SABAGIRO_SHARE_IMAGE } from '@/lib/share-image';
 import { getSiteBaseUrl } from '@/lib/site-url';
 
 function escapeScriptValue(value: string): string {
@@ -10,7 +11,7 @@ export function buildHomepageSeoHeadHtml(): string {
   const title = 'Sabagiro — Underground · Tbilisi';
   const description =
     'Sabagiro — underground club in Tbilisi. Events, tickets, techno nights. Night · Concrete · Sound.';
-  const image = `${base}/club/sabagiro-logo-white.png`;
+  const image = `${base}${SABAGIRO_SHARE_IMAGE.path}`;
 
   return [
     `<link rel="canonical" href="${base}/" />`,
@@ -21,6 +22,9 @@ export function buildHomepageSeoHeadHtml(): string {
     `<meta property="og:title" content="${title}" />`,
     `<meta property="og:description" content="${description}" />`,
     `<meta property="og:image" content="${image}" />`,
+    `<meta property="og:image:width" content="${SABAGIRO_SHARE_IMAGE.width}" />`,
+    `<meta property="og:image:height" content="${SABAGIRO_SHARE_IMAGE.height}" />`,
+    `<meta property="og:image:alt" content="${SABAGIRO_SHARE_IMAGE.alt}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:title" content="${title}" />`,
     `<meta name="twitter:description" content="${description}" />`,

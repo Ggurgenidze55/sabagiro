@@ -27,12 +27,26 @@ export function eventToProduct(event: ClubEvent): Product {
     description: desc || event.title,
     about: event.about || undefined,
     imagePath: event.imagePath || undefined,
-    priceGel: event.priceGel,
+    priceGel: event.isFreeEntry ? 0 : event.priceGel,
     type: 'ticket',
     accent: event.accent,
     tag: `${event.dateLabel} · ${event.dayLabel}`,
     eventDate: event.eventDate ?? undefined,
+    isFreeEntry: event.isFreeEntry,
   };
+}
+
+export async function listPublishedFreeEntryEvents() {
+  if (!hasDatabase()) return [];
+  const events = await prisma.clubEvent.findMany({
+    where: { published: true, isFreeEntry: true },
+  });
+  return sortPublishedEvents(events);
+}
+
+export async function isPublishedFreeEntryEvent(slug: string) {
+  const event = await getPublishedEventBySlug(slug);
+  return Boolean(event?.isFreeEntry);
 }
 
 function hasDatabase() {

@@ -36,6 +36,9 @@ export async function PATCH(request: Request, { params }: Params) {
         ...(body.eventDate !== undefined ? { eventDate: body.eventDate || null } : {}),
         ...(body.accent !== undefined ? { accent: body.accent } : {}),
         ...(body.priceGel !== undefined ? { priceGel: body.priceGel } : {}),
+        ...(body.isFreeEntry !== undefined
+          ? { isFreeEntry: body.isFreeEntry, ...(body.isFreeEntry ? { priceGel: 0 } : {}) }
+          : {}),
         ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
         ...(body.published !== undefined ? { published: body.published } : {}),
         ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),

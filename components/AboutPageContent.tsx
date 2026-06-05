@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
+import { SectionDivider } from '@/components/SectionDivider';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 const PILLARS = [
@@ -61,10 +62,10 @@ export function AboutPageContent() {
       <header className="about-hero about-reveal">
         <div className="about-hero__mark" aria-hidden="true">
           <Image
-            src="/club/sabagiro-logo-white.png"
+            src="/club/sabagiro-logo.png"
             alt=""
             width={200}
-            height={149}
+            height={119}
             className="about-hero__logo"
             priority
           />
@@ -74,7 +75,7 @@ export function AboutPageContent() {
           <em>Night</em> · Concrete · Sound
         </p>
         <p className="page-lead about-hero__lead">Tbilisi · Georgia · Underground</p>
-        <div className="about-page__rule" aria-hidden="true" />
+        <SectionDivider className="section-divider--first" />
       </header>
 
       <section className="about-block about-reveal" aria-labelledby="about-story">
@@ -90,7 +91,6 @@ export function AboutPageContent() {
           Doors 23:00. Exact pin shared with ticket holders before each event. No dress code theatre — respect
           the space, the crew, and the people on the floor.
         </p>
-        <div className="about-page__rule" aria-hidden="true" />
       </section>
 
       <section className="about-pillars" aria-label="What we stand for">
@@ -101,9 +101,7 @@ export function AboutPageContent() {
               className="about-pillar about-reveal"
               style={{ transitionDelay: `${i * 0.08}s` }}
             >
-              <span className="about-pillar__index" aria-hidden="true">
-                {String(i + 1).padStart(2, '0')}
-              </span>
+              <SectionDivider index={i + 1} />
               <h3 className="about-pillar__label">{pillar.label}</h3>
               <p className="about-pillar__text">{pillar.text}</p>
             </li>
@@ -112,6 +110,7 @@ export function AboutPageContent() {
       </section>
 
       <section className="about-block about-reveal" aria-labelledby="about-tickets">
+        <SectionDivider />
         <h2 className="section-title" id="about-tickets">
           Tickets
         </h2>

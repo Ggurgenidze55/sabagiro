@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { SectionDivider } from '@/components/SectionDivider';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
@@ -18,6 +19,8 @@ export default async function LocationPage() {
       <h1 className="page-title">LOCATION</h1>
       <p className="page-lead">Tbilisi · Georgia · Doors 23:00</p>
       <TicketAccessNotice user={user} />
+
+      <SectionDivider className="section-divider--first" />
 
       <div className="location-block">
         <figure className="location-map">
@@ -53,7 +56,7 @@ export default async function LocationPage() {
               </Link>
             ) : (
               <Link href={user ? '/account' : '/register'} className="btn">
-                {user ? 'ანგარიში' : 'რეგისტრაცია'}
+                {user ? 'Account' : 'Register'}
               </Link>
             )}
             <Link href="/" className="btn btn--ghost">

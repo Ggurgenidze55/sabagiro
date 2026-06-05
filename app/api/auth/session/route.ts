@@ -13,6 +13,7 @@ export async function GET() {
       email: user.email,
       role: user.role,
       verificationStatus: user.verificationStatus,
+      freeTicketsEnabled: user.freeTicketsEnabled,
       firstName: user.firstName,
       lastName: user.lastName,
     },

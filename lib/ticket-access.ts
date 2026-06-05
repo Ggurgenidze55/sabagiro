@@ -23,42 +23,58 @@ export function showCartInNav(user: TicketAccessUser): boolean {
 export function getTicketAccessNotice(user: TicketAccessUser): TicketAccessNotice | null {
   if (!user) {
     return {
-      message: 'ბილეთის ყიდვისთვის საჭიროა რეგისტრაცია და შესვლა.',
-      hint: 'შექმენი ანგარიში, შემდეგ გაიარე ადმინისტრაციის ვერიფიკაცია.',
+      message: 'Register and log in to buy tickets.',
+      hint: 'Create an account, then complete admin verification.',
       primaryHref: '/register',
-      primaryLabel: 'რეგისტრაცია',
+      primaryLabel: 'Register',
       secondaryHref: '/login',
-      secondaryLabel: 'შესვლა',
+      secondaryLabel: 'Log in',
     };
   }
 
   if (!canPurchaseTickets(user)) {
     if (user.verificationStatus === 'REJECTED') {
       return {
-        message: 'ბილეთის ყიდვა შეუძლებელია — ანგარიში ვერ დადასტურდა.',
-        hint: 'განაახლე Facebook და Instagram ბმულები, შემდეგ დაგვიკავშირდი.',
+        message: 'Ticket purchase is unavailable — your account was not approved.',
+        hint: 'Update your Facebook and Instagram links, then contact us.',
         primaryHref: '/account/settings',
-        primaryLabel: 'პარამეტრები',
+        primaryLabel: 'Settings',
         secondaryHref: '/contact',
-        secondaryLabel: 'კონტაქტი',
+        secondaryLabel: 'Contact',
       };
     }
 
     return {
-      message: 'ბილეთის ყიდვისთვის საჭიროა ვერიფიკაცია.',
-      hint: 'შენ უკვე შეხვედი სისტემაში — ველოდებით ადმინისტრატორის დადასტურებას.',
+      message: 'Admin verification is required before you can buy tickets.',
+      hint: 'You are signed in — we are waiting for an administrator to approve your account.',
       primaryHref: '/account',
-      primaryLabel: 'ანგარიში',
+      primaryLabel: 'Account',
       secondaryHref: '/account/settings',
-      secondaryLabel: 'პარამეტრები',
+      secondaryLabel: 'Settings',
     };
   }
 
   return null;
 }
 
+export function showFreeTicketsInNav(
+  user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
+): boolean {
+  if (!user) return false;
+  if (user.role === 'ADMIN') return false;
+  return user.freeTicketsEnabled === true && user.verificationStatus === 'VERIFIED';
+}
+
 export function getAddToCartLabel(user: TicketAccessUser): string | undefined {
-  if (!user) return 'საჭიროა რეგისტრაცია';
-  if (!canPurchaseTickets(user)) return 'საჭიროა ვერიფიკაცია';
+  if (!user) return 'Registration required';
+  if (!canPurchaseTickets(user)) return 'Verification required';
   return undefined;
+}
+
+export function canGenerateFreeTicketsForEvent(
+  user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
+  isFreeEntry: boolean,
+): boolean {
+  if (!isFreeEntry) return false;
+  return showFreeTicketsInNav(user);
 }

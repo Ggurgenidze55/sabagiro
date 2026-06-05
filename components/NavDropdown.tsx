@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useCallback, useEffect, useId, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useState } from 'react';
+import { MobileNavPanelOpenContext } from '@/components/MobileNav';
 
 export type NavDropdownItem = {
   href: string;
@@ -24,8 +25,13 @@ function itemIsCurrent(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function isMobileNavViewport() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia(MOBILE_NAV_MQ).matches;
+}
+
 function useIsMobileNav() {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(isMobileNavViewport);
 
   useEffect(() => {
     const mq = window.matchMedia(MOBILE_NAV_MQ);
@@ -43,6 +49,7 @@ export function NavDropdown({ label, items, menuLabel }: NavDropdownProps) {
   const menuId = useId();
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobileNav();
+  const mobilePanelOpen = useContext(MobileNavPanelOpenContext);
   const groupActive = items.some((item) => itemIsCurrent(pathname, item.href));
 
   const close = useCallback(() => setOpen(false), []);
@@ -52,11 +59,17 @@ export function NavDropdown({ label, items, menuLabel }: NavDropdownProps) {
   }, [isMobile]);
 
   useEffect(() => {
+    if (!mobilePanelOpen) setOpen(false);
+  }, [mobilePanelOpen]);
+
+  useEffect(() => {
     close();
   }, [pathname, close]);
 
-  function onToggleClick() {
-    if (isMobile) setOpen((v) => !v);
+  function onToggleClick(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation();
+    if (!isMobileNavViewport()) return;
+    setOpen((v) => !v);
   }
 
   return (

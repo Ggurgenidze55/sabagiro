@@ -39,7 +39,7 @@ Production admins: `info@sabagiro.ge`, `info.sabagiro@gmail.com` (passwords not 
 
 ## Style
 
-Brutalist dark UI: `#0a0a0a`, acid `#c8ff00`, `globals.css` + `SiteChrome`. Match existing patterns; ka + en copy when user writes in Georgian.
+Brutalist dark UI: `#0a0a0a`, acid `#f9c108`, `globals.css` + `SiteChrome`. Match existing patterns; ka + en copy when user writes in Georgian.
 
 ## Pitfalls
 
