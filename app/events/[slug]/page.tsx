@@ -61,8 +61,6 @@ export default async function EventPage({ params }: PageProps) {
         <header className="event-page__head">
           {product.tag ? <p className="event-page__tag">{product.tag}</p> : null}
           <h1 className="event-page__title">{product.name}</h1>
-          {product.lineup ? <p className="event-page__lineup">{product.lineup}</p> : null}
-          {product.venueTag ? <p className="event-page__venue-tag">{product.venueTag}</p> : null}
         </header>
 
         {product.imagePath ? (
