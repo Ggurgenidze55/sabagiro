@@ -134,13 +134,11 @@ export default async function EventPage({ params }: PageProps) {
               <Link href="/account/free-tickets" className="btn">
                 Generate free ticket →
               </Link>
-            ) : (
+            ) : user ? (
               <p className="form-error event-page__sold-out">
-                {!user
-                  ? 'Log in with a free-ticket account to enter.'
-                  : 'Free ticket generator not enabled on your account.'}
+                Free ticket generator not enabled on your account.
               </p>
-            )
+            ) : null
           ) : product.ticketsRemaining === 0 ? (
             <p className="form-error event-page__sold-out">Sold out</p>
           ) : (
