@@ -362,10 +362,10 @@ button {
   position: relative;
   z-index: 10;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
+  justify-content: center;
+  gap: 0.75rem;
   padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
   padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(176, 168, 154, 0.12);
@@ -373,13 +373,16 @@ button {
   background: rgba(10, 10, 10, 0.35);
   margin-top: auto;
   overflow: visible;
+  text-align: center;
 }
 
 .footer__brand {
   display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.35em;
+  width: min(100%, 40rem);
   padding: 0.4rem 0.75rem;
   border: 1px solid var(--hero-chip-border);
   border-radius: 3px;
@@ -387,6 +390,7 @@ button {
   letter-spacing: var(--hero-tagline-tracking);
   text-transform: uppercase;
   line-height: 1.4;
+  box-sizing: border-box;
 }
 
 .footer__credit,
@@ -403,16 +407,27 @@ button {
 }
 
 .social {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
   gap: clamp(0.5rem, 1.5vw, 0.85rem);
+  width: min(100%, 40rem);
   list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.social li {
+  min-width: 0;
 }
 
 .social a {
-  display: inline-block;
-  padding: 0.4rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  padding: 0.4rem 0.5rem;
   border: 1px solid var(--hero-chip-border);
   border-radius: 3px;
   font-size: clamp(0.62rem, 1.8vw, 0.8rem);
@@ -421,6 +436,8 @@ button {
   line-height: 1.4;
   color: var(--hero-tagline-color);
   text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
   transition:
     color 0.2s,
     border-color 0.2s,
@@ -3079,8 +3096,7 @@ body.nav-lock {
   }
 
   .footer {
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .notice-banner .btn {
