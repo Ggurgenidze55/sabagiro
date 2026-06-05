@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { ContactForm } from '@/components/ContactForm';
 import { SiteChrome } from '@/components/SiteChrome';
-import { isEmailConfigured } from '@/lib/email/config';
 import { getContactInboxEmails } from '@/lib/contact-inbox';
 import { INSTAGRAM_URL } from '@/lib/social';
 
@@ -12,7 +11,6 @@ export const metadata = {
 
 export default function ContactPage() {
   const inboxes = getContactInboxEmails();
-  const emailReady = isEmailConfigured();
 
   return (
     <SiteChrome current="contact" mainClassName="site-main--contact">
@@ -58,17 +56,12 @@ export default function ContactPage() {
                 </Link>
               </li>
             </ul>
-            {!emailReady ? (
-              <p className="notice-banner notice-banner--inline contact-info__notice">
-                Form needs <code>RESEND_API_KEY</code> — email {inboxes[0]} directly.
-              </p>
-            ) : null}
           </section>
 
           <section className="contact-form-panel">
             <h2 className="section-title section-title--flush">Send a message</h2>
             <p className="contact-form-panel__hint">
-              To {inboxes.join(' & ')} · confirmation copy · reply 1–2 days
+              To info.sabagiro@gmail.com · confirmation copy · reply 1–2 days
             </p>
             <ContactForm />
           </section>
