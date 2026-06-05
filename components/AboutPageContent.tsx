@@ -65,7 +65,7 @@ export function AboutPageContent() {
             src="/club/sabagiro-logo.png"
             alt=""
             width={200}
-            height={119}
+            height={89}
             className="about-hero__logo"
             priority
           />
