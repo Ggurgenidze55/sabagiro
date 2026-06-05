@@ -852,11 +852,35 @@
         }
 
         .brand-heading {
-          line-height: 1.15;
+          display: none;
         }
 
-        .brand-logo {
-          display: block;
+        .events-panel {
+          position: relative;
+          isolation: isolate;
+          padding-top: 0.35rem;
+        }
+
+        .events-panel::before {
+          content: '';
+          position: absolute;
+          left: 50%;
+          top: 54%;
+          transform: translate(-50%, -50%) rotate(-2deg);
+          width: min(118vw, 560px);
+          height: min(58vw, 280px);
+          background: url('/club/sabagiro-mark.png') center / contain no-repeat;
+          opacity: 0.13;
+          pointer-events: none;
+          z-index: 0;
+          filter: drop-shadow(0 0 56px rgba(249, 193, 8, 0.12));
+        }
+
+        .events-header,
+        .events-list,
+        .events-actions {
+          position: relative;
+          z-index: 1;
         }
 
         .events-list {
@@ -1157,10 +1181,6 @@
       @media (max-width: 640px) {
         .tagline {
           letter-spacing: 0.28em;
-        }
-
-        .brand-logo {
-          height: clamp(2.25rem, 14vw, 2.85rem);
         }
 
         .event-item {
