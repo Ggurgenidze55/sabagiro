@@ -307,14 +307,14 @@ button {
   align-items: center;
   text-decoration: none;
   flex-shrink: 0;
-  padding: 0.3rem 0;
+  padding: 0.35rem 0;
   overflow: visible;
 }
 
 .site-brand__logo {
   display: block;
   width: auto;
-  height: clamp(2.35rem, 6.5vw, 2.85rem);
+  height: clamp(2.5rem, 7vw, 3rem);
   max-height: none;
   object-fit: contain;
   object-position: left center;
@@ -2404,7 +2404,7 @@ button {
 .mobile-nav__logo {
   display: block;
   width: auto;
-  height: clamp(2.35rem, 6.5vw, 2.85rem);
+  height: clamp(2.5rem, 7vw, 3rem);
   max-height: none;
   object-fit: contain;
   object-position: left center;
@@ -2678,7 +2678,7 @@ body.nav-lock {
   }
 
   .site-brand__logo {
-    height: clamp(2.1rem, 7vw, 2.5rem);
+    height: clamp(2.25rem, 7.5vw, 2.75rem);
   }
 
   .admin-header .site-brand__text {
