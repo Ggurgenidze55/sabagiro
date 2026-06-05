@@ -73,10 +73,13 @@ export default async function EventPage({ params }: PageProps) {
           </div>
         ) : null}
 
-        {aboutText ? (
+        {aboutText || product.lineup ? (
           <section className="event-page__about" aria-label="About this event">
             <h2 className="event-page__section-label">About</h2>
-            <p className="event-about">{aboutText}</p>
+            {product.lineup ? (
+              <p className="event-page__about-lineup">{product.lineup}</p>
+            ) : null}
+            {aboutText ? <p className="event-about">{aboutText}</p> : null}
           </section>
         ) : null}
 
