@@ -88,6 +88,4 @@ export async function getProduct(slug: string): Promise<Product | undefined> {
 
 export const merchCatalog = merchProducts;
 
-export function formatGel(amount: number): string {
-  return `${amount.toFixed(0)} ₾`;
-}
+export { formatGel } from '@/lib/format-gel';

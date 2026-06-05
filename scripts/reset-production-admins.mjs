@@ -5,7 +5,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client.ts';
 import bcrypt from 'bcryptjs';
 
 function loadEnvLocal() {
@@ -63,7 +63,7 @@ const REMOVE_EMAILS = [
   'user@sabagiro.test',
 ];
 
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 const credentials = [];
 
 try {
@@ -132,4 +132,5 @@ try {
   }
 } finally {
   await prisma.$disconnect();
+  await pool.end();
 }

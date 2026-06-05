@@ -1,4 +1,4 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
 import { allocateTierPrices, getEventTierAvailability } from '@/lib/ticket-tiers';

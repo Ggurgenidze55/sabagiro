@@ -1,6 +1,6 @@
 /** Remove @sabagiro.test accounts from DB. Run: node scripts/remove-test-users.mjs */
 import { readFileSync } from 'node:fs';
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client.ts';
 
 function loadEnvLocal() {
   try {
@@ -23,7 +23,7 @@ function loadEnvLocal() {
 }
 
 loadEnvLocal();
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 const TEST_EMAILS = ['user@sabagiro.test', 'admin@sabagiro.test'];
 
 for (const email of TEST_EMAILS) {
@@ -39,3 +39,4 @@ for (const email of TEST_EMAILS) {
 const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { email: true } });
 console.log('Admins left:', admins.map((a) => a.email).join(', '));
 await prisma.$disconnect();
+await pool.end();

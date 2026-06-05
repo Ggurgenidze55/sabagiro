@@ -1,4 +1,4 @@
-import type { TicketStatus } from '@prisma/client';
+import type { TicketStatus } from '@/generated/prisma/client';
 
 export type ScanVerdict = {
   tone: 'ok' | 'warn' | 'bad';

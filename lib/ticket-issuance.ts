@@ -1,4 +1,4 @@
-import type { Ticket, TicketSource, User } from '@prisma/client';
+import type { Ticket, TicketSource, User } from '@/generated/prisma/client';
 
 type UserLabel = Pick<User, 'id' | 'firstName' | 'lastName' | 'email' | 'role'>;
 

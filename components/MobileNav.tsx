@@ -58,7 +58,7 @@ export function MobileNav({ children, label = 'Menu' }: MobileNavProps) {
         <div className="mobile-nav__head">
           <Link href="/" className="mobile-nav__logo-link" onClick={() => setOpen(false)}>
             <Image
-              src="/club/sabagiro-mark.png"
+              src="/club/sabagiro-logo-2.png"
               alt="Sabagiro"
               width={170}
               height={74}

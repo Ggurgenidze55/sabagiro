@@ -2,6 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: {
+    serverComponentsExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
+  },
   async redirects() {
     return [
       { source: '/sabagiro.html', destination: '/', permanent: true },

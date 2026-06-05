@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { cartTotal, readCart, writeCart, type CartLine } from '@/lib/cart';
 import { extraHolderCount, holderFormTicketNumber } from '@/lib/ticket-holders';
-import { formatGel } from '@/lib/products';
+import { formatGel } from '@/lib/format-gel';
 
 type HolderDraft = {
   firstName: string;

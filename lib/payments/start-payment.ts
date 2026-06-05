@@ -1,4 +1,4 @@
-import type { Order } from '@prisma/client';
+import type { Order } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { buildFlittWebhookUrl, buildFlittResponseUrl, isPaymentsTestMode } from '@/lib/payments/config';
 import { siteUrl } from '@/lib/site-url';

@@ -2,42 +2,51 @@
   "name": "sabagiro",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "prisma generate && node scripts/generate-homepage-events.mjs && next build",
-    "homepage:events": "dotenv -e .env.local -e .env -- node scripts/generate-homepage-events.mjs",
+    "build": "dotenv -e .env.local -e .env -- prisma generate && dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs && next build",
+    "homepage:events": "dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "db:push": "dotenv -e .env.local -e .env -- prisma db push",
     "db:migrate": "dotenv -e .env.local -e .env -- prisma migrate deploy",
     "db:studio": "dotenv -e .env.local -e .env -- prisma studio",
-    "seed:admin": "node scripts/seed-admin.mjs",
-    "seed:events": "node scripts/seed-events.mjs",
+    "seed:admin": "dotenv -e .env.local -e .env -- tsx scripts/seed-admin.mjs",
+    "seed:events": "dotenv -e .env.local -e .env -- tsx scripts/seed-events.mjs",
     "setup:db": "npm run db:push && npm run seed:events"
   },
   "dependencies": {
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@vercel/blob": "^2.4.0",
     "bcryptjs": "^3.0.2",
+    "dotenv": "^17.4.2",
     "jose": "^5.9.6",
     "next": "^14.2.35",
     "passkit-generator": "^3.5.7",
+    "pg": "^8.21.0",
     "qrcode": "^1.5.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^4.8.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.34.5",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.17.0",
+    "@types/pg": "^8.20.0",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "dotenv-cli": "^11.0.0",
-    "prisma": "^5.22.0",
+    "prisma": "^7.8.0",
+    "tsx": "^4.22.4",
     "typescript": "^5.6.3"
   }
 }

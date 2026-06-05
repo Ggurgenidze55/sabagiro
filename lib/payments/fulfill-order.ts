@@ -1,4 +1,4 @@
-import type { Order, OrderItem, User } from '@prisma/client';
+import type { Order, OrderItem, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { createTicketForUser } from '@/lib/tickets';
 import { getEventTierAvailability } from '@/lib/ticket-tiers';

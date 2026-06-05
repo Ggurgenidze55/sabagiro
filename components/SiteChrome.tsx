@@ -22,7 +22,7 @@ export async function SiteChrome({ children, current, mainClassName }: SiteChrom
           <Link href="/" className="site-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/club/sabagiro-mark.png"
+              src="/club/sabagiro-logo-2.png"
               alt="Sabagiro"
               width={170}
               height={74}

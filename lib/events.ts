@@ -1,4 +1,4 @@
-import type { ClubEvent } from '@prisma/client';
+import type { ClubEvent } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
 import { sortPublishedEvents } from '@/lib/sort-published-events';

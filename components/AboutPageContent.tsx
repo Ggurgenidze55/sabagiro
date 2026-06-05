@@ -62,7 +62,7 @@ export function AboutPageContent() {
       <header className="about-hero about-reveal">
         <div className="about-hero__mark" aria-hidden="true">
           <Image
-            src="/club/sabagiro-mark.png"
+            src="/club/sabagiro-logo-2.png"
             alt=""
             width={200}
             height={119}

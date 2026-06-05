@@ -1,4 +1,4 @@
-import type { Role, VerificationStatus } from '@prisma/client';
+import type { Role, VerificationStatus } from '@/generated/prisma/client';
 
 export function canPurchaseTickets(user: {
   role: Role;

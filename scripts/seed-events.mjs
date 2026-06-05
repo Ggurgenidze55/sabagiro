@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client.ts';
 
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 
 const events = [
   {
@@ -94,3 +94,4 @@ for (const ev of events) {
 
 console.log('Seeded', events.length, 'events');
 await prisma.$disconnect();
+await pool.end();

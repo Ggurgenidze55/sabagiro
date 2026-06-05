@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import type { Ticket, TicketSource, User } from '@prisma/client';
+import type { Ticket, TicketSource, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
 import type { SendEmailResult } from '@/lib/email/client';

@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
-import type { Role, VerificationStatus } from '@prisma/client';
+import type { Role, VerificationStatus } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 
 const SESSION_COOKIE = 'sabagiro_session';

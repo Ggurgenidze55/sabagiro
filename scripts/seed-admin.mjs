@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client.ts';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 
 const email = process.env.ADMIN_EMAIL;
 const password = process.env.ADMIN_PASSWORD;
@@ -32,3 +32,4 @@ const user = await prisma.user.upsert({
 
 console.log('Admin ready:', user.email);
 await prisma.$disconnect();
+await pool.end();

@@ -1,4 +1,4 @@
-import type { Role, User } from '@prisma/client';
+import type { Role, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 
 export function purchaseLimitApplies(user: { role: Role }) {

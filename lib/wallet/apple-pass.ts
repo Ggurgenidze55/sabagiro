@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { Ticket } from '@prisma/client';
+import type { Ticket } from '@/generated/prisma/client';
 import { PKPass } from 'passkit-generator';
 import sharp from 'sharp';
 import { getAppleWalletConfig } from '@/lib/wallet/apple-config';

@@ -1,4 +1,4 @@
-import type { EventTicketTier } from '@prisma/client';
+import type { EventTicketTier } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 
 const ACTIVE_TICKET_STATUSES = ['VALID', 'USED'] as const;

@@ -122,9 +122,9 @@
 
       .logo-mark-bg {
         position: relative;
-        width: min(72vw, 68vh);
-        max-width: 520px;
-        aspect-ratio: 735 / 436;
+        width: min(82vw, 72vh);
+        max-width: 640px;
+        aspect-ratio: 1402 / 1122;
         transform: rotate(-1deg);
         filter: drop-shadow(0 0 80px rgba(249, 193, 8, 0.08));
       }
@@ -835,24 +835,51 @@
       @media (max-width: 899px) {
         html,
         body {
+          min-height: 100dvh;
           height: auto;
           overflow: auto;
         }
 
         .page {
+          min-height: 100dvh;
           height: auto;
           max-height: none;
           overflow: visible;
         }
 
         .hero {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          align-self: stretch;
+          width: 100%;
           overflow-y: visible;
-          align-content: start;
-          padding-top: 2.25rem;
+          text-align: center;
+          min-height: calc(100svh - 11.5rem);
+          min-height: calc(100dvh - 11.5rem);
+          padding-top: 0;
+          padding-bottom: 0;
+          gap: clamp(1rem, 3vh, 1.75rem);
         }
 
         .brand {
-          margin-top: 0.35rem;
+          margin-top: 0;
+          align-items: center;
+          width: min(100%, 28rem);
+          margin-inline: auto;
+          text-align: center;
+        }
+
+        .tagline {
+          width: 100%;
+          text-align: center;
+          padding-right: 0.28em;
+        }
+
+        .hero-meta {
+          width: 100%;
+          text-align: center;
         }
 
         .brand-heading {
@@ -860,35 +887,107 @@
         }
 
         .events-panel {
-          position: relative;
-          isolation: isolate;
-          padding-top: 0.35rem;
+          width: min(100%, 28rem);
+          margin-inline: auto;
+          align-items: center;
         }
 
-        .events-panel::before {
-          content: '';
-          position: absolute;
-          left: 50%;
-          top: 54%;
-          transform: translate(-50%, -50%) rotate(-2deg);
-          width: min(118vw, 560px);
-          height: min(58vw, 280px);
-          background: url('/club/sabagiro-mark.png') center / contain no-repeat;
-          opacity: 0.13;
-          pointer-events: none;
-          z-index: 0;
-          filter: drop-shadow(0 0 56px rgba(249, 193, 8, 0.12));
-        }
-
-        .events-header,
-        .events-list,
-        .events-actions {
-          position: relative;
-          z-index: 1;
+        .events-header {
+          width: 100%;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          gap: 0.35rem;
         }
 
         .events-list {
           max-height: none;
+          width: 100%;
+        }
+
+        .event-item {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          text-align: center;
+          gap: 0.45rem;
+          padding: 0.85rem 0.9rem;
+        }
+
+        .event-item::before,
+        .event-item::after {
+          display: none;
+        }
+
+        .event-item:hover {
+          transform: none;
+        }
+
+        .event-date,
+        .event-title,
+        .event-lineup,
+        .event-tag {
+          width: 100%;
+          text-align: center;
+        }
+
+        .event-arrow {
+          display: none;
+        }
+
+        .events-actions {
+          justify-content: center;
+          width: 100%;
+          text-align: center;
+        }
+
+        .events-link {
+          text-align: center;
+        }
+
+        .events-cta {
+          width: 100%;
+          justify-content: center;
+          letter-spacing: 0.22em;
+        }
+
+        .footer {
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.75rem;
+          text-align: center;
+        }
+
+        .footer__brand {
+          justify-content: center;
+          width: min(100%, 28rem);
+          box-sizing: border-box;
+        }
+
+        .social {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          align-items: stretch;
+          gap: clamp(0.5rem, 1.5vw, 0.85rem);
+          width: min(100%, 28rem);
+          margin: 0;
+          padding: 0;
+        }
+
+        .social li {
+          min-width: 0;
+        }
+
+        .social a {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          min-height: 100%;
+          padding: 0.4rem 0.5rem;
+          text-align: center;
+          box-sizing: border-box;
         }
 
         .logo-bg {
@@ -1135,62 +1234,11 @@
           text-align: center;
           font-size: 0.82rem;
         }
-
-        .footer {
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 0.75rem;
-          text-align: center;
-        }
-
-        .footer__brand {
-          justify-content: center;
-          width: min(100%, 40rem);
-          box-sizing: border-box;
-        }
-
-        .social {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          align-items: stretch;
-          gap: clamp(0.5rem, 1.5vw, 0.85rem);
-          width: min(100%, 40rem);
-          margin: 0;
-          padding: 0;
-        }
-
-        .social li {
-          min-width: 0;
-        }
-
-        .social a {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          min-height: 100%;
-          padding: 0.4rem 0.5rem;
-          text-align: center;
-          box-sizing: border-box;
-        }
-
-        .events-cta {
-          width: 100%;
-          justify-content: center;
-          letter-spacing: 0.22em;
-        }
       }
 
       @media (max-width: 640px) {
         .tagline {
           letter-spacing: 0.28em;
-        }
-
-        .event-item {
-          grid-template-columns: 48px 1fr auto;
-          gap: 0.5rem 0.65rem;
-          padding: 0.65rem 0.75rem;
         }
 
         .event-title {
@@ -1204,14 +1252,6 @@
 
       @media (max-width: 420px) {
         .nav-meta {
-          display: none;
-        }
-
-        .event-item {
-          grid-template-columns: 44px 1fr;
-        }
-
-        .event-arrow {
           display: none;
         }
       }
@@ -1235,10 +1275,10 @@
         <div class="logo-mark-bg" role="img" aria-label="Sabagiro">
           <img
             class="logo-mark-bg__mark"
-            src="/club/sabagiro-mark.png"
+            src="/club/sabagiro-logo.png"
             alt=""
-            width="170"
-            height="74"
+            width="1402"
+            height="1122"
             decoding="async"
           />
         </div>
@@ -1253,10 +1293,10 @@
         <a href="/" class="header-brand hoverable" aria-label="Sabagiro home">
           <img
             class="header-brand__logo"
-            src="/club/sabagiro-mark.png"
+            src="/club/sabagiro-logo-2.png"
             alt="Sabagiro"
-            width="170"
-            height="74"
+            width="1402"
+            height="1122"
             decoding="async"
           />
         </a>
@@ -1269,10 +1309,10 @@
             <a href="/" class="nav-panel__logo-link hoverable" aria-label="Sabagiro home">
               <img
                 class="nav-panel__logo"
-                src="/club/sabagiro-mark.png"
+                src="/club/sabagiro-logo-2.png"
                 alt="Sabagiro"
-                width="170"
-                height="74"
+                width="1402"
+                height="1122"
                 decoding="async"
               />
             </a>
@@ -1329,10 +1369,10 @@
           <h1 class="brand-heading">
             <img
               class="brand-logo"
-              src="/club/sabagiro-mark.png"
+              src="/club/sabagiro-logo-2.png"
               alt="Sabagiro"
-              width="170"
-              height="74"
+              width="1402"
+              height="1122"
               decoding="async"
             />
           </h1>
@@ -1353,7 +1393,7 @@
           <ul class="events-list" id="events-list">
             <li class="events-loading">Loading events…</li>
           </ul>
-          <script type="application/json" id="homepage-events-data">{"season":"Summer 2026","events":[{"slug":"phaza-0","title":"Phaza 0","lineup":"AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT","tag":"Sabagiro, Garden, AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT, Lisi, Event, Night club","dayLabel":"SAT","dateLabel":"27 JUN","accent":"#11ff00","isFeatured":false,"isFreeEntry":true,"shopUrl":"/events/phaza-0"}]}</script>
+          <script type="application/json" id="homepage-events-data">{"season":"Garden Summer 2026","events":[{"slug":"phaza-0","title":"Phaza 0","lineup":"AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT","tag":"Sabagiro, Garden, AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT, Lisi, Event, Night club","dayLabel":"SAT","dateLabel":"27 JUN","accent":"#ff0000","isFeatured":true,"isFreeEntry":true,"shopUrl":"/events/phaza-0"}]}</script>
           <script>
             (function renderHomepageEventsEarly() {
               function esc(s) {

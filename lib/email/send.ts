@@ -1,4 +1,4 @@
-import type { Ticket } from '@prisma/client';
+import type { Ticket } from '@/generated/prisma/client';
 import { sendEmail, type SendEmailResult } from '@/lib/email/client';
 import type { ContactTopic } from '@/lib/contact-topic';
 import { getContactInboxEmailsForTopic } from '@/lib/contact-inbox';

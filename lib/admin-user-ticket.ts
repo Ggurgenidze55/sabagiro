@@ -1,4 +1,4 @@
-import type { TicketSource, TicketStatus } from '@prisma/client';
+import type { TicketSource, TicketStatus } from '@/generated/prisma/client';
 import { formatScannedAt } from '@/lib/ticket-scan';
 
 export type AdminUserTicketRow = {

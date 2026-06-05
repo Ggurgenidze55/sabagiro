@@ -8,7 +8,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PrismaClient } from '@prisma/client';
+import { createPrismaClient } from './prisma-client.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
@@ -16,7 +16,7 @@ const marker = '<!-- SABAGIRO_EVENTS_SNAPSHOT -->';
 const indexPath = join(root, 'public', 'index.html');
 const snapshotPath = join(root, 'public', 'events.snapshot.json');
 
-const prisma = new PrismaClient();
+const { prisma, pool } = createPrismaClient();
 
 function mapEvents(events) {
   return events.map((e) => ({
@@ -102,6 +102,7 @@ async function main() {
     console.log(`[homepage-events] embedded snapshot in ${relPath}`);
   }
   await prisma.$disconnect();
+  await pool.end();
 }
 
 main().catch((e) => {
