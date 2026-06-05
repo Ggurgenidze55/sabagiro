@@ -40,10 +40,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/favicon.ico', sizes: '48x48' },
+      { url: '/club/favicon-48.png', sizes: '48x48', type: 'image/png' },
       { url: '/club/favicon-32.png', sizes: '32x32', type: 'image/png' },
       { url: '/club/favicon-16.png', sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: '/club/favicon.png',
+    shortcut: '/favicon.ico',
     apple: '/club/apple-touch-icon.png',
   },
 };
