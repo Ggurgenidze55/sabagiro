@@ -1,6 +1,9 @@
 package ge.sabagiro.app
 
 import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.webkit.CookieManager
@@ -63,6 +66,21 @@ class MainActivity : AppCompatActivity() {
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
         webView.setBackgroundColor(getColor(R.color.sabagiro_background))
+
+        webView.setDownloadListener { url, _, _, mimeType, _ ->
+            val uri = Uri.parse(url)
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                if (mimeType != null || url.endsWith(".apk", ignoreCase = true)) {
+                    setDataAndType(uri, mimeType ?: "application/vnd.android.package-archive")
+                }
+            }
+            try {
+                startActivity(intent)
+            } catch (_: ActivityNotFoundException) {
+                startActivity(Intent(Intent.ACTION_VIEW, uri))
+            }
+        }
 
         webView.webViewClient = SabagiroWebViewClient(
             onPaymentFlowChange = { active -> paymentCheckoutActive = active },

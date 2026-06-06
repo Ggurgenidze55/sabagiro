@@ -9,7 +9,7 @@
     "dev": "next dev -p 3001",
     "build": "dotenv -e .env.local -e .env -- prisma generate && dotenv -e .env.local -e .env -- prisma migrate deploy && dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs && next build",
     "homepage:events": "dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs",
-    "android:publish-apk": "cp android/app/build/outputs/apk/debug/app-debug.apk public/downloads/sabagiro-android.apk",
+    "android:publish-apk": "cd android && ./gradlew assembleRelease && cp app/build/outputs/apk/release/app-release.apk ../public/downloads/sabagiro-android.apk",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",

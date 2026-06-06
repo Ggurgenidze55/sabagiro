@@ -36,9 +36,17 @@ Yellow loader + Sabagiro logo on `#0a0a0a` background until the first page load 
 
 ## Release build
 
+1. Copy `keystore.properties.example` → `keystore.properties` and fill in your keystore paths/passwords.
+2. Build and publish to the website download folder:
+
 ```bash
 cd android
 ./gradlew assembleRelease
+cp app/build/outputs/apk/release/app-release.apk ../public/downloads/sabagiro-android.apk
 ```
 
-APK: `app/build/outputs/apk/release/app-release-unsigned.apk` — sign before Play Store upload.
+Or from repo root: `npm run android:publish-apk` (after a release build).
+
+**Play Protect:** sideload installs show “App blocked” until the app is on Google Play. Users must tap **More details → Install anyway**. Steps: **https://www.sabagiro.ge/download/android**
+
+Keep `sabagiro-release.keystore` and `keystore.properties` backed up locally — they are gitignored.

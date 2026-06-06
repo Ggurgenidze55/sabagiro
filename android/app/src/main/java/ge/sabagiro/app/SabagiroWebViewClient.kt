@@ -79,6 +79,22 @@ class SabagiroWebViewClient(
 
         applyPaymentFlowState(uri)
 
+        if (uri.path?.endsWith(".apk", ignoreCase = true) == true) {
+            val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                setDataAndType(uri, "application/vnd.android.package-archive")
+            }
+            runCatching { view.context.startActivity(intent) }
+                .onFailure {
+                    view.context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+                }
+            return true
+        }
+
+        if (uri.path?.startsWith("/download/android") == true) {
+            return false
+        }
+
         if (AppConfig.shouldStayInApp(uri, paymentCheckoutActive())) {
             return false
         }

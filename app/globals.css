@@ -3675,6 +3675,32 @@ body.nav-lock {
   margin-top: clamp(1.5rem, 4vw, 2rem);
 }
 
+.info-page__actions--stack {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.info-page__list--ordered {
+  counter-reset: sabagiro-step;
+}
+
+.info-page__list--ordered li {
+  counter-increment: sabagiro-step;
+  padding-left: 1.75rem;
+}
+
+.info-page__list--ordered li::before {
+  content: counter(sabagiro-step) '.';
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  letter-spacing: 0.08em;
+}
+
+.download-page__badge {
+  display: block;
+  height: 44px;
+  width: auto;
+}
+
 .about-pillar .section-divider {
   margin-top: 0;
 }
