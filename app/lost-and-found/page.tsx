@@ -7,9 +7,17 @@ import { siteUrl } from '@/lib/site-url';
 
 export const metadata = {
   title: 'Lost & Found — Sabagiro',
-  description: 'Lost something at Sabagiro? How to claim items left at the club in Tbilisi.',
+  description: 'Lost or found something at Sabagiro? How to report items and what to expect.',
   alternates: { canonical: siteUrl('/lost-and-found') },
 };
+
+const LOST_FOUND_COPY = [
+  'If you lose or find an item within the space, please report it to our team.',
+  'Found items will be stored for a limited period and reasonable efforts will be made to return them to their owners.',
+  'While we will do our best to assist, the space and its management cannot accept responsibility for lost, stolen, or damaged personal belongings.',
+  'Any unclaimed items may be donated, recycled, or disposed of after the designated holding period.',
+  'Please keep your valuables with you at all times.',
+] as const;
 
 export default function LostAndFoundPage() {
   const inbox = getContactInboxEmails()[0];
@@ -19,21 +27,19 @@ export default function LostAndFoundPage() {
       <div className="centered-page">
         <header className="centered-page__intro">
           <h1 className="page-title">LOST &amp; FOUND</h1>
-          <p className="page-lead">Left something at the club? We keep items from event nights for a limited time.</p>
+          <p className="page-lead">
+            Report lost or found items to our team. We store found belongings for a limited time.
+          </p>
         </header>
 
         <div className="centered-page__body info-page">
           <SectionDivider className="section-divider--first" />
 
-          <section className="info-page__block">
-            <h2 className="section-title">How it works</h2>
-            <ul className="info-page__list">
-              <li>Items found during or after an event are logged by door staff.</li>
-              <li>Describe your item, the event date, and where you think you lost it.</li>
-              <li>Valid ID may be required when collecting personal belongings.</li>
-              <li>Unclaimed items are donated or disposed of after 30 days.</li>
-            </ul>
-          </section>
+          {LOST_FOUND_COPY.map((paragraph) => (
+            <p key={paragraph} className="info-page__copy">
+              {paragraph}
+            </p>
+          ))}
 
           <section className="info-page__block">
             <h2 className="section-title">Contact</h2>
@@ -46,7 +52,7 @@ export default function LostAndFoundPage() {
               <a href={INSTAGRAM_URL} className="info-page__link" target="_blank" rel="noopener noreferrer">
                 Instagram
               </a>
-              . Include a photo if you have one.
+              . Include a photo and the event date if you have them.
             </p>
           </section>
 
