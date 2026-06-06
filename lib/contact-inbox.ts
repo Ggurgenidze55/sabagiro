@@ -20,6 +20,7 @@ const TOPIC_INBOX_ENV: Record<ContactTopic, string> = {
   tickets: 'CONTACT_INBOX_TICKETS',
   events: 'CONTACT_INBOX_EVENTS',
   press: 'CONTACT_INBOX_PRESS',
+  'lost-and-found': 'CONTACT_INBOX_LOST_FOUND',
   other: 'CONTACT_INBOX_OTHER',
 };
 

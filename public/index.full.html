@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Sabagiro — Underground · Tbilisi</title>
     <meta name="description" content="Sabagiro — brutalist underground club. Night. Concrete. Sound. Tbilisi, Georgia." />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -90,6 +90,7 @@
       .page {
         position: relative;
         width: 100%;
+        min-height: 100vh;
         min-height: 100dvh;
         display: grid;
         grid-template-rows: auto 1fr auto;
@@ -97,7 +98,9 @@
 
       @media (hover: hover) and (pointer: fine) {
         .page {
+          height: 100vh;
           height: 100dvh;
+          max-height: 100vh;
           max-height: 100dvh;
           overflow: hidden;
         }
@@ -520,6 +523,56 @@
         text-transform: uppercase;
       }
 
+      .app-downloads {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-top: 1.35rem;
+      }
+
+      .app-download {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+      }
+
+      .app-download img {
+        display: block;
+        width: auto;
+        height: 40px;
+      }
+
+      .app-download:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.08);
+      }
+
+      .app-download--soon {
+        opacity: 0.72;
+        cursor: default;
+        pointer-events: none;
+      }
+
+      .app-download--soon:hover {
+        transform: none;
+        filter: none;
+      }
+
+      .app-download__soon {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -1rem;
+        font-size: 0.52rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        text-align: center;
+        color: rgba(249, 193, 8, 0.72);
+      }
+
       .events-panel {
         display: flex;
         flex-direction: column;
@@ -865,12 +918,14 @@
       @media (max-width: 899px) {
         html,
         body {
+          min-height: 100vh;
           min-height: 100dvh;
           height: auto;
           overflow: auto;
         }
 
         .page {
+          min-height: 100vh;
           min-height: 100dvh;
           height: auto;
           max-height: none;
@@ -886,6 +941,7 @@
           width: 100%;
           overflow-y: visible;
           text-align: center;
+          min-height: calc(100vh - 11.5rem);
           min-height: calc(100svh - 11.5rem);
           min-height: calc(100dvh - 11.5rem);
           padding-top: 0;
@@ -910,6 +966,12 @@
         .hero-meta {
           width: 100%;
           text-align: center;
+        }
+
+        .app-downloads {
+          justify-content: center;
+          width: 100%;
+          margin-top: 1.1rem;
         }
 
         .brand-heading {
@@ -1087,6 +1149,7 @@
           z-index: 100;
           width: 100%;
           max-width: none;
+          height: 100vh;
           height: 100dvh;
           padding: max(1.35rem, env(safe-area-inset-top, 0px)) 1.35rem
             max(1.5rem, env(safe-area-inset-bottom, 0px));
@@ -1440,6 +1503,36 @@
             Brutalist venue · Open air &amp; warehouse<br />
             Doors 23:00 · Tbilisi, Georgia
           </p>
+
+          <div class="app-downloads" aria-label="Download the Sabagiro app">
+            <a
+              href="/downloads/sabagiro-android.apk"
+              class="app-download app-download--android hoverable"
+              download="sabagiro-android.apk"
+            >
+              <img
+                src="/club/badge-android.svg"
+                alt="Download Sabagiro for Android"
+                width="135"
+                height="40"
+                decoding="async"
+              />
+            </a>
+            <span
+              class="app-download app-download--ios app-download--soon"
+              aria-label="Sabagiro on the App Store — coming soon"
+            >
+              <img
+                src="/club/badge-app-store.svg"
+                alt=""
+                width="135"
+                height="40"
+                decoding="async"
+                aria-hidden="true"
+              />
+              <span class="app-download__soon">Coming soon</span>
+            </span>
+          </div>
         </section>
 
         <section class="events-panel" id="events" aria-labelledby="events-heading">

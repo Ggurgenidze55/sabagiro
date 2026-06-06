@@ -57,6 +57,7 @@ button {
 
 .site-shell,
 .site-page {
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -160,6 +161,7 @@ button {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   min-height: 100dvh;
 }
 
@@ -1627,6 +1629,7 @@ button {
 }
 
 .scan-page {
+  min-height: 100vh;
   min-height: 100dvh;
   display: flex;
   align-items: center;
@@ -2747,6 +2750,7 @@ body.nav-lock {
     z-index: 100;
     width: 100%;
     max-width: none;
+    height: 100vh;
     height: 100dvh;
     padding: max(1.35rem, env(safe-area-inset-top, 0px)) 1.35rem
       max(1.5rem, env(safe-area-inset-bottom, 0px));
@@ -3306,6 +3310,7 @@ body.nav-lock {
 
 /* —— Contact (centered, one viewport) —— */
 .site-page__stack:has(.contact-page) {
+  min-height: 100vh;
   min-height: 100dvh;
 }
 

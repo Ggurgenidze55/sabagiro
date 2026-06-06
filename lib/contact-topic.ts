@@ -1,10 +1,11 @@
-export const CONTACT_TOPICS = ['tickets', 'events', 'press', 'other'] as const;
+export const CONTACT_TOPICS = ['tickets', 'events', 'press', 'lost-and-found', 'other'] as const;
 export type ContactTopic = (typeof CONTACT_TOPICS)[number];
 
 const TOPIC_LABELS: Record<ContactTopic, string> = {
   tickets: 'Tickets & orders',
   events: 'Events & lineup',
   press: 'Press & partnerships',
+  'lost-and-found': 'Lost & found',
   other: 'Other',
 };
 
@@ -15,6 +16,9 @@ const LABEL_TO_TOPIC: Record<string, ContactTopic> = {
   'events & lineup': 'events',
   press: 'press',
   'press & partnerships': 'press',
+  'lost-and-found': 'lost-and-found',
+  'lost & found': 'lost-and-found',
+  'lost and found': 'lost-and-found',
   other: 'other',
 };
 

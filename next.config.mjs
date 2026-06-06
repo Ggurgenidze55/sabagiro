@@ -5,6 +5,23 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
   },
+async headers() {
+    return [
+      {
+        source: '/downloads/sabagiro-android.apk',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/vnd.android.package-archive',
+          },
+          {
+            key: 'Content-Disposition',
+            value: 'attachment; filename="sabagiro-android.apk"',
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: '/sabagiro.html', destination: '/', permanent: true },
