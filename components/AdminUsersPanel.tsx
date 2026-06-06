@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { AdminUserActionsMenu } from '@/components/AdminUserActionsMenu';
 import { AdminUserTicketsList } from '@/components/AdminUserTicketsList';
+import { ArtistUserBadge } from '@/components/ArtistRosterBanner';
 import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
 
 export type AdminUserRow = {
@@ -16,6 +17,10 @@ export type AdminUserRow = {
   instagramUrl: string;
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   role: string;
+  isArtist: boolean;
+  artistId: string | null;
+  artistLabel: string | null;
+  artistActive: boolean;
   ticketCount: number;
   tickets: AdminUserTicketRow[];
   ticketLimitPerEvent: number;
@@ -32,6 +37,31 @@ function normalizeSearch(q: string) {
   return q.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function UserNameCell({ user }: { user: AdminUserRow }) {
+  return (
+    <>
+      {user.firstName} {user.lastName}
+      {user.isArtist ? (
+        <>
+          {' '}
+          <ArtistUserBadge />
+        </>
+      ) : null}
+      <br />
+      <span className="table-sub">{user.personalId}</span>
+      {user.isArtist && user.artistLabel ? (
+        <>
+          <br />
+          <span className={`table-sub${user.artistActive ? ' table-sub--artist' : ''}`}>
+            Artist · {user.artistLabel}
+            {!user.artistActive ? ' · inactive' : ''}
+          </span>
+        </>
+      ) : null}
+    </>
+  );
+}
+
 function userMatchesSearch(user: AdminUserRow, query: string) {
   if (!query) return true;
   const haystack = [
@@ -41,6 +71,8 @@ function userMatchesSearch(user: AdminUserRow, query: string) {
     user.email,
     user.personalId,
     user.phone,
+    user.isArtist ? 'dj artist' : '',
+    user.artistLabel ?? '',
   ]
     .join(' ')
     .toLowerCase();
@@ -115,6 +147,65 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     } else {
       setMsg('Verification status updated');
     }
+  }
+
+  async function addToArtistRoster(user: AdminUserRow) {
+    setError('');
+    setMsg('');
+    const res = await fetch(`/api/admin/users/${user.id}/artist`, { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data.error || 'Could not add to artist roster');
+      return;
+    }
+    setUsers((list) =>
+      list.map((u) =>
+        u.id === user.id
+          ? {
+              ...u,
+              isArtist: true,
+              artistId: data.artistId ?? null,
+              artistLabel: data.artistLabel ?? u.artistLabel,
+              artistActive: data.artistActive ?? true,
+            }
+          : u,
+      ),
+    );
+    if (data.email?.sent) {
+      setMsg('User added to DJ roster — notification email sent.');
+    } else if (data.email?.skipped) {
+      setMsg('User added to DJ roster (email skipped — RESEND not configured).');
+    } else if (data.email && !data.email.sent) {
+      setMsg('User added to DJ roster.');
+      setError(data.email.error || 'Roster email failed to send.');
+    } else {
+      setMsg('User added to DJ roster.');
+    }
+  }
+
+  async function removeFromArtistRoster(user: AdminUserRow) {
+    setError('');
+    setMsg('');
+    const res = await fetch(`/api/admin/users/${user.id}/artist`, { method: 'DELETE' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data.error || 'Could not remove from artist roster');
+      return;
+    }
+    setUsers((list) =>
+      list.map((u) =>
+        u.id === user.id
+          ? {
+              ...u,
+              isArtist: false,
+              artistId: null,
+              artistLabel: null,
+              artistActive: false,
+            }
+          : u,
+      ),
+    );
+    setMsg('User removed from DJ roster.');
   }
 
   async function deleteUser(user: AdminUserRow) {
@@ -219,9 +310,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                   <Fragment key={u.id}>
                     <tr className={expanded ? 'admin-users-row--expanded' : undefined}>
                       <td>
-                        {u.firstName} {u.lastName}
-                        <br />
-                        <span className="table-sub">{u.personalId}</span>
+                        <UserNameCell user={u} />
                       </td>
                       <td>
                         {u.email}
@@ -294,6 +383,8 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                               list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
                             )
                           }
+                          onAddArtist={() => void addToArtistRoster(u)}
+                          onRemoveArtist={() => void removeFromArtistRoster(u)}
                         />
                       </td>
                     </tr>
@@ -329,8 +420,20 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                   <span className="admin-user-card__summary-main">
                     <span className="admin-user-card__name">
                       {u.firstName} {u.lastName}
+                      {u.isArtist ? (
+                        <>
+                          {' '}
+                          <ArtistUserBadge />
+                        </>
+                      ) : null}
                     </span>
                     <span className="table-sub">{u.personalId}</span>
+                    {u.isArtist && u.artistLabel ? (
+                      <span className={`table-sub${u.artistActive ? ' table-sub--artist' : ''}`}>
+                        Artist · {u.artistLabel}
+                        {!u.artistActive ? ' · inactive' : ''}
+                      </span>
+                    ) : null}
                     <span
                       className={`verify-badge verify-badge--${u.verificationStatus.toLowerCase()}`}
                     >
@@ -412,6 +515,8 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                             list.map((row) => (row.id === u.id ? { ...row, ...patch } : row)),
                           )
                         }
+                        onAddArtist={() => void addToArtistRoster(u)}
+                        onRemoveArtist={() => void removeFromArtistRoster(u)}
                       />
                     </div>
                   </div>

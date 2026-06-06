@@ -3690,6 +3690,11 @@ body.nav-lock {
   border: 1px solid var(--acid-hot);
 }
 
+.table-sub--artist {
+  color: var(--acid);
+  letter-spacing: 0.08em;
+}
+
 .admin-section-title {
   margin: 0 0 1rem;
   font-size: 0.95rem;

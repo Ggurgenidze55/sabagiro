@@ -23,6 +23,8 @@ type AdminUserActionsMenuProps = {
   onCancelDelete: () => void;
   onConfirmDelete: () => void;
   onUpdated: (patch: Partial<AdminUserRow>) => void;
+  onAddArtist: () => void;
+  onRemoveArtist: () => void;
 };
 
 type DropCoords = {
@@ -78,6 +80,8 @@ export function AdminUserActionsMenu({
   onCancelDelete,
   onConfirmDelete,
   onUpdated,
+  onAddArtist,
+  onRemoveArtist,
 }: AdminUserActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<'menu' | 'limits' | 'delete'>('menu');
@@ -226,6 +230,25 @@ export function AdminUserActionsMenu({
               Limits / free tickets
             </button>
           ) : null}
+          {user.isArtist ? (
+            <button
+              type="button"
+              className="admin-actions__item"
+              role="menuitem"
+              onClick={() => runAction(onRemoveArtist)}
+            >
+              Remove from DJ roster
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="admin-actions__item"
+              role="menuitem"
+              onClick={() => runAction(onAddArtist)}
+            >
+              Add to DJ roster
+            </button>
+          )}
           <button
             type="button"
             className="admin-actions__item admin-actions__item--danger"
