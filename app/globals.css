@@ -3690,6 +3690,19 @@ body.nav-lock {
   border: 1px solid var(--acid-hot);
 }
 
+.door-scan-user-badge {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  vertical-align: middle;
+  color: var(--acid);
+  background: transparent;
+  border: 1px solid var(--acid);
+}
+
 .table-sub--artist {
   color: var(--acid);
   letter-spacing: 0.08em;

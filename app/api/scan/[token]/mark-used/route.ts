@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireDoorScanner } from '@/lib/door-scan';
 import { prisma } from '@/lib/db';
 import { formatScannedAt } from '@/lib/ticket-scan';
 import { loadTicketQrContext } from '@/lib/ticket-qr-access';
@@ -9,7 +9,7 @@ type Params = { params: { token: string } };
 
 export async function POST(_request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireDoorScanner();
     const ticket = await prisma.ticket.findUnique({
       where: { qrToken: params.token },
     });

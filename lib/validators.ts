@@ -158,6 +158,10 @@ export const ticketPolicySchema = z.object({
   freeTicketsQuota: z.coerce.number().int().min(0).max(500),
 });
 
+export const doorScanSchema = z.object({
+  enabled: z.boolean(),
+});
+
 export const freeTicketGenerateSchema = z.object({
   productSlug: z.string().min(1),
   firstName: z.string().trim().min(2).max(80),

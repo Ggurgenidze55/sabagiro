@@ -68,6 +68,7 @@ model User {
   freeTicketsEnabled   Boolean            @default(false)
   freeTicketsQuota     Int                @default(0)
   freeTicketsUsed      Int                @default(0)
+  doorScanEnabled      Boolean            @default(false)
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
   tickets              Ticket[]           @relation("TicketOwner")

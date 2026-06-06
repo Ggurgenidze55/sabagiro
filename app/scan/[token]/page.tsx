@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { ScanDoorCheck } from '@/components/ScanDoorCheck';
 import { ScanVerdict } from '@/components/ScanVerdict';
 import { getSessionUser } from '@/lib/auth';
+import { canScanAtDoor } from '@/lib/door-scan';
 import { prisma } from '@/lib/db';
 import { getPublishedEventBySlug } from '@/lib/events';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
@@ -32,16 +33,16 @@ export default async function ScanPage({ params }: PageProps) {
   if (!ticket) notFound();
 
   const user = await getSessionUser();
-  const isAdmin = user?.role === 'ADMIN';
+  const canDoorScan = user ? canScanAtDoor(user) : false;
   const event = ticket.eventDate ? null : await getPublishedEventBySlug(ticket.productSlug);
   const eventDatesBySlug: Record<string, string | null | undefined> = event
     ? { [ticket.productSlug]: event.eventDate }
     : {};
   const ctx = ticketQrContext(ticket, eventDatesBySlug);
-  const qrAvailable = canAccessTicketQr(ctx, isAdmin);
+  const qrAvailable = canAccessTicketQr(ctx, canDoorScan);
   const qrExpired = !qrAvailable && ticket.status === 'VALID';
-  const verdict = getScanVerdict(ticket.status, ticket.scannedAt, qrExpired && !isAdmin);
-  const showHolderDetails = isAdmin || ticket.status === 'VALID';
+  const verdict = getScanVerdict(ticket.status, ticket.scannedAt, qrExpired && !canDoorScan);
+  const showHolderDetails = canDoorScan || ticket.status === 'VALID';
   const issuance = describeTicketIssuance(
     ticket,
     ticket.user,
@@ -110,8 +111,8 @@ export default async function ScanPage({ params }: PageProps) {
         <ScanDoorCheck
           qrToken={ticket.qrToken}
           status={ticket.status}
-          canCheckIn={isAdmin && qrAvailable}
-          qrExpired={qrExpired && !isAdmin}
+          canCheckIn={canDoorScan && qrAvailable}
+          qrExpired={qrExpired && !canDoorScan}
         />
       </div>
     </div>

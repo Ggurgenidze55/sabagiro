@@ -25,6 +25,8 @@ type AdminUserActionsMenuProps = {
   onUpdated: (patch: Partial<AdminUserRow>) => void;
   onAddArtist: () => void;
   onRemoveArtist: () => void;
+  onEnableDoorScan: () => void;
+  onDisableDoorScan: () => void;
 };
 
 type DropCoords = {
@@ -82,6 +84,8 @@ export function AdminUserActionsMenu({
   onUpdated,
   onAddArtist,
   onRemoveArtist,
+  onEnableDoorScan,
+  onDisableDoorScan,
 }: AdminUserActionsMenuProps) {
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<'menu' | 'limits' | 'delete'>('menu');
@@ -247,6 +251,25 @@ export function AdminUserActionsMenu({
               onClick={() => runAction(onAddArtist)}
             >
               Add to DJ list
+            </button>
+          )}
+          {user.doorScanEnabled ? (
+            <button
+              type="button"
+              className="admin-actions__item"
+              role="menuitem"
+              onClick={() => runAction(onDisableDoorScan)}
+            >
+              Disable door scan
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="admin-actions__item"
+              role="menuitem"
+              onClick={() => runAction(onEnableDoorScan)}
+            >
+              Enable door scan
             </button>
           )}
           <button

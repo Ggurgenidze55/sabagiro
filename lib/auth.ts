@@ -23,6 +23,7 @@ export type SessionUser = {
   freeTicketsEnabled: boolean;
   freeTicketsQuota: number;
   freeTicketsUsed: number;
+  doorScanEnabled: boolean;
 };
 
 function getSecret() {
@@ -123,6 +124,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
         freeTicketsEnabled: true,
         freeTicketsQuota: true,
         freeTicketsUsed: true,
+        doorScanEnabled: true,
       },
     });
     return user;
@@ -158,6 +160,10 @@ export function toSessionUser(user: {
   freeTicketsEnabled: boolean;
   freeTicketsQuota: number;
   freeTicketsUsed: number;
+  doorScanEnabled?: boolean;
 }): SessionUser {
-  return user;
+  return {
+    ...user,
+    doorScanEnabled: user.doorScanEnabled ?? false,
+  };
 }

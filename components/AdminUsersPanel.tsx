@@ -4,6 +4,7 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { AdminUserActionsMenu } from '@/components/AdminUserActionsMenu';
 import { AdminUserTicketsList } from '@/components/AdminUserTicketsList';
 import { ArtistUserBadge } from '@/components/ArtistUserBadge';
+import { DoorScanUserBadge } from '@/components/DoorScanUserBadge';
 import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
 
 export type AdminUserRow = {
@@ -27,6 +28,7 @@ export type AdminUserRow = {
   freeTicketsEnabled: boolean;
   freeTicketsQuota: number;
   freeTicketsUsed: number;
+  doorScanEnabled: boolean;
 };
 
 const PAGE_SIZE = 10;
@@ -45,6 +47,12 @@ function UserNameCell({ user }: { user: AdminUserRow }) {
         <>
           {' '}
           <ArtistUserBadge />
+        </>
+      ) : null}
+      {user.doorScanEnabled ? (
+        <>
+          {' '}
+          <DoorScanUserBadge />
         </>
       ) : null}
       <br />
@@ -73,6 +81,7 @@ function userMatchesSearch(user: AdminUserRow, query: string) {
     user.phone,
     user.isArtist ? 'dj artist' : '',
     user.artistLabel ?? '',
+    user.doorScanEnabled ? 'door scan' : '',
   ]
     .join(' ')
     .toLowerCase();
@@ -206,6 +215,25 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
       ),
     );
     setMsg('User removed from DJ list.');
+  }
+
+  async function setDoorScan(user: AdminUserRow, enabled: boolean) {
+    setError('');
+    setMsg('');
+    const res = await fetch(`/api/admin/users/${user.id}/door-scan`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setError(data.error || 'Could not update door scan access');
+      return;
+    }
+    setUsers((list) =>
+      list.map((u) => (u.id === user.id ? { ...u, doorScanEnabled: enabled } : u)),
+    );
+    setMsg(enabled ? 'Door scan enabled for user.' : 'Door scan disabled for user.');
   }
 
   async function deleteUser(user: AdminUserRow) {
@@ -352,19 +380,27 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         </button>
                       </td>
                       <td>
-                        {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                        {u.role === 'ADMIN' ? (
+                          <span className="table-sub">—</span>
+                        ) : (
                           <>
-                            <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
-                            <br />
+                            {u.verificationStatus === 'VERIFIED' ? (
+                              <>
+                                <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+                                <br />
+                                <span className="table-sub">
+                                  Free:{' '}
+                                  {u.freeTicketsEnabled
+                                    ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
+                                    : 'off'}
+                                </span>
+                                <br />
+                              </>
+                            ) : null}
                             <span className="table-sub">
-                              Free:{' '}
-                              {u.freeTicketsEnabled
-                                ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
-                                : 'off'}
+                              Door scan: {u.doorScanEnabled ? 'on' : 'off'}
                             </span>
                           </>
-                        ) : (
-                          <span className="table-sub">—</span>
                         )}
                       </td>
                       <td className="table-actions table-actions--menu">
@@ -385,6 +421,8 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                           }
                           onAddArtist={() => void addToArtistRoster(u)}
                           onRemoveArtist={() => void removeFromArtistRoster(u)}
+                          onEnableDoorScan={() => void setDoorScan(u, true)}
+                          onDisableDoorScan={() => void setDoorScan(u, false)}
                         />
                       </td>
                     </tr>
@@ -424,6 +462,12 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         <>
                           {' '}
                           <ArtistUserBadge />
+                        </>
+                      ) : null}
+                      {u.doorScanEnabled ? (
+                        <>
+                          {' '}
+                          <DoorScanUserBadge />
                         </>
                       ) : null}
                     </span>
@@ -481,19 +525,27 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                       <div className="responsive-table__field">
                         <dt>Limits</dt>
                         <dd>
-                          {u.role !== 'ADMIN' && u.verificationStatus === 'VERIFIED' ? (
+                          {u.role === 'ADMIN' ? (
+                            <span className="table-sub">—</span>
+                          ) : (
                             <>
-                              <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
-                              <br />
+                              {u.verificationStatus === 'VERIFIED' ? (
+                                <>
+                                  <span className="table-sub">Paid: {u.ticketLimitPerEvent}/event</span>
+                                  <br />
+                                  <span className="table-sub">
+                                    Free:{' '}
+                                    {u.freeTicketsEnabled
+                                      ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
+                                      : 'off'}
+                                  </span>
+                                  <br />
+                                </>
+                              ) : null}
                               <span className="table-sub">
-                                Free:{' '}
-                                {u.freeTicketsEnabled
-                                  ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
-                                  : 'off'}
+                                Door scan: {u.doorScanEnabled ? 'on' : 'off'}
                               </span>
                             </>
-                          ) : (
-                            <span className="table-sub">—</span>
                           )}
                         </dd>
                       </div>
@@ -517,6 +569,8 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         }
                         onAddArtist={() => void addToArtistRoster(u)}
                         onRemoveArtist={() => void removeFromArtistRoster(u)}
+                        onEnableDoorScan={() => void setDoorScan(u, true)}
+                        onDisableDoorScan={() => void setDoorScan(u, false)}
                       />
                     </div>
                   </div>

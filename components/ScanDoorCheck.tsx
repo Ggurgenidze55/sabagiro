@@ -56,7 +56,7 @@ export function ScanDoorCheck({ qrToken, status, canCheckIn, qrExpired }: ScanDo
   if (!canCheckIn) {
     return (
       <p className="scan-door-hint">
-        Log in as admin to confirm scan at the door.
+        Log in with door scan access to confirm entry at the door.
       </p>
     );
   }

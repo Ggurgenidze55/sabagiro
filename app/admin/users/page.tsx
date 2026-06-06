@@ -97,6 +97,7 @@ export default async function AdminUsersPage() {
           freeTicketsEnabled: u.freeTicketsEnabled,
           freeTicketsQuota: u.freeTicketsQuota,
           freeTicketsUsed: u.freeTicketsUsed,
+          doorScanEnabled: u.doorScanEnabled,
             };
           })}
         />
