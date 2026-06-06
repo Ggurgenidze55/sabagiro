@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArtistRosterBanner } from '@/components/ArtistRosterBanner';
+import { ArtistListBanner } from '@/components/ArtistListBanner';
 import { ArtistUserBadge } from '@/components/ArtistUserBadge';
 import { SectionDivider } from '@/components/SectionDivider';
 import { SiteChrome } from '@/components/SiteChrome';
@@ -95,7 +95,7 @@ export default async function AccountPage() {
       </div>
 
       {artist ? (
-        <ArtistRosterBanner
+        <ArtistListBanner
           stageName={artist.stageName}
           firstName={artist.firstName}
           lastName={artist.lastName}

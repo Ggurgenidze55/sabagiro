@@ -56,7 +56,7 @@ Production admins only — no `@sabagiro.test` accounts.
 | Shop / events | `lib/events.ts`, Prisma `Product` |
 | Auth | `lib/auth.ts`, `middleware.ts` |
 | Tickets / QR | `lib/tickets.ts`, `lib/qr.ts` |
-| Artist roster / weekly comps | `lib/artist-tickets.ts`, `/admin/artists`, `/api/cron/artist-tickets` |
+| Artist list / weekly comps | `lib/artist-tickets.ts`, `/admin/artists`, `/api/cron/artist-tickets` |
 | Email | `lib/email/*` |
 | Payments | `lib/payments/*` (Flitt or test mode) |
 | Apple Wallet | `lib/wallet/*` |

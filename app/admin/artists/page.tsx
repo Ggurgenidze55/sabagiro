@@ -4,7 +4,7 @@ import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Artists — Admin — Sabagiro' };
+export const metadata = { title: 'DJ list — Admin — Sabagiro' };
 
 export default async function AdminArtistsPage() {
   const rows = await prisma.artist.findMany({
@@ -29,7 +29,7 @@ export default async function AdminArtistsPage() {
 
   return (
     <>
-      <h1 className="page-title">ARTISTS</h1>
+      <h1 className="page-title">DJ LIST</h1>
       <AdminArtistsPanel artists={artists} />
     </>
   );

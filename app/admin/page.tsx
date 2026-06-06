@@ -35,7 +35,7 @@ export default async function AdminOverviewPage() {
           MANAGE EVENTS
         </Link>
         <Link href="/admin/artists" className="btn btn--ghost">
-          ARTISTS / DJS
+          DJ LIST
         </Link>
         <Link href="/admin/generate" className="btn btn--ghost">
           GENERATE TICKET

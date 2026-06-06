@@ -8,7 +8,7 @@ type Props = {
   active: boolean;
 };
 
-export function ArtistRosterBanner({
+export function ArtistListBanner({
   stageName,
   firstName,
   lastName,
@@ -18,8 +18,8 @@ export function ArtistRosterBanner({
   const displayName = artistDisplayName({ stageName, firstName, lastName });
 
   return (
-    <div className="artist-roster-banner" style={{ marginBottom: '1.5rem' }}>
-      <p className="artist-roster-banner__title">DJ / Artist list</p>
+    <div className="artist-list-banner" style={{ marginBottom: '1.5rem' }}>
+      <p className="artist-list-banner__title">DJ / Artist list</p>
       <p className="page-lead" style={{ marginBottom: '0.35rem' }}>
         You are on the Sabagiro artist list as <strong>{displayName}</strong>.
       </p>

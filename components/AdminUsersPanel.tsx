@@ -53,7 +53,7 @@ function UserNameCell({ user }: { user: AdminUserRow }) {
         <>
           <br />
           <span className={`table-sub${user.artistActive ? ' table-sub--artist' : ''}`}>
-            Artist · {user.artistLabel}
+            DJ list · {user.artistLabel}
             {!user.artistActive ? ' · inactive' : ''}
           </span>
         </>
@@ -430,7 +430,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                     <span className="table-sub">{u.personalId}</span>
                     {u.isArtist && u.artistLabel ? (
                       <span className={`table-sub${u.artistActive ? ' table-sub--artist' : ''}`}>
-                        Artist · {u.artistLabel}
+                        DJ list · {u.artistLabel}
                         {!u.artistActive ? ' · inactive' : ''}
                       </span>
                     ) : null}

@@ -3660,7 +3660,7 @@ body.nav-lock {
   }
 }
 
-.artist-roster-banner {
+.artist-list-banner {
   padding: 1.15rem 1.2rem;
   border: 1px solid rgba(249, 193, 8, 0.32);
   border-left: 3px solid var(--acid);
@@ -3668,7 +3668,7 @@ body.nav-lock {
   box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
 }
 
-.artist-roster-banner__title {
+.artist-list-banner__title {
   margin: 0 0 0.5rem;
   font-size: var(--text-sm);
   font-weight: 700;
