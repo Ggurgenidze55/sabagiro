@@ -21,6 +21,8 @@ export function ticketSourceLabel(source: TicketSource) {
       return 'Free';
     case 'ADMIN':
       return 'Admin';
+    case 'ARTIST':
+      return 'Artist';
     default:
       return 'Purchase';
   }

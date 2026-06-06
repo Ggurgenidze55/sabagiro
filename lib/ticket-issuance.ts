@@ -35,6 +35,16 @@ export function describeTicketIssuance(
     };
   }
 
+  if (ticket.source === 'ARTIST') {
+    return {
+      holderNote: 'Ticket Holder (Entry)',
+      actorNote: 'Artist roster · issued by',
+      actorLabel,
+      ownerLabel,
+      detail: `${actorLabel} · weekly artist ticket · ${ownerLabel}`,
+    };
+  }
+
   return {
     holderNote: 'Ticket Holder (Entry)',
     actorNote: 'Admin issued by',
@@ -52,6 +62,8 @@ export function sourceLabel(source: TicketSource) {
       return 'Free';
     case 'ADMIN':
       return 'Admin';
+    case 'ARTIST':
+      return 'Artist';
     default:
       return source;
   }

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "dotenv -e .env.local -e .env -- prisma generate && dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs && next build",
+    "build": "dotenv -e .env.local -e .env -- prisma generate && dotenv -e .env.local -e .env -- prisma migrate deploy && dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs && next build",
     "homepage:events": "dotenv -e .env.local -e .env -- tsx scripts/generate-homepage-events.mjs",
     "start": "next start",
     "lint": "next lint",

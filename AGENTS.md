@@ -37,7 +37,7 @@ Port **3001** — LariPay often uses 3000.
 | `docs/EMAIL-GMAIL.md` | info@sabagiro.ge Gmail |
 | `docs/WALLET.md` | Apple Wallet `.pkpass` |
 
-Required: `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`.
+Required: `DATABASE_URL`, `AUTH_SECRET`, `APP_URL`, `NEXT_PUBLIC_APP_URL`. Cron: `CRON_SECRET` (weekly artist tickets, Thu 20:00 Tbilisi).
 
 ## Test accounts
 
@@ -56,6 +56,7 @@ Production admins only — no `@sabagiro.test` accounts.
 | Shop / events | `lib/events.ts`, Prisma `Product` |
 | Auth | `lib/auth.ts`, `middleware.ts` |
 | Tickets / QR | `lib/tickets.ts`, `lib/qr.ts` |
+| Artist roster / weekly comps | `lib/artist-tickets.ts`, `/admin/artists`, `/api/cron/artist-tickets` |
 | Email | `lib/email/*` |
 | Payments | `lib/payments/*` (Flitt or test mode) |
 | Apple Wallet | `lib/wallet/*` |

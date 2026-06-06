@@ -38,6 +38,7 @@ Optional:
 | `FLITT_MERCHANT_ID` | Flitt merchant ID — see `docs/PAYMENTS-FLITT.md` |
 | `FLITT_SECRET_KEY` | Flitt payment secret key |
 | `FLITT_API_ORIGIN` | Optional — default `https://pay.flitt.com` |
+| `CRON_SECRET` | Vercel Cron auth for weekly artist tickets (`openssl rand -base64 32`) |
 
 ## After adding variables
 

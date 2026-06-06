@@ -3630,3 +3630,33 @@ body.nav-lock {
     width: 100%;
   }
 }
+
+.admin-section-title {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+
+.admin-artists__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.admin-artists__flags {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.admin-artists__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}

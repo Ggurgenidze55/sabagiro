@@ -28,6 +28,7 @@ enum TicketSource {
   PURCHASE
   ADMIN
   FREE
+  ARTIST
 }
 
 enum OrderStatus {
@@ -73,6 +74,7 @@ model User {
   ticketsCreated       Ticket[]           @relation("TicketCreatedBy")
   orders               Order[]
   passwordResetTokens  PasswordResetToken[]
+  artist               Artist?
 
   @@index([verificationStatus])
 }
@@ -181,6 +183,41 @@ model SiteSetting {
   value String
 }
 
+model Artist {
+  id             String                 @id @default(cuid())
+  stageName      String                 @default("")
+  firstName      String
+  lastName       String
+  personalId     String
+  email          String
+  phone          String
+  instagramUrl   String                 @default("")
+  active         Boolean                @default(true)
+  weeklyTickets  Boolean                @default(true)
+  userId         String?                @unique
+  user           User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+  dispatches     ArtistTicketDispatch[]
+
+  @@index([active, weeklyTickets])
+  @@index([email])
+}
+
+model ArtistTicketDispatch {
+  id        String   @id @default(cuid())
+  artistId  String
+  artist    Artist   @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  eventSlug String
+  weekKey   String
+  ticketId  String   @unique
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([artistId, eventSlug, weekKey])
+  @@index([weekKey])
+}
+
 model Ticket {
   id               String       @id @default(cuid())
   qrToken          String       @unique
@@ -202,6 +239,7 @@ model Ticket {
   source           TicketSource
   scannedAt        DateTime?
   createdAt        DateTime     @default(now())
+  artistDispatch   ArtistTicketDispatch?
 
   @@index([userId])
   @@index([createdByUserId])

@@ -69,6 +69,8 @@ Passwords are **not** in git. Created via `scripts/reset-production-admins.mjs` 
    npm run seed:events
    ```
 
+4. Set `CRON_SECRET` in Vercel (Production + Preview) so `/api/cron/artist-tickets` runs every **Thursday 20:00 Tbilisi** (16:00 UTC).
+
 ## 6. Vercel + Railway DB (current setup)
 
 **Frontend on Vercel**, **DB on Railway**:

@@ -166,3 +166,20 @@ export const freeTicketGenerateSchema = z.object({
   email: z.string().trim().email(),
   phone: z.string().trim().min(9).max(20),
 });
+
+export const artistSchema = z.object({
+  stageName: z.string().trim().max(120).optional(),
+  firstName: z.string().trim().min(2).max(80),
+  lastName: z.string().trim().min(2).max(80),
+  personalId: personalIdSchema,
+  email: z.string().trim().email(),
+  phone: z.string().trim().min(9).max(20),
+  instagramUrl: z.preprocess(emptyToUndefined, z.string().trim().max(300).optional()),
+  active: z.boolean().optional(),
+  weeklyTickets: z.boolean().optional(),
+});
+
+export const artistUpdateSchema = artistSchema.partial().refine(
+  (data) => Object.keys(data).length > 0,
+  { message: 'No fields to update' },
+);
