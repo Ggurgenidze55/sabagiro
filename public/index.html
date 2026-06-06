@@ -480,7 +480,25 @@
       @media (min-width: 900px) {
         .hero {
           grid-template-columns: 1.05fr minmax(300px, 440px);
+          grid-template-rows: auto auto;
+          align-items: start;
           gap: clamp(1.5rem, 4vw, 3rem);
+        }
+
+        .brand {
+          grid-column: 1;
+          grid-row: 1;
+        }
+
+        .app-downloads {
+          grid-column: 1;
+          grid-row: 2;
+          margin-top: 0;
+        }
+
+        .events-panel {
+          grid-column: 2;
+          grid-row: 1 / span 2;
         }
       }
 
@@ -974,8 +992,15 @@
 
         .app-downloads {
           justify-content: center;
-          width: 100%;
-          margin-top: 1.1rem;
+          width: min(100%, 28rem);
+          margin-inline: auto;
+          margin-top: 0.35rem;
+          margin-bottom: 0;
+          padding-bottom: 0.85rem;
+        }
+
+        .events-actions {
+          margin-bottom: 0;
         }
 
         .brand-heading {
@@ -1507,36 +1532,6 @@
             Brutalist venue · Open air &amp; warehouse<br />
             Doors 23:00 · Tbilisi, Georgia
           </p>
-
-          <div class="app-downloads" aria-label="Download the Sabagiro app">
-            <a
-              href="/downloads/sabagiro-android.apk"
-              class="app-download app-download--android hoverable"
-              download="sabagiro-android.apk"
-            >
-              <img
-                src="/club/badge-google-play.svg"
-                alt="Get Sabagiro on Google Play"
-                width="155"
-                height="40"
-                decoding="async"
-              />
-            </a>
-            <span
-              class="app-download app-download--ios app-download--soon"
-              aria-label="Sabagiro on the App Store — coming soon"
-            >
-              <img
-                src="/club/badge-app-store.svg"
-                alt=""
-                width="155"
-                height="40"
-                decoding="async"
-                aria-hidden="true"
-              />
-              <span class="app-download__soon">Coming soon</span>
-            </span>
-          </div>
         </section>
 
         <section class="events-panel" id="events" aria-labelledby="events-heading">
@@ -1607,6 +1602,36 @@
             <a href="/events" class="events-cta hoverable">All events</a>
           </div>
         </section>
+
+        <div class="app-downloads" aria-label="Download the Sabagiro app">
+          <a
+            href="/downloads/sabagiro-android.apk"
+            class="app-download app-download--android hoverable"
+            download="sabagiro-android.apk"
+          >
+            <img
+              src="/club/badge-google-play.svg"
+              alt="Get Sabagiro on Google Play"
+              width="155"
+              height="40"
+              decoding="async"
+            />
+          </a>
+          <span
+            class="app-download app-download--ios app-download--soon"
+            aria-label="Sabagiro on the App Store — coming soon"
+          >
+            <img
+              src="/club/badge-app-store.svg"
+              alt=""
+              width="155"
+              height="40"
+              decoding="async"
+              aria-hidden="true"
+            />
+            <span class="app-download__soon">Coming soon</span>
+          </span>
+        </div>
       </main>
 
       <footer class="footer" id="contact">
