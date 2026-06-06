@@ -14,6 +14,7 @@ type NavDropdownProps = {
   label: string;
   items: NavDropdownItem[];
   menuLabel?: string;
+  highlight?: boolean;
 };
 
 const MOBILE_NAV_MQ = '(max-width: 768px)';
@@ -44,7 +45,7 @@ function useIsMobileNav() {
   return isMobile;
 }
 
-export function NavDropdown({ label, items, menuLabel }: NavDropdownProps) {
+export function NavDropdown({ label, items, menuLabel, highlight }: NavDropdownProps) {
   const pathname = usePathname();
   const menuId = useId();
   const [open, setOpen] = useState(false);
@@ -78,6 +79,7 @@ export function NavDropdown({ label, items, menuLabel }: NavDropdownProps) {
         'site-nav__drop',
         groupActive ? 'site-nav__drop--active' : '',
         open ? 'site-nav__drop--open' : '',
+        highlight ? 'site-nav__drop--highlight' : '',
       ]
         .filter(Boolean)
         .join(' ')}

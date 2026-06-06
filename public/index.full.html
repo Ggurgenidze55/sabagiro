@@ -1267,6 +1267,26 @@
           box-shadow: inset 0 -2px 0 var(--acid);
         }
 
+        .nav-highlight > a,
+        .nav-drop--highlight > .nav-drop-toggle {
+          color: var(--black);
+          background: var(--acid);
+          border: 1px solid var(--acid-hot);
+          border-radius: 3px;
+          box-shadow: none;
+        }
+
+        .nav-highlight > a:hover,
+        .nav-highlight > a:focus-visible,
+        .nav-drop--highlight > .nav-drop-toggle:hover,
+        .nav-drop--highlight > .nav-drop-toggle:focus-visible,
+        .nav-drop--highlight.nav-drop--open > .nav-drop-toggle {
+          color: var(--black);
+          background: var(--acid-hot);
+          border-color: var(--acid-hot);
+          box-shadow: none;
+        }
+
         .nav-logout {
           width: 100%;
           text-align: center;
@@ -1365,9 +1385,9 @@
               <a href="/account/free-tickets" class="hoverable">Free tickets</a>
             </li>
             <li><a href="/location" class="hoverable">Location</a></li>
-            <li data-nav="guest"><a href="/login" class="hoverable">Log in</a></li>
+            <li data-nav="guest" class="nav-highlight"><a href="/login" class="hoverable">Log in</a></li>
             <li data-nav="guest"><a href="/register" class="hoverable">Register</a></li>
-            <li class="nav-drop" data-nav="account" hidden>
+            <li class="nav-drop nav-drop--highlight" data-nav="account" hidden>
               <button type="button" class="nav-drop-toggle hoverable" aria-haspopup="menu" aria-expanded="false">
                 Account
                 <span class="nav-drop-caret" aria-hidden="true">▾</span>

@@ -47,7 +47,12 @@ export function SiteNav({ user, current }: SiteNavProps) {
       </li>
       {user ? (
         <>
-          <NavDropdown label="Account" items={ACCOUNT_MENU_ITEMS} menuLabel="Account menu" />
+          <NavDropdown
+            label="Account"
+            items={ACCOUNT_MENU_ITEMS}
+            menuLabel="Account menu"
+            highlight
+          />
           {user.role === 'ADMIN' ? (
             <NavDropdown label="Admin" items={ADMIN_MENU_ITEMS} menuLabel="Admin menu" />
           ) : null}
@@ -67,7 +72,7 @@ export function SiteNav({ user, current }: SiteNavProps) {
         </>
       ) : (
         <>
-          <li>
+          <li className="site-nav__highlight">
             <Link href="/login">Log in</Link>
           </li>
           <li>

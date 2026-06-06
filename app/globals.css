@@ -2919,6 +2919,27 @@ body.nav-lock {
     background: rgba(249, 193, 8, 0.06);
   }
 
+  .mobile-nav__panel .site-nav__highlight > a,
+  .mobile-nav__panel .site-nav__drop--highlight > .site-nav__drop-toggle {
+    color: var(--black);
+    background: var(--acid);
+    border: 1px solid var(--acid-hot);
+    border-radius: 3px;
+    box-shadow: none;
+  }
+
+  .mobile-nav__panel .site-nav__highlight > a:hover,
+  .mobile-nav__panel .site-nav__highlight > a:focus-visible,
+  .mobile-nav__panel .site-nav__drop--highlight > .site-nav__drop-toggle:hover,
+  .mobile-nav__panel .site-nav__drop--highlight > .site-nav__drop-toggle:focus-visible,
+  .mobile-nav__panel .site-nav__drop--highlight.site-nav__drop--open > .site-nav__drop-toggle,
+  .mobile-nav__panel .site-nav__drop--highlight.site-nav__drop--active > .site-nav__drop-toggle {
+    color: var(--black);
+    background: var(--acid-hot);
+    border-color: var(--acid-hot);
+    box-shadow: none;
+  }
+
   .about-page {
     margin-inline: auto;
   }
