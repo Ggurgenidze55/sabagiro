@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { artistDisplayName } from '@/lib/artist-tickets';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { artistSchema, artistUpdateSchema, formatValidationError } from '@/lib/validators';
+import { sendArtistRosterAddedEmail } from '@/lib/email/send';
+import { artistSchema, formatValidationError } from '@/lib/validators';
 import { findOrCreateUserForAdmin } from '@/lib/tickets';
 
 export async function GET() {
@@ -67,7 +68,23 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, artist });
+    const email = await sendArtistRosterAddedEmail({
+      to: artist.email,
+      firstName: artist.firstName,
+      displayName: artistDisplayName(artist),
+      weeklyTickets: artist.weeklyTickets,
+    });
+
+    if (!email.sent) {
+      console.error('[artist] roster email failed', {
+        artistId: artist.id,
+        to: artist.email,
+        error: email.error,
+        skipped: email.skipped,
+      });
+    }
+
+    return NextResponse.json({ ok: true, artist, email });
   } catch (e) {
     const message = formatValidationError(e);
     const status =

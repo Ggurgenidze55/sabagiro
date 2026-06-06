@@ -6,6 +6,7 @@ export {
   sendAccountRejectedEmail,
   sendAccountPendingEmail,
   sendFreeTicketsEnabledEmail,
+  sendArtistRosterAddedEmail,
   sendTicketEmail,
   sendPasswordResetEmail,
   sendPasswordChangedEmail,

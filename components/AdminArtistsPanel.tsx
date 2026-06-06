@@ -64,7 +64,14 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
         return;
       }
       setForm(emptyForm);
-      setMsg('Artist added.');
+      if (data.email?.sent) {
+        setMsg('Artist added — notification email sent.');
+      } else if (data.email?.skipped) {
+        setMsg('Artist added — email skipped (RESEND_API_KEY not set).');
+      } else {
+        setMsg('Artist added — email could not be sent.');
+        setError(data.email?.error || 'Check Resend settings.');
+      }
       await reload();
     } finally {
       setBusy(false);

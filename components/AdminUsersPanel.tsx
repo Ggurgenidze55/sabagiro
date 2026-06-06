@@ -175,7 +175,9 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
             <button
               key={f.id}
               type="button"
-              className={`admin-users-filter${statusFilter === f.id ? ' admin-users-filter--active' : ''}`}
+              className={`admin-users-filter admin-users-filter--${f.id.toLowerCase()}${
+                statusFilter === f.id ? ' admin-users-filter--active' : ''
+              }`}
               onClick={() => setStatusFilter(f.id)}
             >
               {f.label}

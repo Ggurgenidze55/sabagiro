@@ -6,6 +6,7 @@ import {
   accountPendingEmail,
   accountRejectedEmail,
   accountVerifiedEmail,
+  artistRosterAddedEmail,
   freeTicketsEnabledEmail,
   contactFormAckEmail,
   contactFormNotificationEmail,
@@ -56,6 +57,16 @@ export function sendFreeTicketsEnabledEmail(opts: {
   quota: number;
 }): Promise<SendEmailResult> {
   const msg = freeTicketsEnabledEmail(opts);
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendArtistRosterAddedEmail(opts: {
+  to: string;
+  firstName: string;
+  displayName: string;
+  weeklyTickets: boolean;
+}): Promise<SendEmailResult> {
+  const msg = artistRosterAddedEmail(opts);
   return sendEmail({ to: opts.to, ...msg });
 }
 
