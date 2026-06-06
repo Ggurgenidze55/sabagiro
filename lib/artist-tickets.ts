@@ -1,7 +1,10 @@
 import type { Artist, ClubEvent } from '@/generated/prisma/client';
+import { artistDisplayName, artistLabel } from '@/lib/artist-display';
 import { prisma } from '@/lib/db';
 import { listPublishedEvents } from '@/lib/events';
 import { createTicketForUser, findOrCreateUserForAdmin } from '@/lib/tickets';
+
+export { artistDisplayName, artistLabel } from '@/lib/artist-display';
 
 const TBILISI_TZ = 'Asia/Tbilisi';
 
@@ -156,20 +159,6 @@ async function ensureArtistUser(artist: Artist) {
   }
 
   return user;
-}
-
-export function artistLabel(artist: Pick<Artist, 'stageName' | 'firstName' | 'lastName'>) {
-  if (artist.stageName.trim()) return artist.stageName.trim();
-  return `${artist.firstName} ${artist.lastName}`.trim();
-}
-
-export function artistDisplayName(artist: Pick<Artist, 'stageName' | 'firstName' | 'lastName'>) {
-  const legal = `${artist.firstName} ${artist.lastName}`.trim();
-  const stage = artist.stageName.trim();
-  if (stage && stage.toLowerCase() !== legal.toLowerCase()) {
-    return `${stage} (${legal})`;
-  }
-  return legal;
 }
 
 const artistAccountSelect = {

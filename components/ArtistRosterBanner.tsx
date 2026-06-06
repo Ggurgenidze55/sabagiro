@@ -1,4 +1,4 @@
-import { artistDisplayName } from '@/lib/artist-tickets';
+import { artistDisplayName } from '@/lib/artist-display';
 
 type Props = {
   stageName: string;
@@ -35,8 +35,4 @@ export function ArtistRosterBanner({
       )}
     </div>
   );
-}
-
-export function ArtistUserBadge() {
-  return <span className="artist-user-badge">DJ</span>;
 }

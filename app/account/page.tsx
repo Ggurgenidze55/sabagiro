@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { ArtistRosterBanner, ArtistUserBadge } from '@/components/ArtistRosterBanner';
+import { ArtistRosterBanner } from '@/components/ArtistRosterBanner';
+import { ArtistUserBadge } from '@/components/ArtistUserBadge';
 import { SectionDivider } from '@/components/SectionDivider';
 import { SiteChrome } from '@/components/SiteChrome';
 import { TicketQrCard } from '@/components/TicketQrCard';

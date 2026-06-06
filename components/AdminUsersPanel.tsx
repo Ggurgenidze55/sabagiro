@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { AdminUserActionsMenu } from '@/components/AdminUserActionsMenu';
 import { AdminUserTicketsList } from '@/components/AdminUserTicketsList';
-import { ArtistUserBadge } from '@/components/ArtistRosterBanner';
+import { ArtistUserBadge } from '@/components/ArtistUserBadge';
 import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
 
 export type AdminUserRow = {
