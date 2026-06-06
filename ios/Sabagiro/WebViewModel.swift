@@ -15,6 +15,7 @@ final class WebViewModel: ObservableObject {
   init() {
     let config = WKWebViewConfiguration()
     config.defaultWebpagePreferences.allowsContentJavaScript = true
+    config.applicationNameForUserAgent = "SabagiroApp/1.0 iOS"
     config.websiteDataStore = .default()
     webView = WKWebView(frame: .zero, configuration: config)
     webView.isOpaque = false

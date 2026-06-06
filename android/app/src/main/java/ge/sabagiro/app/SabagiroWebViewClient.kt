@@ -51,7 +51,7 @@ class SabagiroWebViewClient(
                 }
               }
 
-              document.documentElement.classList.add('sabagiro-android-shell');
+              document.documentElement.classList.add('sabagiro-android-shell', 'sabagiro-in-app');
               if (document.getElementById('sabagiro-android-viewport-fix')) return;
 
               var style = document.createElement('style');
@@ -60,7 +60,8 @@ class SabagiroWebViewClient(
                 '.sabagiro-android-shell, .sabagiro-android-shell body { min-height: 100vh !important; }' +
                 '.sabagiro-android-shell .page, .sabagiro-android-shell .site-shell, .sabagiro-android-shell .site-page { min-height: 100vh !important; }' +
                 '@media (max-width: 899px) { .sabagiro-android-shell .hero { min-height: calc(100vh - 11.5rem) !important; } }' +
-                '.sabagiro-android-shell .nav-panel { height: 100vh !important; max-height: 100vh !important; }';
+                '.sabagiro-android-shell .nav-panel { height: 100vh !important; max-height: 100vh !important; }' +
+                '.sabagiro-in-app .app-downloads { display: none !important; }';
               document.head.appendChild(style);
             })();
             """

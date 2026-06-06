@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <script>
+      if (/SabagiroApp/i.test(navigator.userAgent)) {
+        document.documentElement.classList.add('sabagiro-in-app');
+      }
+    </script>
     <title>Sabagiro — Underground · Tbilisi</title>
     <meta name="description" content="Sabagiro — brutalist underground club. Night. Concrete. Sound. Tbilisi, Georgia." />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
@@ -589,6 +594,10 @@
         text-transform: uppercase;
         text-align: center;
         color: rgba(249, 193, 8, 0.72);
+      }
+
+      html.sabagiro-in-app .app-downloads {
+        display: none !important;
       }
 
       .events-panel {
