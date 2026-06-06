@@ -233,7 +233,24 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     setUsers((list) =>
       list.map((u) => (u.id === user.id ? { ...u, doorScanEnabled: enabled } : u)),
     );
-    setMsg(enabled ? 'Door scan enabled for user.' : 'Door scan disabled for user.');
+    if (data.email?.sent) {
+      setMsg(
+        enabled
+          ? 'Door scan enabled — notification email sent.'
+          : 'Door scan disabled — notification email sent.',
+      );
+    } else if (data.email?.skipped) {
+      setMsg(
+        enabled
+          ? 'Door scan enabled (email skipped — RESEND not configured).'
+          : 'Door scan disabled (email skipped — RESEND not configured).',
+      );
+    } else if (data.email && !data.email.sent) {
+      setMsg(enabled ? 'Door scan enabled for user.' : 'Door scan disabled for user.');
+      setError(data.email.error || 'Notification email failed to send.');
+    } else {
+      setMsg(enabled ? 'Door scan enabled for user.' : 'Door scan disabled for user.');
+    }
   }
 
   async function deleteUser(user: AdminUserRow) {

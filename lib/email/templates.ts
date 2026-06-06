@@ -89,6 +89,49 @@ export function freeTicketsEnabledEmail(opts: {
   };
 }
 
+export function doorScanEnabledEmail(opts: {
+  firstName: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const bodyHtml = `
+    <p>Hi ${name}, <strong style="color:${EMAIL_ACID}">door scan access</strong> is now enabled on your Sabagiro account.</p>
+    <p>At the club entrance, stay logged in on your phone, open a guest's ticket QR link, and tap <strong>CONFIRM ENTRY</strong>. Each QR works once.</p>
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">If you lose access or have questions, contact Sabagiro admin.</p>
+  `;
+  return {
+    subject: 'Sabagiro — door scan access enabled',
+    html: renderEmailLayout({
+      preheader: 'You can confirm ticket entry at the door',
+      title: 'Door scan enabled',
+      bodyHtml,
+      ctaLabel: 'LOG IN',
+      ctaHref: siteUrl('/login'),
+    }),
+    text: `Hi ${opts.firstName}, door scan access is enabled on your Sabagiro account. Log in on your phone at the door and confirm guest QR codes. Log in: ${siteUrl('/login')}`,
+  };
+}
+
+export function doorScanDisabledEmail(opts: {
+  firstName: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const bodyHtml = `
+    <p>Hi ${name}, <strong>door scan access</strong> has been removed from your Sabagiro account.</p>
+    <p>You can no longer confirm ticket entry at the door with this account. Contact Sabagiro if you think this is a mistake.</p>
+  `;
+  return {
+    subject: 'Sabagiro — door scan access removed',
+    html: renderEmailLayout({
+      preheader: 'Door scan access was turned off',
+      title: 'Door scan disabled',
+      bodyHtml,
+      ctaLabel: 'YOUR ACCOUNT',
+      ctaHref: siteUrl('/account'),
+    }),
+    text: `Hi ${opts.firstName}, door scan access was removed from your Sabagiro account. Account: ${siteUrl('/account')}`,
+  };
+}
+
 export function artistRosterAddedEmail(opts: {
   firstName: string;
   displayName: string;

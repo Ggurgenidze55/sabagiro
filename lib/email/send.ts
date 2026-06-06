@@ -7,6 +7,8 @@ import {
   accountRejectedEmail,
   accountVerifiedEmail,
   artistRosterAddedEmail,
+  doorScanDisabledEmail,
+  doorScanEnabledEmail,
   freeTicketsEnabledEmail,
   contactFormAckEmail,
   contactFormNotificationEmail,
@@ -57,6 +59,22 @@ export function sendFreeTicketsEnabledEmail(opts: {
   quota: number;
 }): Promise<SendEmailResult> {
   const msg = freeTicketsEnabledEmail(opts);
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendDoorScanEnabledEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
+  const msg = doorScanEnabledEmail({ firstName: opts.firstName });
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendDoorScanDisabledEmail(opts: {
+  to: string;
+  firstName: string;
+}): Promise<SendEmailResult> {
+  const msg = doorScanDisabledEmail({ firstName: opts.firstName });
   return sendEmail({ to: opts.to, ...msg });
 }
 
