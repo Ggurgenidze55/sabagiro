@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="155" height="40" viewBox="0 0 155 40" role="img" aria-label="Get it on Google Play">
+  <defs>
+    <linearGradient id="sabagiro-badge-bg-gp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#121212" />
+      <stop offset="1" stop-color="#0a0a0a" />
+    </linearGradient>
+  </defs>
+  <rect width="155" height="40" rx="5" fill="url(#sabagiro-badge-bg-gp)" stroke="#f9c108" stroke-width="1" stroke-opacity="0.72" />
+  <g transform="translate(7.5 8)">
+    <path fill="#f9c108" d="M1.04 19.5V4.5c0-.59.34-1.11.84-1.35l9.85 9.85-9.85 9.85c-.5-.24-.84-.76-.84-1.35z" />
+    <path fill="#fbc007" d="M14.35 14.62 3.59 20.84l8.49-8.49 2.27 2.27z" />
+    <path fill="#d4a006" d="M17.7 10.31c.34.27.59.69.59 1.19s-.22.82-.57 1.1l-2.29 1.32-2.5-2.5 2.5-2.5 2.29 1.32z" />
+    <path fill="#b08800" d="M3.59 3.16 14.35 9.38 11.08 12.65 3.59 3.16z" />
+  </g>
+  <text x="34" y="15.5" fill="#b0a89a" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="6" letter-spacing="0.14em">GET IT ON</text>
+  <text x="34" y="29" fill="#f9c108" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" letter-spacing="-0.02em">Google Play</text>
+</svg>
