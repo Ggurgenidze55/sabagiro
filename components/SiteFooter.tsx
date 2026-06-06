@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { SiteFooterBrand } from '@/components/SiteFooterBrand';
+import { FOOTER_PAGE_LINKS } from '@/lib/footer-links';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 const SOCIAL_LINKS = [
@@ -11,6 +13,13 @@ export function SiteFooter() {
   return (
     <footer className="footer" id="contact">
       <SiteFooterBrand />
+      <nav className="footer__nav" aria-label="Info">
+        {FOOTER_PAGE_LINKS.map((item) => (
+          <Link key={item.href} href={item.href}>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
       <ul className="social">
         {SOCIAL_LINKS.map((item) => (
           <li key={item.label}>

@@ -363,10 +363,9 @@ button {
 .footer {
   position: relative;
   z-index: 10;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 0.75rem 1.25rem;
   padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
   padding-bottom: max(0.85rem, env(safe-area-inset-bottom, 0px));
@@ -379,6 +378,7 @@ button {
 
 .footer__brand {
   display: inline-flex;
+  justify-self: start;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35em;
@@ -404,7 +404,39 @@ button {
   opacity: 0.65;
 }
 
+.footer__nav {
+  justify-self: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 1.5vw, 0.85rem);
+}
+
+.footer__nav a {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--hero-chip-border);
+  border-radius: 3px;
+  font-size: clamp(0.62rem, 1.8vw, 0.8rem);
+  letter-spacing: var(--hero-tagline-tracking);
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--hero-tagline-color);
+  text-decoration: none;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.footer__nav a:hover {
+  color: var(--acid);
+  border-color: rgba(249, 193, 8, 0.35);
+}
+
 .social {
+  justify-self: end;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -3108,6 +3140,7 @@ body.nav-lock {
   }
 
   .footer {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -3115,12 +3148,19 @@ body.nav-lock {
   }
 
   .footer__brand {
+    justify-self: center;
     justify-content: center;
     width: min(100%, 40rem);
     box-sizing: border-box;
   }
 
+  .footer__nav {
+    justify-self: center;
+    width: min(100%, 40rem);
+  }
+
   .social {
+    justify-self: center;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: stretch;
@@ -3545,6 +3585,68 @@ body.nav-lock {
 
 .about-pillar:last-child {
   padding-bottom: 0;
+}
+
+/* —— Info pages (lost & found, rules) —— */
+.info-page {
+  text-align: left;
+}
+
+.info-page__block {
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.info-page__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+}
+
+.info-page__list li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: var(--text-md);
+  line-height: 1.7;
+  color: rgba(212, 204, 196, 0.88);
+}
+
+.info-page__list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--acid);
+}
+
+.info-page__copy {
+  font-size: var(--text-md);
+  line-height: 1.75;
+  color: rgba(212, 204, 196, 0.88);
+  margin: 0;
+}
+
+.info-page__copy--muted {
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  color: rgba(176, 168, 154, 0.72);
+}
+
+.info-page__link {
+  color: var(--acid);
+  text-decoration: none;
+}
+
+.info-page__link:hover {
+  text-decoration: underline;
+}
+
+.info-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: clamp(1.5rem, 4vw, 2rem);
 }
 
 .about-pillar .section-divider {
