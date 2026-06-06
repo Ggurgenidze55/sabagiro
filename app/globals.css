@@ -3660,6 +3660,36 @@ body.nav-lock {
   }
 }
 
+.artist-roster-banner {
+  padding: 1.15rem 1.2rem;
+  border: 1px solid rgba(249, 193, 8, 0.32);
+  border-left: 3px solid var(--acid);
+  background: rgba(249, 193, 8, 0.06);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+.artist-roster-banner__title {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--acid);
+}
+
+.artist-user-badge {
+  display: inline-block;
+  padding: 0.18rem 0.5rem;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  vertical-align: middle;
+  color: var(--black);
+  background: var(--acid);
+  border: 1px solid var(--acid-hot);
+}
+
 .admin-section-title {
   margin: 0 0 1rem;
   font-size: 0.95rem;

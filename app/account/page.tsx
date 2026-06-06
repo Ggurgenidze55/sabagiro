@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { ArtistRosterBanner, ArtistUserBadge } from '@/components/ArtistRosterBanner';
 import { SectionDivider } from '@/components/SectionDivider';
 import { SiteChrome } from '@/components/SiteChrome';
 import { TicketQrCard } from '@/components/TicketQrCard';
+import { getArtistForAccountUser } from '@/lib/artist-tickets';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
@@ -22,6 +24,8 @@ export const metadata = { title: 'My account — Sabagiro' };
 export default async function AccountPage() {
   const user = await getSessionUser();
   if (!user) redirect('/login?next=/account');
+
+  const artist = await getArtistForAccountUser(user);
 
   const tickets = await prisma.ticket.findMany({
     where: { userId: user.id },
@@ -69,7 +73,15 @@ export default async function AccountPage() {
         <div>
           <h1 className="page-title">MY ACCOUNT</h1>
           <p className="page-lead">
-            {user.firstName} {user.lastName} · {user.email} · {user.phone}
+            {user.firstName} {user.lastName}
+            {artist ? (
+              <>
+                {' '}
+                <ArtistUserBadge />
+              </>
+            ) : null}
+            {' · '}
+            {user.email} · {user.phone}
           </p>
         </div>
         {user.role === 'ADMIN' ? (
@@ -80,6 +92,16 @@ export default async function AccountPage() {
           </div>
         ) : null}
       </div>
+
+      {artist ? (
+        <ArtistRosterBanner
+          stageName={artist.stageName}
+          firstName={artist.firstName}
+          lastName={artist.lastName}
+          weeklyTickets={artist.weeklyTickets}
+          active={artist.active}
+        />
+      ) : null}
 
       {user.role !== 'ADMIN' ? (
         <div

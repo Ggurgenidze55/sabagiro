@@ -171,3 +171,41 @@ export function artistDisplayName(artist: Pick<Artist, 'stageName' | 'firstName'
   }
   return legal;
 }
+
+const artistAccountSelect = {
+  stageName: true,
+  firstName: true,
+  lastName: true,
+  weeklyTickets: true,
+  active: true,
+} as const;
+
+/** Artist roster row linked to this account (by userId or email). */
+export async function getArtistForAccountUser(user: { id: string; email: string }) {
+  const byUser = await prisma.artist.findUnique({
+    where: { userId: user.id },
+    select: artistAccountSelect,
+  });
+  if (byUser) return byUser;
+
+  const byEmail = await prisma.artist.findFirst({
+    where: { email: user.email },
+    select: { ...artistAccountSelect, id: true, userId: true },
+  });
+  if (!byEmail) return null;
+
+  if (byEmail.userId !== user.id) {
+    await prisma.artist.update({
+      where: { id: byEmail.id },
+      data: { userId: user.id },
+    });
+  }
+
+  return {
+    stageName: byEmail.stageName,
+    firstName: byEmail.firstName,
+    lastName: byEmail.lastName,
+    weeklyTickets: byEmail.weeklyTickets,
+    active: byEmail.active,
+  };
+}
