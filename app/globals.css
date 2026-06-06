@@ -14,6 +14,8 @@
   --acid-hot: #fbc007;
   --neon-cyan: #00f0ff;
   --neon-magenta: #ff0044;
+  --status-verified: #22c55e;
+  --status-verified-hot: #4ade80;
   --font-display-fallback: system-ui, 'Segoe UI', sans-serif;
   --font-mono-fallback: ui-monospace, 'SFMono-Regular', monospace;
   /* Readable small copy (was ~8–10px, now ~11–13px at 16px root) */
@@ -1381,9 +1383,9 @@ button {
 }
 
 .admin-users-filter--verified.admin-users-filter--active {
-  border-color: var(--acid);
-  color: var(--acid);
-  background: rgba(249, 193, 8, 0.12);
+  border-color: var(--status-verified);
+  color: var(--status-verified-hot);
+  background: rgba(34, 197, 94, 0.12);
 }
 
 .admin-users-filter--pending.admin-users-filter--active {
@@ -2125,9 +2127,9 @@ button {
 
 .verify-badge--verified {
   color: var(--black);
-  background: var(--acid);
-  border-color: var(--acid-hot);
-  box-shadow: 0 0 14px rgba(249, 193, 8, 0.4);
+  background: var(--status-verified);
+  border-color: var(--status-verified-hot);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
 }
 
 .verify-badge--pending {
@@ -2152,7 +2154,7 @@ button {
 }
 
 .verify-banner--verified {
-  border-color: rgba(249, 193, 8, 0.35);
+  border-color: rgba(34, 197, 94, 0.45);
 }
 
 .verify-banner--pending {
