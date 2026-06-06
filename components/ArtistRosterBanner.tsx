@@ -19,12 +19,12 @@ export function ArtistRosterBanner({
 
   return (
     <div className="artist-roster-banner" style={{ marginBottom: '1.5rem' }}>
-      <p className="artist-roster-banner__title">DJ / Artist roster</p>
+      <p className="artist-roster-banner__title">DJ / Artist list</p>
       <p className="page-lead" style={{ marginBottom: '0.35rem' }}>
-        You are on the Sabagiro artist roster as <strong>{displayName}</strong>.
+        You are on the Sabagiro artist list as <strong>{displayName}</strong>.
       </p>
       {!active ? (
-        <p className="page-lead">Your roster profile is currently inactive — contact Sabagiro.</p>
+        <p className="page-lead">Your artist list profile is currently inactive — contact Sabagiro.</p>
       ) : weeklyTickets ? (
         <p className="page-lead">
           Complimentary QR tickets for upcoming events are emailed every{' '}

@@ -98,22 +98,22 @@ export function artistRosterAddedEmail(opts: {
   const rosterName = escapeHtml(opts.displayName);
   const scheduleLine = opts.weeklyTickets
     ? `<p>Every <strong style="color:${EMAIL_ACID}">Thursday at 20:00</strong> (Tbilisi time) you will receive complimentary QR tickets by email for every upcoming Sabagiro event. Each ticket is also saved in your account.</p>`
-    : `<p>You are on the roster with weekly auto-tickets turned off. Contact Sabagiro if you need event tickets.</p>`;
+    : `<p>You are on the list with weekly auto-tickets turned off. Contact Sabagiro if you need event tickets.</p>`;
   const bodyHtml = `
-    <p>Hi ${name}, you have been added to the <strong style="color:${EMAIL_ACID}">Sabagiro artist roster</strong>${rosterName !== name ? ` as <strong>${rosterName}</strong>` : ''}.</p>
+    <p>Hi ${name}, you have been added to the <strong style="color:${EMAIL_ACID}">Sabagiro artist list</strong>${rosterName !== name ? ` as <strong>${rosterName}</strong>` : ''}.</p>
     ${scheduleLine}
     <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show your QR at the door. See you underground.</p>
   `;
   return {
-    subject: 'Sabagiro — you\'re on the artist roster',
+    subject: 'Sabagiro — you\'re on the artist list',
     html: renderEmailLayout({
-      preheader: 'Added to the Sabagiro DJ / artist roster',
-      title: 'Artist roster',
+      preheader: 'Added to the Sabagiro DJ / artist list',
+      title: 'Artist list',
       bodyHtml,
       ctaLabel: 'YOUR ACCOUNT',
       ctaHref: siteUrl('/account'),
     }),
-    text: `Hi ${opts.firstName}, you were added to the Sabagiro artist roster as ${opts.displayName}. ${
+    text: `Hi ${opts.firstName}, you were added to the Sabagiro artist list as ${opts.displayName}. ${
       opts.weeklyTickets
         ? 'Weekly comp tickets are emailed every Thursday at 20:00 Tbilisi.'
         : 'Weekly auto-tickets are off on your profile.'

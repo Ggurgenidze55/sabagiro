@@ -96,7 +96,7 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
   }
 
   async function removeArtist(id: string) {
-    if (!window.confirm('Remove this artist from the roster?')) return;
+    if (!window.confirm('Remove this artist from the list?')) return;
     setError('');
     setMsg('');
     const res = await fetch(`/api/admin/artists/${id}`, { method: 'DELETE' });
@@ -144,11 +144,11 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
     <div className="admin-artists">
       <div className="admin-artists__intro">
         <p className="page-lead" style={{ marginBottom: '0.75rem' }}>
-          DJ roster — comp tickets for every published upcoming event, emailed each Thursday at 20:00
+          DJ list — comp tickets for every published upcoming event, emailed each Thursday at 20:00
           (Tbilisi).
         </p>
         <p className="form-foot" style={{ marginBottom: '1rem' }}>
-          Active roster: {activeCount} · Total: {artists.length}
+          Active on list: {activeCount} · Total: {artists.length}
         </p>
         <div className="cart-actions" style={{ marginBottom: '1.5rem' }}>
           <button type="button" className="btn btn--ghost" onClick={runDispatch} disabled={dispatchBusy}>
@@ -228,7 +228,7 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
       {msg ? <p className="form-ok">{msg}</p> : null}
 
       <h2 className="admin-section-title" style={{ marginTop: '2rem' }}>
-        Roster
+        List
       </h2>
       {artists.length === 0 ? (
         <p className="page-lead">No artists yet — add your first DJ above.</p>

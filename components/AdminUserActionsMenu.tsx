@@ -237,7 +237,7 @@ export function AdminUserActionsMenu({
               role="menuitem"
               onClick={() => runAction(onRemoveArtist)}
             >
-              Remove from DJ roster
+              Remove from DJ list
             </button>
           ) : (
             <button
@@ -246,7 +246,7 @@ export function AdminUserActionsMenu({
               role="menuitem"
               onClick={() => runAction(onAddArtist)}
             >
-              Add to DJ roster
+              Add to DJ list
             </button>
           )}
           <button

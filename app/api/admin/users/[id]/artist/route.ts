@@ -30,7 +30,7 @@ export async function POST(_request: Request, { params }: Params) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     if (user.role === 'ADMIN') {
-      return NextResponse.json({ error: 'Admin accounts cannot be added to the artist roster' }, { status: 400 });
+      return NextResponse.json({ error: 'Admin accounts cannot be added to the artist list' }, { status: 400 });
     }
 
     const existing = await prisma.artist.findFirst({
@@ -44,7 +44,7 @@ export async function POST(_request: Request, { params }: Params) {
         });
         return NextResponse.json({ ok: true, ...artistPayload(linked) });
       }
-      return NextResponse.json({ error: 'User is already on the artist roster' }, { status: 409 });
+      return NextResponse.json({ error: 'User is already on the artist list' }, { status: 409 });
     }
 
     const artist = await prisma.artist.create({
@@ -103,7 +103,7 @@ export async function DELETE(_request: Request, { params }: Params) {
       where: { OR: [{ userId: user.id }, { email: user.email }] },
     });
     if (!artist) {
-      return NextResponse.json({ error: 'User is not on the artist roster' }, { status: 404 });
+      return NextResponse.json({ error: 'User is not on the artist list' }, { status: 404 });
     }
 
     await prisma.artist.delete({ where: { id: artist.id } });

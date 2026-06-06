@@ -155,7 +155,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     const res = await fetch(`/api/admin/users/${user.id}/artist`, { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data.error || 'Could not add to artist roster');
+      setError(data.error || 'Could not add to artist list');
       return;
     }
     setUsers((list) =>
@@ -172,14 +172,14 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
       ),
     );
     if (data.email?.sent) {
-      setMsg('User added to DJ roster — notification email sent.');
+      setMsg('User added to DJ list — notification email sent.');
     } else if (data.email?.skipped) {
-      setMsg('User added to DJ roster (email skipped — RESEND not configured).');
+      setMsg('User added to DJ list (email skipped — RESEND not configured).');
     } else if (data.email && !data.email.sent) {
-      setMsg('User added to DJ roster.');
-      setError(data.email.error || 'Roster email failed to send.');
+      setMsg('User added to DJ list.');
+      setError(data.email.error || 'List notification email failed to send.');
     } else {
-      setMsg('User added to DJ roster.');
+      setMsg('User added to DJ list.');
     }
   }
 
@@ -189,7 +189,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
     const res = await fetch(`/api/admin/users/${user.id}/artist`, { method: 'DELETE' });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError(data.error || 'Could not remove from artist roster');
+      setError(data.error || 'Could not remove from artist list');
       return;
     }
     setUsers((list) =>
@@ -205,7 +205,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
           : u,
       ),
     );
-    setMsg('User removed from DJ roster.');
+    setMsg('User removed from DJ list.');
   }
 
   async function deleteUser(user: AdminUserRow) {

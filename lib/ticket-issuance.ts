@@ -38,7 +38,7 @@ export function describeTicketIssuance(
   if (ticket.source === 'ARTIST') {
     return {
       holderNote: 'Ticket Holder (Entry)',
-      actorNote: 'Artist roster · issued by',
+      actorNote: 'Artist list · issued by',
       actorLabel,
       ownerLabel,
       detail: `${actorLabel} · weekly artist ticket · ${ownerLabel}`,
