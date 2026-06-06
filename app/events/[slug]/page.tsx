@@ -11,7 +11,12 @@ import {
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
-import { formatGel, getProduct } from '@/lib/products';
+import {
+  getPublicEventPriceDisplay,
+  getPublicEventPriceLabel,
+  ONLINE_INVITATION_LABEL,
+} from '@/lib/event-price-display';
+import { getProduct } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +56,12 @@ export default async function EventPage({ params }: PageProps) {
   const isFreeEntry = Boolean(product.isFreeEntry);
   const canUseFreeGenerator = canGenerateFreeTicketsForEvent(user, isFreeEntry);
   const aboutText = product.about?.trim() || product.description;
+  const priceDisplay = getPublicEventPriceDisplay({
+    isLoggedIn: Boolean(user),
+    isFreeEntry,
+    priceGel: product.priceGel,
+    ticketsRemaining: product.ticketsRemaining,
+  });
 
   return (
     <SiteChrome current="events">
@@ -81,18 +92,17 @@ export default async function EventPage({ params }: PageProps) {
           </section>
         ) : null}
 
-        <div className="event-page__price-card">
-          <span className="event-page__price-label">{isFreeEntry ? 'Entry' : 'Ticket'}</span>
-          <p className="event-page__price">{isFreeEntry ? 'Free' : formatGel(product.priceGel)}</p>
-          {!isFreeEntry && product.ticketsRemaining === 0 ? (
-            <p className="event-page__stock">Sold out</p>
-          ) : null}
-        </div>
+        {priceDisplay ? (
+          <div className="event-page__price-card">
+            <span className="event-page__price-label">{getPublicEventPriceLabel(isFreeEntry)}</span>
+            <p className="event-page__price">{priceDisplay}</p>
+          </div>
+        ) : null}
 
         <div className="event-page__notices">
           {isFreeEntry ? (
             <p className="notice-banner notice-banner--inline">
-              Free entry event — complimentary tickets for invited guests only.
+              {ONLINE_INVITATION_LABEL} — complimentary access for invited guests only.
               {canUseFreeGenerator ? (
                 <>
                   {' '}

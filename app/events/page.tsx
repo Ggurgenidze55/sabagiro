@@ -2,7 +2,11 @@ import Link from 'next/link';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
-import { formatGel, listTicketProducts } from '@/lib/products';
+import {
+  getPublicEventCtaLabel,
+  getPublicEventPriceDisplay,
+} from '@/lib/event-price-display';
+import { listTicketProducts } from '@/lib/products';
 
 export const revalidate = 30;
 
@@ -27,7 +31,15 @@ export default async function EventsPage() {
         </p>
       ) : (
         <div className="product-grid">
-          {products.map((product) => (
+          {products.map((product) => {
+            const priceLabel = getPublicEventPriceDisplay({
+              isLoggedIn: Boolean(user),
+              isFreeEntry: Boolean(product.isFreeEntry),
+              priceGel: product.priceGel,
+              ticketsRemaining: product.ticketsRemaining,
+            });
+
+            return (
             <article
               key={product.slug}
               className="product-card"
@@ -40,22 +52,16 @@ export default async function EventsPage() {
               {!product.lineup && !product.venueTag ? (
                 <p className="product-card__meta">{product.description}</p>
               ) : null}
-              <p className="product-card__price">
-                {product.isFreeEntry
-                  ? 'Free entry'
-                  : product.ticketsRemaining === 0
-                    ? 'Sold out'
-                    : formatGel(product.priceFromGel ?? product.priceGel)}
-              </p>
+              {priceLabel ? <p className="product-card__price">{priceLabel}</p> : null}
               <Link href={`/events/${product.slug}`} className="btn btn--ghost">
-                {product.isFreeEntry
-                  ? 'FREE ENTRY'
-                  : product.ticketsRemaining === 0
-                    ? 'VIEW'
-                    : 'GET TICKETS'}
+                {getPublicEventCtaLabel({
+                  isFreeEntry: Boolean(product.isFreeEntry),
+                  ticketsRemaining: product.ticketsRemaining,
+                })}
               </Link>
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </SiteChrome>
