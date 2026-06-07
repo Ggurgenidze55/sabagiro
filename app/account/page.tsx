@@ -139,7 +139,7 @@ export default async function AccountPage() {
           No tickets yet. <Link href="/events">Browse events</Link>
         </p>
       ) : (
-        <div className="ticket-grid">
+        <div className="ticket-stack">
           {sortedTickets.map((t) => {
             const issuance = describeTicketIssuance(t, t.user, t.createdBy ?? t.user);
             const ctx = ticketQrContext(t, eventDatesBySlug);

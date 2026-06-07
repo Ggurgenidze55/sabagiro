@@ -23,18 +23,15 @@ export function TicketQrCard({
   qrAvailable = true,
   expiredMessage = 'This event has passed. QR code is no longer available.',
 }: TicketQrCardProps) {
+  const [open, setOpen] = useState(false);
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   const [qrToken, setQrToken] = useState<string | null>(null);
   const [walletEnabled, setWalletEnabled] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!qrAvailable) {
-      setLoading(false);
-      setDataUrl(null);
-      setQrToken(null);
-      setError('');
+    if (!open || !qrAvailable) {
       return;
     }
 
@@ -69,39 +66,62 @@ export function TicketQrCard({
     return () => {
       cancelled = true;
     };
-  }, [ticketId, qrAvailable]);
+  }, [ticketId, qrAvailable, open]);
 
   const walletHref = `/api/tickets/${ticketId}/wallet`;
-  const showWallet = qrAvailable && walletEnabled && status !== 'CANCELLED';
+  const showWallet = open && qrAvailable && walletEnabled && status !== 'CANCELLED';
 
   return (
-    <article className={`ticket-card${qrAvailable ? '' : ' ticket-card--archived'}`}>
-      <div className="ticket-card__head">
-        <h3>{productName}</h3>
-        <span className={`ticket-status ticket-status--${status.toLowerCase()}`}>{status}</span>
+    <article
+      className={`ticket-card${open ? ' ticket-card--open' : ' ticket-card--collapsed'}${qrAvailable ? '' : ' ticket-card--archived'}`}
+    >
+      <div className="ticket-card__summary">
+        <div className="ticket-card__head">
+          <h3>{productName}</h3>
+          <span className={`ticket-status ticket-status--${status.toLowerCase()}`}>{status}</span>
+        </div>
+        <button
+          type="button"
+          className="btn btn--ghost ticket-card__toggle"
+          aria-expanded={open}
+          onClick={() => setOpen((prev) => !prev)}
+        >
+          {open ? 'Hide ticket' : 'View ticket'}
+        </button>
       </div>
-      <p className="ticket-card__meta">
-        Entry: {holderName} · {personalId}
-      </p>
-      {issuanceLine ? <p className="ticket-card__meta">{issuanceLine}</p> : null}
-      {!qrAvailable ? (
-        <p className="ticket-card__expired">{expiredMessage}</p>
-      ) : dataUrl ? (
-        <img src={dataUrl} alt="Ticket QR code" className="ticket-card__qr" width={200} height={200} />
-      ) : loading ? (
-        <p className="ticket-card__loading">Loading QR…</p>
-      ) : (
-        <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
-      )}
-      {showWallet ? (
-        <a href={walletHref} className="wallet-badge" download>
-          Add to Apple Wallet
-        </a>
-      ) : null}
-      {qrToken ? (
-        <a href={`/scan/${qrToken}`} className="ticket-card__link">
-          Scan link →
-        </a>
+
+      {open ? (
+        <div className="ticket-card__body">
+          <p className="ticket-card__meta">
+            Entry: {holderName} · {personalId}
+          </p>
+          {issuanceLine ? <p className="ticket-card__meta">{issuanceLine}</p> : null}
+          {!qrAvailable ? (
+            <p className="ticket-card__expired">{expiredMessage}</p>
+          ) : dataUrl ? (
+            <img
+              src={dataUrl}
+              alt="Ticket QR code"
+              className="ticket-card__qr"
+              width={200}
+              height={200}
+            />
+          ) : loading ? (
+            <p className="ticket-card__loading">Loading QR…</p>
+          ) : (
+            <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
+          )}
+          {showWallet ? (
+            <a href={walletHref} className="wallet-badge" download>
+              Add to Apple Wallet
+            </a>
+          ) : null}
+          {qrToken ? (
+            <a href={`/scan/${qrToken}`} className="ticket-card__link">
+              Scan link →
+            </a>
+          ) : null}
+        </div>
       ) : null}
     </article>
   );

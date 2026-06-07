@@ -1183,6 +1183,13 @@ button {
   gap: 1.25rem;
 }
 
+.ticket-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 36rem;
+}
+
 .ticket-card {
   border: 1px solid rgba(176, 168, 154, 0.22);
   padding: 1.1rem;
@@ -1202,6 +1209,34 @@ button {
   font-size: 1.1rem;
   letter-spacing: 0.08em;
   color: var(--concrete-light);
+}
+
+.ticket-card__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ticket-card__summary .ticket-card__head {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.ticket-card__toggle {
+  flex-shrink: 0;
+  min-height: 44px;
+}
+
+.ticket-card__body {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(176, 168, 154, 0.18);
+}
+
+.ticket-card--collapsed {
+  padding-block: 0.85rem;
 }
 
 .ticket-card__meta {
