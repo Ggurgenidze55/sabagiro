@@ -63,6 +63,7 @@ export function ticketAlreadyOwnedMessage(limit: number) {
 
 export function freeTicketsRemaining(user: Pick<User, 'freeTicketsEnabled' | 'freeTicketsQuota' | 'freeTicketsUsed'>) {
   if (!user.freeTicketsEnabled) return 0;
+  /** Legacy helper — quota is enforced per event; this is total issued count only. */
   return Math.max(0, user.freeTicketsQuota - user.freeTicketsUsed);
 }
 

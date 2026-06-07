@@ -37,7 +37,7 @@ export default async function FreeTicketsPage() {
         <div>
           <h1 className="page-title">FREE TICKETS</h1>
           <p className="page-lead">
-            Free-entry events only · {user.freeTicketsQuota} ticket(s) per event
+            All events · {user.freeTicketsQuota} free ticket(s) per event
           </p>
         </div>
         <div className="dash-head__actions">

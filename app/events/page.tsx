@@ -7,6 +7,8 @@ import {
   getPublicEventPriceDisplay,
 } from '@/lib/event-price-display';
 import { listTicketProducts } from '@/lib/products';
+import { canUseFreeTicketGenerator } from '@/lib/ticket-access';
+import { canPurchaseTickets } from '@/lib/verification';
 
 export const revalidate = 30;
 
@@ -17,6 +19,9 @@ export const metadata = {
 
 export default async function EventsPage() {
   const user = await getSessionUser();
+  const hasFreeTicketAccess = Boolean(
+    user && canUseFreeTicketGenerator(user) && canPurchaseTickets(user),
+  );
   const products = await listTicketProducts();
 
   return (
@@ -35,6 +40,7 @@ export default async function EventsPage() {
             const priceLabel = getPublicEventPriceDisplay({
               isLoggedIn: Boolean(user),
               isFreeEntry: Boolean(product.isFreeEntry),
+              hasFreeTicketAccess,
               priceGel: product.priceGel,
               ticketsRemaining: product.ticketsRemaining,
             });
@@ -56,6 +62,7 @@ export default async function EventsPage() {
               <Link href={`/events/${product.slug}`} className="btn btn--ghost">
                 {getPublicEventCtaLabel({
                   isFreeEntry: Boolean(product.isFreeEntry),
+                  hasFreeTicketAccess,
                   ticketsRemaining: product.ticketsRemaining,
                 })}
               </Link>

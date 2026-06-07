@@ -60,18 +60,23 @@ export function showFreeTicketsInNav(
   return user.freeTicketsEnabled === true && user.verificationStatus === 'VERIFIED';
 }
 
+export function canUseFreeTicketGenerator(
+  user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
+): boolean {
+  return showFreeTicketsInNav(user);
+}
+
+/** @deprecated Use canUseFreeTicketGenerator — quota applies per event, not only free-entry events. */
 export function canGenerateFreeTicketsForEvent(
   user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
-  isFreeEntry: boolean,
 ): boolean {
-  if (!isFreeEntry) return false;
-  return showFreeTicketsInNav(user);
+  return canUseFreeTicketGenerator(user);
 }
 
 export function getFreeTicketAccessNotice(
   user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
 ): TicketAccessNotice | null {
-  if (canGenerateFreeTicketsForEvent(user, true)) return null;
+  if (canUseFreeTicketGenerator(user)) return null;
 
   if (!user) {
     return {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
-import { listPublishedFreeEntryEvents } from '@/lib/events';
+import { listPublishedEvents } from '@/lib/events';
 import { canPurchaseTickets } from '@/lib/verification';
 
 export async function GET() {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ events: [] });
     }
 
-    const events = await listPublishedFreeEntryEvents();
+    const events = await listPublishedEvents();
     return NextResponse.json({
       events: events.map((e) => ({ slug: e.slug, title: e.title })),
     });

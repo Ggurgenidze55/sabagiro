@@ -95,7 +95,9 @@ export function AdminUserTicketPolicyForm({ user, onUpdated, onSaved }: AdminUse
           disabled={!freeTicketsEnabled}
         />
       </label>
-      <p className="form-foot">Used (all events): {user.freeTicketsUsed}</p>
+      <p className="form-foot">
+        Total issued: {user.freeTicketsUsed} · Quota: {user.freeTicketsQuota} per event
+      </p>
       {error ? <p className="form-error">{error}</p> : null}
       {msg ? <p className="form-ok">{msg}</p> : null}
       <button type="submit" className="btn" disabled={saving}>

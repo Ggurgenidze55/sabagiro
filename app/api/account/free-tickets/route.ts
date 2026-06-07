@@ -77,15 +77,6 @@ export async function POST(request: Request) {
     if (message === 'INVALID_PRODUCT') {
       return NextResponse.json({ error: 'Invalid event' }, { status: 400 });
     }
-    if (message === 'NOT_FREE_ENTRY') {
-      return NextResponse.json(
-        {
-          error: 'This event is not free entry — use the shop for paid tickets.',
-          code: 'NOT_FREE_ENTRY',
-        },
-        { status: 403 },
-      );
-    }
     if (message === 'HOLDER_REQUIRED') {
       return NextResponse.json(
         { error: 'Enter guest holder details for this ticket.', code: 'HOLDER_REQUIRED' },

@@ -59,7 +59,7 @@ export function FreeTicketGenerator({
           setSelectedSlug((prev) => prev || list[0]?.slug || '');
         }
       })
-      .catch(() => setError('Could not load free-entry events'));
+      .catch(() => setError('Could not load events'));
   }, []);
 
   const usedForSelected = selectedSlug ? (localUsedByEvent[selectedSlug] ?? 0) : 0;
@@ -122,7 +122,7 @@ export function FreeTicketGenerator({
     <section style={{ marginBottom: '2.5rem' }}>
       <h2 className="section-title section-title--flush">Free Ticket Generator</h2>
       <p className="page-lead" style={{ marginBottom: '0.5rem' }}>
-        Free-entry events only · {quota} ticket(s) per event. Your first ticket uses your account
+        All events · {quota} ticket(s) per event. Your first ticket uses your account
         details; additional tickets need guest holder details.
       </p>
       {!profileComplete && !needsHolderForm ? (
@@ -152,7 +152,7 @@ export function FreeTicketGenerator({
             }}
           >
             {events.length === 0 ? (
-              <option value="">No free-entry events published</option>
+              <option value="">No published events</option>
             ) : (
               events.map((ev) => {
                 const used = localUsedByEvent[ev.slug] ?? 0;

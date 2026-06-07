@@ -4,7 +4,7 @@ import { EventTicketButton } from '@/components/EventTicketButton';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import {
-  canGenerateFreeTicketsForEvent,
+  canUseFreeTicketGenerator,
   getFreeTicketAccessNotice,
 } from '@/lib/ticket-access';
 import { getSessionUser } from '@/lib/auth';
@@ -62,39 +62,44 @@ export default async function EventPage({ params }: PageProps) {
   );
   const showLimitDetails = Boolean(user?.freeTicketsEnabled);
   const isFreeEntry = Boolean(product.isFreeEntry);
-  const canUseFreeGenerator = canGenerateFreeTicketsForEvent(user, isFreeEntry);
-  const freeTicketsRemaining =
-    user && isFreeEntry && canUseFreeGenerator
-      ? await remainingFreeTicketsForEvent(user, product.slug)
-      : 0;
+  const canUseFreeGenerator = canUseFreeTicketGenerator(user);
+  const freeTicketsRemaining = user && canUseFreeGenerator
+    ? await remainingFreeTicketsForEvent(user, product.slug)
+    : 0;
   const existingPurchased =
     user && product.type === 'ticket'
       ? await countPurchasedTicketsForEvent(user.id, product.slug)
       : 0;
   const existingFree =
-    user && isFreeEntry && canUseFreeGenerator
+    user && canUseFreeGenerator
       ? await countFreeTicketsForEvent(user.id, product.slug)
       : 0;
   const profileComplete = Boolean(user && isProfileCompleteForTicket(user));
-  const canInstantTicket =
+  const canInstantFreeTicket =
     Boolean(user) &&
     canPurchaseTickets(user!) &&
     profileComplete &&
-    (isFreeEntry
-      ? canUseFreeGenerator && freeTicketsRemaining > 0 && existingFree === 0
-      : !cannotBuyMore && (product.ticketsRemaining ?? 0) > 0);
-  const canGuestTicket =
+    canUseFreeGenerator &&
+    freeTicketsRemaining > 0 &&
+    existingFree === 0;
+  const canGuestFreeTicket =
     Boolean(user) &&
     canPurchaseTickets(user!) &&
-    (isFreeEntry
-      ? canUseFreeGenerator && freeTicketsRemaining > 0 && existingFree > 0
-      : false);
-  const useInstantCheckout =
-    canInstantTicket && !isFreeEntry && extraHolderCount(1, existingPurchased) === 0;
+    canUseFreeGenerator &&
+    freeTicketsRemaining > 0 &&
+    existingFree > 0;
+  const useInstantPaidCheckout =
+    !canUseFreeGenerator &&
+    Boolean(user) &&
+    canPurchaseTickets(user!) &&
+    profileComplete &&
+    !cannotBuyMore &&
+    (product.ticketsRemaining ?? 0) > 0 &&
+    extraHolderCount(1, existingPurchased) === 0;
   const canGuestPaidTicket =
+    !canUseFreeGenerator &&
     Boolean(user) &&
     canPurchaseTickets(user!) &&
-    !isFreeEntry &&
     !cannotBuyMore &&
     (product.ticketsRemaining ?? 0) > 0 &&
     existingPurchased > 0;
@@ -102,6 +107,7 @@ export default async function EventPage({ params }: PageProps) {
   const priceDisplay = getPublicEventPriceDisplay({
     isLoggedIn: Boolean(user),
     isFreeEntry,
+    hasFreeTicketAccess: canUseFreeGenerator,
     priceGel: product.priceGel,
     ticketsRemaining: product.ticketsRemaining,
   });
@@ -137,26 +143,31 @@ export default async function EventPage({ params }: PageProps) {
 
         {priceDisplay ? (
           <div className="event-page__price-card">
-            <span className="event-page__price-label">{getPublicEventPriceLabel(isFreeEntry)}</span>
+            <span className="event-page__price-label">
+              {getPublicEventPriceLabel(isFreeEntry, canUseFreeGenerator)}
+            </span>
             <p className="event-page__price">{priceDisplay}</p>
           </div>
         ) : null}
 
         <div className="event-page__notices">
-          {isFreeEntry ? (
+          {isFreeEntry && !canUseFreeGenerator ? (
             <>
               <p className="notice-banner notice-banner--inline">
                 {ONLINE_INVITATION_LABEL} — complimentary access for invited guests only.
               </p>
-              {!canUseFreeGenerator ? (
-                <TicketAccessNotice user={user} getNotice={getFreeTicketAccessNotice} />
-              ) : null}
+              <TicketAccessNotice user={user} getNotice={getFreeTicketAccessNotice} />
             </>
+          ) : canUseFreeGenerator ? (
+            <p className="notice-banner notice-banner--inline">
+              {ONLINE_INVITATION_LABEL} — {user!.freeTicketsQuota} free ticket(s) per event on your
+              account.
+            </p>
           ) : (
             <TicketAccessNotice user={user} />
           )}
 
-          {user && canPurchaseTickets(user) && !profileComplete ? (
+          {user && canPurchaseTickets(user) && !profileComplete && canUseFreeGenerator ? (
             <p className="notice-banner notice-banner--inline">
               Complete your profile in Settings before getting a ticket.{' '}
               <Link href="/account/settings" className="btn btn--ghost event-page__notice-btn">
@@ -165,7 +176,16 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {isFreeEntry && canUseFreeGenerator && freeTicketsRemaining <= 0 ? (
+          {user && canPurchaseTickets(user) && !profileComplete && !canUseFreeGenerator ? (
+            <p className="notice-banner notice-banner--inline">
+              Complete your profile in Settings before buying a ticket.{' '}
+              <Link href="/account/settings" className="btn btn--ghost event-page__notice-btn">
+                Settings
+              </Link>
+            </p>
+          ) : null}
+
+          {canUseFreeGenerator && freeTicketsRemaining <= 0 ? (
             <p className="notice-banner notice-banner--inline">
               Free ticket limit reached for this event ({user!.freeTicketsQuota}/event).
               <Link href="/account" className="btn btn--ghost event-page__notice-btn">
@@ -174,7 +194,11 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {!isFreeEntry && user && canPurchaseTickets(user) && cannotBuyMore && showLimitDetails ? (
+          {!canUseFreeGenerator &&
+          user &&
+          canPurchaseTickets(user) &&
+          cannotBuyMore &&
+          showLimitDetails ? (
             <p className="notice-banner notice-banner--inline">
               Purchase limit reached for this event ({purchaseLimit}).
               <Link href="/account" className="btn btn--ghost event-page__notice-btn">
@@ -183,13 +207,13 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {isFreeEntry && canUseFreeGenerator && canGuestTicket ? (
+          {canUseFreeGenerator && canGuestFreeTicket ? (
             <p className="event-page__hint">
               Additional free tickets require guest holder details.
             </p>
           ) : null}
 
-          {!isFreeEntry &&
+          {!canUseFreeGenerator &&
           user &&
           canPurchaseTickets(user) &&
           !cannotBuyMore &&
@@ -199,7 +223,7 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {!isFreeEntry &&
+          {!canUseFreeGenerator &&
           user &&
           canPurchaseTickets(user) &&
           !cannotBuyMore &&
@@ -213,20 +237,18 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="event-page__actions">
-          {isFreeEntry ? (
-            canInstantTicket ? (
-              <EventTicketButton slug={product.slug} isFreeEntry />
-            ) : canGuestTicket ? (
-              <EventTicketButton
-                slug={product.slug}
-                isFreeEntry
-                needsHolderForm
-                ticketNumber={existingFree + 1}
-              />
-            ) : null
-          ) : product.ticketsRemaining === 0 ? (
+          {canInstantFreeTicket ? (
+            <EventTicketButton slug={product.slug} isFreeEntry />
+          ) : canGuestFreeTicket ? (
+            <EventTicketButton
+              slug={product.slug}
+              isFreeEntry
+              needsHolderForm
+              ticketNumber={existingFree + 1}
+            />
+          ) : !canUseFreeGenerator && product.ticketsRemaining === 0 ? (
             <p className="form-error event-page__sold-out">Sold out</p>
-          ) : useInstantCheckout ? (
+          ) : useInstantPaidCheckout ? (
             <EventTicketButton slug={product.slug} isFreeEntry={false} label="Buy ticket" />
           ) : canGuestPaidTicket ? (
             <EventTicketButton

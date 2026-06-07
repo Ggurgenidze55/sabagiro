@@ -408,7 +408,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                                 <span className="table-sub">
                                   Free:{' '}
                                   {u.freeTicketsEnabled
-                                    ? `${u.freeTicketsUsed}/${u.freeTicketsQuota}`
+                                    ? `${u.freeTicketsQuota}/event · ${u.freeTicketsUsed} issued`
                                     : 'off'}
                                 </span>
                                 <br />
