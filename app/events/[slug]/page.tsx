@@ -65,6 +65,7 @@ export default async function EventPage({ params }: PageProps) {
   const canAccessFree = canAccessFreeTicketForEvent(user, eventMeta);
   const showInvitationPrice = showsOnlineInvitationForUser(user, eventMeta);
   const perEventFreeLimit = user && canAccessFree ? getFreeEntryQuotaLimit(user, eventMeta) : 0;
+  const purchaseLimit = user ? getTicketLimitPerEvent(user) : 1;
   const purchaseRemaining =
     user && product.type === 'ticket'
       ? await remainingPurchaseSlots(user, product.slug)
