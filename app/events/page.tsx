@@ -6,9 +6,8 @@ import {
   getPublicEventCtaLabel,
   getPublicEventPriceDisplay,
 } from '@/lib/event-price-display';
+import { canAccessFreeTicketForEvent, showsOnlineInvitationForUser } from '@/lib/free-entry-access';
 import { listTicketProducts } from '@/lib/products';
-import { canUseFreeTicketGenerator } from '@/lib/ticket-access';
-import { canPurchaseTickets } from '@/lib/verification';
 
 export const revalidate = 30;
 
@@ -19,9 +18,6 @@ export const metadata = {
 
 export default async function EventsPage() {
   const user = await getSessionUser();
-  const hasFreeTicketAccess = Boolean(
-    user && canUseFreeTicketGenerator(user) && canPurchaseTickets(user),
-  );
   const products = await listTicketProducts();
 
   return (
@@ -37,10 +33,16 @@ export default async function EventsPage() {
       ) : (
         <div className="product-grid">
           {products.map((product) => {
+            const eventMeta = {
+              isFreeEntry: Boolean(product.isFreeEntry),
+              freeEntryAccess: product.freeEntryAccess ?? 'INVITED_ONLY',
+            };
+            const showInvitationPrice = showsOnlineInvitationForUser(user, eventMeta);
+            const hasFreeTicketAccess = canAccessFreeTicketForEvent(user, eventMeta);
             const priceLabel = getPublicEventPriceDisplay({
               isLoggedIn: Boolean(user),
               isFreeEntry: Boolean(product.isFreeEntry),
-              hasFreeTicketAccess,
+              hasFreeTicketAccess: showInvitationPrice,
               priceGel: product.priceGel,
               ticketsRemaining: product.ticketsRemaining,
             });
@@ -62,7 +64,7 @@ export default async function EventsPage() {
               <Link href={`/events/${product.slug}`} className="btn btn--ghost">
                 {getPublicEventCtaLabel({
                   isFreeEntry: Boolean(product.isFreeEntry),
-                  hasFreeTicketAccess,
+                  hasFreeTicketAccess: showInvitationPrice,
                   ticketsRemaining: product.ticketsRemaining,
                 })}
               </Link>

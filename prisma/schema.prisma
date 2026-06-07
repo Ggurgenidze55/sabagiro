@@ -51,6 +51,11 @@ enum PaymentStatus {
   FAILED
 }
 
+enum FreeEntryAccess {
+  ALL_VERIFIED
+  INVITED_ONLY
+}
+
 model User {
   id                 String             @id @default(cuid())
   email              String             @unique
@@ -156,8 +161,10 @@ model ClubEvent {
   eventDate   String?
   accent      String            @default("#f9c108")
   priceGel    Int               @default(45)
-  isFreeEntry Boolean           @default(false)
-  isFeatured  Boolean           @default(false)
+  isFreeEntry      Boolean           @default(false)
+  freeEntryAccess  FreeEntryAccess   @default(INVITED_ONLY)
+  artistTicketsEnabled Boolean       @default(false)
+  isFeatured       Boolean           @default(false)
   published   Boolean           @default(true)
   sortOrder   Int               @default(0)
   createdAt   DateTime          @default(now())

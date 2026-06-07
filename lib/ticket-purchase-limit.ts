@@ -1,5 +1,11 @@
 import type { Role, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
+import {
+  getFreeEntryQuotaLimit,
+  type FreeEntryEventMeta,
+  VERIFIED_FREE_ENTRY_LIMIT,
+} from '@/lib/free-entry-access';
+import { canPurchaseTickets } from '@/lib/verification';
 
 export function purchaseLimitApplies(user: { role: Role }) {
   return user.role !== 'ADMIN';
@@ -79,11 +85,41 @@ export async function countFreeTicketsForEvent(userId: string, eventSlug: string
 }
 
 export async function remainingFreeTicketsForEvent(
-  user: Pick<User, 'id' | 'role' | 'freeTicketsEnabled' | 'freeTicketsQuota'>,
+  user: Pick<User, 'id' | 'role' | 'freeTicketsEnabled' | 'freeTicketsQuota' | 'verificationStatus'>,
   eventSlug: string,
+  eventMeta?: FreeEntryEventMeta,
 ) {
   if (user.role === 'ADMIN') return 99;
-  if (!user.freeTicketsEnabled) return 0;
+
+  let meta = eventMeta;
+  if (!meta) {
+    const row = (await prisma.clubEvent.findUnique({
+      where: { slug: eventSlug },
+    })) as { isFreeEntry: boolean; freeEntryAccess?: FreeEntryEventMeta['freeEntryAccess'] } | null;
+    meta = {
+      isFreeEntry: row?.isFreeEntry ?? false,
+      freeEntryAccess: row?.freeEntryAccess ?? 'INVITED_ONLY',
+    };
+  }
+
   const used = await countFreeTicketsForEvent(user.id, eventSlug);
+
+  if (meta.isFreeEntry && meta.freeEntryAccess === 'ALL_VERIFIED') {
+    if (!canPurchaseTickets(user)) return 0;
+    return Math.max(0, VERIFIED_FREE_ENTRY_LIMIT - used);
+  }
+
+  if (!user.freeTicketsEnabled) return 0;
   return Math.max(0, user.freeTicketsQuota - used);
+}
+
+export function freeTicketLimitMessage(
+  user: Pick<User, 'freeTicketsEnabled' | 'freeTicketsQuota'>,
+  event: FreeEntryEventMeta,
+): string {
+  const limit = getFreeEntryQuotaLimit(user, event);
+  if (event.isFreeEntry && event.freeEntryAccess === 'ALL_VERIFIED') {
+    return `Free ticket limit reached for this event (${VERIFIED_FREE_ENTRY_LIMIT}/event).`;
+  }
+  return `Free ticket limit reached for this event (${limit}/event).`;
 }

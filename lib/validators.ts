@@ -112,6 +112,8 @@ export const clubEventSchema = z.object({
   accent: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/),
   priceGel: z.coerce.number().int().min(0).max(10000),
   isFreeEntry: z.boolean().optional(),
+  freeEntryAccess: z.enum(['ALL_VERIFIED', 'INVITED_ONLY']).optional(),
+  artistTicketsEnabled: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   published: z.boolean().optional(),
   sortOrder: z.coerce.number().int().optional(),

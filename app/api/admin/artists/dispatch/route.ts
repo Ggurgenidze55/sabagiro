@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { artistDispatchWeekKey, runWeeklyArtistTicketDispatch } from '@/lib/artist-tickets';
+import { runArtistPreEventTicketDispatch } from '@/lib/artist-tickets';
 import { requireAdmin } from '@/lib/auth';
 
-/** Admin: run this week's artist ticket batch now (same logic as Thursday cron). */
+/** Admin: send DJ list tickets for events happening tomorrow (same as daily cron). */
 export async function POST() {
   try {
     const admin = await requireAdmin();
-    const result = await runWeeklyArtistTicketDispatch({
-      weekKey: artistDispatchWeekKey(),
+    const result = await runArtistPreEventTicketDispatch({
       createdByUserId: admin.id,
     });
     return NextResponse.json({ ok: true, result });

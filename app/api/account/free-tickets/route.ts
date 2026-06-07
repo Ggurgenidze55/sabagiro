@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail } from '@/lib/email/dispatch';
+import { canAccessFreeTicketForEvent } from '@/lib/free-entry-access';
+import { getProduct } from '@/lib/products';
+import { resolveNextTicketHolder } from '@/lib/resolve-ticket-holder';
 import { createFreeTicketForVerifiedUser, deliverTicketEmail } from '@/lib/tickets';
 import {
   countFreeTicketsForEvent,
+  freeTicketLimitMessage,
   remainingFreeTicketsForEvent,
 } from '@/lib/ticket-purchase-limit';
-import { resolveNextTicketHolder } from '@/lib/resolve-ticket-holder';
 import { canPurchaseTickets } from '@/lib/verification';
 import { formatValidationError, freeTicketGenerateSchema } from '@/lib/validators';
 
@@ -23,20 +26,36 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!user.freeTicketsEnabled) {
+    const body = freeTicketGenerateSchema.parse(await request.json());
+    const product = await getProduct(body.productSlug);
+    if (!product || product.type !== 'ticket') {
+      return NextResponse.json({ error: 'Invalid event' }, { status: 400 });
+    }
+
+    const eventMeta = {
+      isFreeEntry: Boolean(product.isFreeEntry),
+      freeEntryAccess: product.freeEntryAccess ?? 'INVITED_ONLY',
+    };
+
+    if (!canAccessFreeTicketForEvent(user, eventMeta)) {
       return NextResponse.json(
-        { error: 'Free ticket generator is not enabled on your account.', code: 'NO_FREE_TICKETS' },
+        {
+          error:
+            eventMeta.isFreeEntry && eventMeta.freeEntryAccess === 'INVITED_ONLY'
+              ? 'Free ticket generator is not enabled on your account.'
+              : 'You cannot claim a free ticket for this event.',
+          code: 'NO_FREE_TICKETS',
+        },
         { status: 403 },
       );
     }
 
-    const body = freeTicketGenerateSchema.parse(await request.json());
-    const remainingForEvent = await remainingFreeTicketsForEvent(user, body.productSlug);
+    const remainingForEvent = await remainingFreeTicketsForEvent(user, body.productSlug, eventMeta);
 
     if (remainingForEvent <= 0) {
       return NextResponse.json(
         {
-          error: `Free ticket limit reached for this event (${user.freeTicketsQuota}/event).`,
+          error: freeTicketLimitMessage(user, eventMeta),
           code: 'NO_FREE_TICKETS',
         },
         { status: 409 },

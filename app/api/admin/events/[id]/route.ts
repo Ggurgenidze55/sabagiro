@@ -43,6 +43,10 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     const isFreeEntry = body.isFreeEntry ?? existing.isFreeEntry;
+    const freeEntryAccess =
+      body.freeEntryAccess ??
+      ((existing as typeof existing & { freeEntryAccess?: 'ALL_VERIFIED' | 'INVITED_ONLY' })
+        .freeEntryAccess ?? 'INVITED_ONLY');
     const derivedLabels = body.eventDate ? labelsFromEventDate(body.eventDate) : null;
     const dayLabel = derivedLabels?.dayLabel ?? body.dayLabel ?? existing.dayLabel;
     const dateLabel = derivedLabels?.dateLabel ?? body.dateLabel ?? existing.dateLabel;
@@ -91,10 +95,16 @@ export async function PATCH(request: Request, { params }: Params) {
           ...(body.accent !== undefined ? { accent: body.accent } : {}),
           priceGel,
           ...(body.isFreeEntry !== undefined ? { isFreeEntry: body.isFreeEntry } : {}),
+          ...(body.freeEntryAccess !== undefined || body.isFreeEntry !== undefined
+            ? { freeEntryAccess: isFreeEntry ? freeEntryAccess : 'INVITED_ONLY' }
+            : {}),
+          ...(body.artistTicketsEnabled !== undefined
+            ? { artistTicketsEnabled: body.artistTicketsEnabled }
+            : {}),
           ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
           ...(body.published !== undefined ? { published: body.published } : {}),
           ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),
-        },
+        } as Parameters<typeof tx.clubEvent.update>[0]['data'],
         include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
       });
     });

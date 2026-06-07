@@ -27,8 +27,9 @@ export function ArtistListBanner({
         <p className="page-lead">Your artist list profile is currently inactive — contact Sabagiro.</p>
       ) : weeklyTickets ? (
         <p className="page-lead">
-          Complimentary QR tickets for upcoming events are emailed every{' '}
-          <strong>Thursday at 20:00</strong> (Tbilisi). They also appear below.
+          Complimentary QR tickets are emailed{' '}
+          <strong>one day before each event</strong> (when that event has DJ tickets enabled). They
+          also appear below.
         </p>
       ) : (
         <p className="page-lead">Weekly auto-tickets are off — contact Sabagiro for event access.</p>

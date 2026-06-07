@@ -22,6 +22,8 @@ type ClubEventRow = {
   accent: string;
   priceGel: number;
   isFreeEntry: boolean;
+  freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
+  artistTicketsEnabled: boolean;
   isFeatured: boolean;
   published: boolean;
   sortOrder: number;
@@ -36,7 +38,7 @@ const defaultTiers: TierFormRow[] = [
   { label: 'Wave 3', quantity: 10, priceGel: 55 },
 ];
 
-const defaultForm = {
+const defaultFormBase = {
   title: '',
   slug: '',
   about: '',
@@ -52,6 +54,15 @@ const defaultForm = {
   isFeatured: false,
   published: true,
   sortOrder: 0,
+};
+
+const defaultForm: typeof defaultFormBase & {
+  freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
+  artistTicketsEnabled: boolean;
+} = {
+  ...defaultFormBase,
+  freeEntryAccess: 'INVITED_ONLY',
+  artistTicketsEnabled: false,
 };
 
 function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
@@ -169,6 +180,8 @@ export function AdminEventsPanel() {
       accent: ev.accent,
       priceGel: ev.priceGel,
       isFreeEntry: ev.isFreeEntry,
+      freeEntryAccess: ev.freeEntryAccess ?? 'INVITED_ONLY',
+      artistTicketsEnabled: ev.artistTicketsEnabled ?? false,
       isFeatured: ev.isFeatured,
       published: ev.published,
       sortOrder: ev.sortOrder,
@@ -215,6 +228,8 @@ export function AdminEventsPanel() {
       imagePath,
       priceGel: form.isFreeEntry ? 0 : Number(tiers[0]?.priceGel ?? form.priceGel),
       isFreeEntry: form.isFreeEntry,
+      freeEntryAccess: form.isFreeEntry ? form.freeEntryAccess : 'INVITED_ONLY',
+      artistTicketsEnabled: form.artistTicketsEnabled,
       sortOrder: Number(form.sortOrder),
       tiers: form.isFreeEntry
         ? [{ label: 'Free entry', quantity: 9999, priceGel: 0 }]
@@ -417,10 +432,44 @@ export function AdminEventsPanel() {
                   ...form,
                   isFreeEntry: e.target.checked,
                   priceGel: e.target.checked ? 0 : form.priceGel,
+                  freeEntryAccess: e.target.checked ? form.freeEntryAccess : 'INVITED_ONLY',
                 })
               }
             />
-            Free entry — only users with free ticket generator (no paid checkout)
+            Free entry event (online invitation — no paid checkout)
+          </label>
+          {form.isFreeEntry ? (
+            <fieldset className="form-stack" style={{ marginTop: '0.75rem' }}>
+              <legend className="table-sub" style={{ marginBottom: '0.5rem' }}>
+                Who can claim a free ticket?
+              </legend>
+              <label className="form-check">
+                <input
+                  type="radio"
+                  name="freeEntryAccess"
+                  checked={form.freeEntryAccess === 'ALL_VERIFIED'}
+                  onChange={() => setForm({ ...form, freeEntryAccess: 'ALL_VERIFIED' })}
+                />
+                <span>All verified members — 1 ticket each</span>
+              </label>
+              <label className="form-check">
+                <input
+                  type="radio"
+                  name="freeEntryAccess"
+                  checked={form.freeEntryAccess === 'INVITED_ONLY'}
+                  onChange={() => setForm({ ...form, freeEntryAccess: 'INVITED_ONLY' })}
+                />
+                <span>Invited accounts only — uses account free ticket quota</span>
+              </label>
+            </fieldset>
+          ) : null}
+          <label className="form-check">
+            <input
+              type="checkbox"
+              checked={form.artistTicketsEnabled}
+              onChange={(e) => setForm({ ...form, artistTicketsEnabled: e.target.checked })}
+            />
+            Send DJ list 1 free ticket (1 day before event date)
           </label>
           <label className="form-check">
             <input
@@ -567,8 +616,11 @@ export function AdminEventsPanel() {
               status: (
                 <>
                   {ev.published ? 'Live' : 'Hidden'}
-                  {ev.isFreeEntry ? ' · Free' : ''}
+                  {ev.isFreeEntry
+                    ? ` · Free · ${ev.freeEntryAccess === 'ALL_VERIFIED' ? 'All verified' : 'Invited'}`
+                    : ''}
                   {ev.isFeatured ? ' · ★' : ''}
+                  {ev.artistTicketsEnabled ? ' · DJ' : ''}
                 </>
               ),
               actions: (

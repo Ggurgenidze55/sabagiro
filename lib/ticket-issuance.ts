@@ -41,7 +41,7 @@ export function describeTicketIssuance(
       actorNote: 'Artist list · issued by',
       actorLabel,
       ownerLabel,
-      detail: `${actorLabel} · weekly artist ticket · ${ownerLabel}`,
+      detail: `${actorLabel} · artist list ticket · ${ownerLabel}`,
     };
   }
 

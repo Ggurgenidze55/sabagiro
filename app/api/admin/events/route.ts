@@ -59,6 +59,10 @@ export async function POST(request: Request) {
         accent: body.accent,
         priceGel: body.isFreeEntry ? 0 : tiersInput[0].priceGel,
         isFreeEntry: body.isFreeEntry ?? false,
+        freeEntryAccess: body.isFreeEntry
+          ? (body.freeEntryAccess ?? 'INVITED_ONLY')
+          : 'INVITED_ONLY',
+        artistTicketsEnabled: body.artistTicketsEnabled ?? false,
         isFeatured: body.isFeatured ?? false,
         published: body.published ?? true,
         sortOrder: body.sortOrder ?? 0,
@@ -70,7 +74,7 @@ export async function POST(request: Request) {
             priceGel: tier.priceGel,
           })),
         },
-      },
+      } as Parameters<typeof prisma.clubEvent.create>[0]['data'],
       include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
     });
 

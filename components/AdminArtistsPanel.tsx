@@ -112,7 +112,7 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
   async function runDispatch() {
     if (
       !window.confirm(
-        'Send this week\'s tickets to all active artists for every upcoming event? Already-sent pairs are skipped.',
+        'Send DJ list tickets for events happening tomorrow (artist tickets enabled)? Already-sent pairs are skipped.',
       )
     ) {
       return;
@@ -144,15 +144,16 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
     <div className="admin-artists">
       <div className="admin-artists__intro">
         <p className="page-lead" style={{ marginBottom: '0.75rem' }}>
-          DJ list — comp tickets for every published upcoming event, emailed each Thursday at 20:00
-          (Tbilisi).
+          DJ list — one complimentary ticket per event, sent by email{' '}
+          <strong>one day before the event date</strong> (Tbilisi), for events where DJ tickets are
+          enabled.
         </p>
         <p className="form-foot" style={{ marginBottom: '1rem' }}>
           Active on list: {activeCount} · Total: {artists.length}
         </p>
         <div className="cart-actions" style={{ marginBottom: '1.5rem' }}>
           <button type="button" className="btn btn--ghost" onClick={runDispatch} disabled={dispatchBusy}>
-            {dispatchBusy ? 'Sending…' : 'SEND THIS WEEK NOW'}
+            {dispatchBusy ? 'Sending…' : 'SEND TOMORROW\'S EVENTS NOW'}
           </button>
         </div>
       </div>

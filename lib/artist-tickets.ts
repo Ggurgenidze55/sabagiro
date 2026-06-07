@@ -1,7 +1,6 @@
 import type { Artist, ClubEvent } from '@/generated/prisma/client';
 import { artistDisplayName, artistLabel } from '@/lib/artist-display';
 import { prisma } from '@/lib/db';
-import { listPublishedEvents } from '@/lib/events';
 import { createTicketForUser, findOrCreateUserForAdmin } from '@/lib/tickets';
 
 export { artistDisplayName, artistLabel } from '@/lib/artist-display';
@@ -17,17 +16,30 @@ export function tbilisiDateKey(date = new Date()): string {
   }).format(date);
 }
 
-/** Thursday dispatch key — one batch per calendar week in Tbilisi. */
-export function artistDispatchWeekKey(date = new Date()): string {
-  return tbilisiDateKey(date);
+export function addTbilisiDays(dateKey: string, days: number): string {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d + days));
+  return dt.toISOString().slice(0, 10);
 }
 
-function eventEligibleForArtistTickets(event: ClubEvent, todayTbilisi: string) {
-  if (!event.eventDate) return true;
-  return event.eventDate >= todayTbilisi;
+/** Event date (YYYY-MM-DD) that artist tickets should be sent for when cron runs on referenceDate. */
+export function artistTicketTargetEventDate(referenceDate = new Date()): string {
+  return addTbilisiDays(tbilisiDateKey(referenceDate), 1);
+}
+
+/** @deprecated Use artistTicketTargetEventDate — kept for admin API compatibility. */
+export function artistDispatchWeekKey(date = new Date()): string {
+  return artistTicketTargetEventDate(date);
+}
+
+function artistEventDispatchKey(eventSlug: string) {
+  return `pre-event:${eventSlug}`;
 }
 
 export type ArtistDispatchResult = {
+  /** Event date tickets were issued for (tomorrow from cron run day). */
+  targetEventDate: string;
+  /** Legacy alias for cron responses. */
   weekKey: string;
   artists: number;
   events: number;
@@ -37,27 +49,33 @@ export type ArtistDispatchResult = {
   errors: string[];
 };
 
-export async function runWeeklyArtistTicketDispatch(opts?: {
-  weekKey?: string;
+export async function runArtistPreEventTicketDispatch(opts?: {
+  referenceDate?: Date;
   createdByUserId?: string;
 }): Promise<ArtistDispatchResult> {
-  const weekKey = opts?.weekKey ?? artistDispatchWeekKey();
-  const todayTbilisi = tbilisiDateKey();
+  const referenceDate = opts?.referenceDate ?? new Date();
+  const targetEventDate = artistTicketTargetEventDate(referenceDate);
 
   const [artists, events] = await Promise.all([
     prisma.artist.findMany({
       where: { active: true, weeklyTickets: true },
       orderBy: [{ stageName: 'asc' }, { lastName: 'asc' }],
     }),
-    listPublishedEvents(),
+    prisma.clubEvent.findMany({
+      where: {
+        published: true,
+        artistTicketsEnabled: true,
+        eventDate: targetEventDate,
+      },
+      orderBy: [{ sortOrder: 'asc' }, { dateLabel: 'asc' }],
+    }),
   ]);
 
-  const eligibleEvents = events.filter((e) => eventEligibleForArtistTickets(e, todayTbilisi));
-
   const result: ArtistDispatchResult = {
-    weekKey,
+    targetEventDate,
+    weekKey: targetEventDate,
     artists: artists.length,
-    events: eligibleEvents.length,
+    events: events.length,
     created: 0,
     skipped: 0,
     emailsSent: 0,
@@ -65,13 +83,14 @@ export async function runWeeklyArtistTicketDispatch(opts?: {
   };
 
   for (const artist of artists) {
-    for (const event of eligibleEvents) {
+    for (const event of events) {
+      const dispatchKey = artistEventDispatchKey(event.slug);
       const existing = await prisma.artistTicketDispatch.findUnique({
         where: {
           artistId_eventSlug_weekKey: {
             artistId: artist.id,
             eventSlug: event.slug,
-            weekKey,
+            weekKey: dispatchKey,
           },
         },
       });
@@ -84,8 +103,8 @@ export async function runWeeklyArtistTicketDispatch(opts?: {
       try {
         const ticket = await issueArtistEventTicket({
           artist,
-          eventSlug: event.slug,
-          weekKey,
+          event,
+          dispatchKey,
           createdByUserId: opts?.createdByUserId,
         });
         result.created += 1;
@@ -101,17 +120,26 @@ export async function runWeeklyArtistTicketDispatch(opts?: {
   return result;
 }
 
+/** @deprecated Alias — runs day-before dispatch for events happening tomorrow. */
+export async function runWeeklyArtistTicketDispatch(opts?: {
+  weekKey?: string;
+  createdByUserId?: string;
+}): Promise<ArtistDispatchResult> {
+  void opts?.weekKey;
+  return runArtistPreEventTicketDispatch({ createdByUserId: opts?.createdByUserId });
+}
+
 async function issueArtistEventTicket(opts: {
   artist: Artist;
-  eventSlug: string;
-  weekKey: string;
+  event: ClubEvent;
+  dispatchKey: string;
   createdByUserId?: string;
 }) {
   const user = await ensureArtistUser(opts.artist);
 
   const { ticket, email } = await createTicketForUser({
     user,
-    productSlug: opts.eventSlug,
+    productSlug: opts.event.slug,
     source: 'ARTIST',
     createdByUserId: opts.createdByUserId,
     priceGel: 0,
@@ -128,8 +156,8 @@ async function issueArtistEventTicket(opts: {
   await prisma.artistTicketDispatch.create({
     data: {
       artistId: opts.artist.id,
-      eventSlug: opts.eventSlug,
-      weekKey: opts.weekKey,
+      eventSlug: opts.event.slug,
+      weekKey: opts.dispatchKey,
       ticketId: ticket.id,
     },
   });

@@ -6,7 +6,7 @@
   "crons": [
     {
       "path": "/api/cron/artist-tickets",
-      "schedule": "0 16 * * 4"
+      "schedule": "0 16 * * *"
     }
   ]
 }

@@ -5,6 +5,7 @@ import { getProduct } from '@/lib/products';
 import type { SendEmailResult } from '@/lib/email/client';
 import { sendTicketEmail } from '@/lib/email/index';
 import { qrDataUrl, scanUrl } from '@/lib/qr';
+import { VERIFIED_FREE_ENTRY_LIMIT } from '@/lib/free-entry-access';
 
 export { scanUrl, qrDataUrl };
 
@@ -84,7 +85,15 @@ export async function createFreeTicketForVerifiedUser(opts: {
   productSlug: string;
   holder: Holder;
 }) {
-  if (!opts.owner.freeTicketsEnabled) {
+  const product = await getProduct(opts.productSlug);
+  if (!product || product.type !== 'ticket') {
+    throw new Error('INVALID_PRODUCT');
+  }
+
+  const isAllVerifiedFree =
+    Boolean(product.isFreeEntry) && product.freeEntryAccess === 'ALL_VERIFIED';
+
+  if (!isAllVerifiedFree && !opts.owner.freeTicketsEnabled) {
     throw new Error('NO_FREE_TICKETS');
   }
 
@@ -98,19 +107,19 @@ export async function createFreeTicketForVerifiedUser(opts: {
       },
     });
 
-    if (usedForEvent >= opts.owner.freeTicketsQuota) {
+    const limit = isAllVerifiedFree ? VERIFIED_FREE_ENTRY_LIMIT : opts.owner.freeTicketsQuota;
+    if (usedForEvent >= limit) {
       throw new Error('NO_FREE_TICKETS');
     }
 
-    await tx.user.update({
-      where: {
-        id: opts.owner.id,
-      },
-      data: { freeTicketsUsed: { increment: 1 } },
-    });
-
-    const product = await getProduct(opts.productSlug);
-    if (!product || product.type !== 'ticket') throw new Error('INVALID_PRODUCT');
+    if (!isAllVerifiedFree) {
+      await tx.user.update({
+        where: {
+          id: opts.owner.id,
+        },
+        data: { freeTicketsUsed: { increment: 1 } },
+      });
+    }
 
     const ticket = await tx.ticket.create({
       data: {

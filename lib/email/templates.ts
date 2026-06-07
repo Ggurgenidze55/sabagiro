@@ -140,8 +140,8 @@ export function artistRosterAddedEmail(opts: {
   const name = escapeHtml(opts.firstName);
   const rosterName = escapeHtml(opts.displayName);
   const scheduleLine = opts.weeklyTickets
-    ? `<p>Every <strong style="color:${EMAIL_ACID}">Thursday at 20:00</strong> (Tbilisi time) you will receive complimentary QR tickets by email for every upcoming Sabagiro event. Each ticket is also saved in your account.</p>`
-    : `<p>You are on the list with weekly auto-tickets turned off. Contact Sabagiro if you need event tickets.</p>`;
+    ? `<p>For each upcoming event with DJ tickets enabled, you will receive one complimentary QR ticket by email <strong style="color:${EMAIL_ACID}">one day before the event date</strong> (Tbilisi time). Each ticket is also saved in your account.</p>`
+    : `<p>You are on the list with auto-tickets turned off. Contact Sabagiro if you need event tickets.</p>`;
   const bodyHtml = `
     <p>Hi ${name}, you have been added to the <strong style="color:${EMAIL_ACID}">Sabagiro artist list</strong>${rosterName !== name ? ` as <strong>${rosterName}</strong>` : ''}.</p>
     ${scheduleLine}
@@ -158,8 +158,8 @@ export function artistRosterAddedEmail(opts: {
     }),
     text: `Hi ${opts.firstName}, you were added to the Sabagiro artist list as ${opts.displayName}. ${
       opts.weeklyTickets
-        ? 'Weekly comp tickets are emailed every Thursday at 20:00 Tbilisi.'
-        : 'Weekly auto-tickets are off on your profile.'
+        ? 'Comp tickets are emailed one day before each event (when DJ tickets are enabled for that event).'
+        : 'Auto-tickets are off on your profile.'
     } Account: ${siteUrl('/account')}`,
   };
 }

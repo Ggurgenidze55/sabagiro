@@ -1,3 +1,4 @@
+import type { FreeEntryAccessMode } from '@/lib/free-entry-access';
 import { eventToProduct } from '@/lib/events';
 import { getPublishedEventBySlug, listPublishedEvents } from '@/lib/events';
 import { getEventTierAvailability, type TierAvailability } from '@/lib/ticket-tiers';
@@ -18,6 +19,7 @@ export type Product = {
   venueTag?: string;
   eventDate?: string;
   isFreeEntry?: boolean;
+  freeEntryAccess?: FreeEntryAccessMode;
   tiers?: TierAvailability[];
   ticketsRemaining?: number;
   priceFromGel?: number;

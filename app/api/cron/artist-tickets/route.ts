@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { runWeeklyArtistTicketDispatch } from '@/lib/artist-tickets';
+import { runArtistPreEventTicketDispatch } from '@/lib/artist-tickets';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 export const runtime = 'nodejs';
 
-/** Vercel Cron — every Thursday 20:00 Tbilisi (16:00 UTC). */
+/** Vercel Cron — daily 20:00 Tbilisi (16:00 UTC): DJ list tickets 1 day before each marked event. */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret) {
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await runWeeklyArtistTicketDispatch();
+    const result = await runArtistPreEventTicketDispatch();
     console.info('[cron:artist-tickets] done', result);
     return NextResponse.json({ ok: true, result });
   } catch (e) {
