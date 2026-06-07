@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { formatGel } from '@/lib/format-gel';
+import { ticketSuccessUrl } from '@/lib/ticket-success-url';
 
 type OrderStatus = 'PENDING' | 'PAID' | 'FAILED' | 'EXPIRED' | 'CANCELLED';
 
@@ -41,7 +42,7 @@ function ReturnInner() {
 
       if (s === 'PAID') {
         setStatus('PAID');
-        router.replace('/account');
+        router.replace(ticketSuccessUrl({ source: 'purchase', orderId }));
         return;
       }
       if (s === 'FAILED' || s === 'CANCELLED' || s === 'EXPIRED') {
@@ -73,7 +74,7 @@ function ReturnInner() {
   if (!orderId) {
     return (
       <main className="payment-page">
-        <p>Invalid return link. <Link href="/cart">Back to cart</Link></p>
+        <p>Invalid return link. <Link href="/events">Browse events</Link></p>
       </main>
     );
   }
@@ -83,10 +84,7 @@ function ReturnInner() {
       <main className="payment-page">
         <div className="payment-card payment-card--success">
           <h1>Payment successful</h1>
-          <p>Your tickets are ready in your account.</p>
-          <Link href="/account" className="btn">
-            View tickets
-          </Link>
+          <p>Redirecting to your tickets…</p>
         </div>
       </main>
     );
@@ -97,9 +95,9 @@ function ReturnInner() {
       <main className="payment-page">
         <div className="payment-card payment-card--error">
           <h1>Payment not completed</h1>
-          <p>No tickets were issued. You can try again from the cart.</p>
-          <Link href="/cart" className="btn btn--ghost">
-            Back to cart
+          <p>No tickets were issued. You can try again from the event page.</p>
+          <Link href="/events" className="btn btn--ghost">
+            Browse events
           </Link>
         </div>
       </main>

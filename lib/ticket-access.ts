@@ -15,11 +15,6 @@ export type TicketAccessNotice = {
   secondaryLabel?: string;
 };
 
-export function showCartInNav(user: TicketAccessUser): boolean {
-  if (!user) return false;
-  return canPurchaseTickets(user);
-}
-
 export function getTicketAccessNotice(user: TicketAccessUser): TicketAccessNotice | null {
   if (!user) {
     return {
@@ -65,16 +60,40 @@ export function showFreeTicketsInNav(
   return user.freeTicketsEnabled === true && user.verificationStatus === 'VERIFIED';
 }
 
-export function getAddToCartLabel(user: TicketAccessUser): string | undefined {
-  if (!user) return 'Registration required';
-  if (!canPurchaseTickets(user)) return 'Verification required';
-  return undefined;
-}
-
 export function canGenerateFreeTicketsForEvent(
   user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
   isFreeEntry: boolean,
 ): boolean {
   if (!isFreeEntry) return false;
   return showFreeTicketsInNav(user);
+}
+
+export function getFreeTicketAccessNotice(
+  user: (TicketAccessUser & { freeTicketsEnabled?: boolean }) | null,
+): TicketAccessNotice | null {
+  if (canGenerateFreeTicketsForEvent(user, true)) return null;
+
+  if (!user) {
+    return {
+      message: 'Register and log in to get your free ticket.',
+      hint: 'Create an account, then complete admin verification.',
+      primaryHref: '/register',
+      primaryLabel: 'Register',
+      secondaryHref: '/login',
+      secondaryLabel: 'Log in',
+    };
+  }
+
+  if (!canPurchaseTickets(user)) {
+    return getTicketAccessNotice(user);
+  }
+
+  return {
+    message: 'Free ticket generator is not enabled on your account.',
+    hint: 'Complimentary access is for invited guests only.',
+    primaryHref: '/contact',
+    primaryLabel: 'Contact',
+    secondaryHref: '/account',
+    secondaryLabel: 'Account',
+  };
 }

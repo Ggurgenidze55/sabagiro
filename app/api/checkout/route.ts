@@ -9,6 +9,7 @@ import {
   ticketLimitMessage,
 } from '@/lib/ticket-purchase-limit';
 import { canPurchaseTickets } from '@/lib/verification';
+import { PROFILE_INCOMPLETE_MESSAGE } from '@/lib/user-ticket-holder';
 import { checkoutSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
@@ -68,8 +69,14 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    if (message === 'PROFILE_INCOMPLETE') {
+      return NextResponse.json(
+        { error: PROFILE_INCOMPLETE_MESSAGE, code: 'PROFILE_INCOMPLETE' },
+        { status: 400 },
+      );
+    }
     if (message === 'NO_ITEMS') {
-      return NextResponse.json({ error: 'No valid tickets in cart' }, { status: 400 });
+      return NextResponse.json({ error: 'No valid tickets in order' }, { status: 400 });
     }
     if (message === 'FLITT_NO_REDIRECT') {
       return NextResponse.json(

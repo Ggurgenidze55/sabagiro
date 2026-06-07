@@ -40,7 +40,7 @@ function TestPaymentInner() {
   if (!orderId) {
     return (
       <main className="payment-page">
-        <p>Missing order. Return to <Link href="/cart">cart</Link>.</p>
+        <p>Missing order. Return to <Link href="/events">events</Link>.</p>
       </main>
     );
   }

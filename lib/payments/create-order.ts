@@ -8,6 +8,9 @@ import {
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
 import { extraHolderCount } from '@/lib/ticket-holders';
+import {
+  isProfileCompleteForTicket,
+} from '@/lib/user-ticket-holder';
 import { ORDER_TTL_MINUTES } from '@/lib/payments/config';
 import type { CheckoutLineItem } from '@/lib/payments/types';
 
@@ -44,6 +47,9 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
     const extraHolders = item.holders ?? [];
     const existingPurchased = await countPurchasedTicketsForEvent(user.id, item.slug);
     const requiredHolders = extraHolderCount(item.qty, existingPurchased);
+    if (requiredHolders === 0 && item.qty > 0 && !isProfileCompleteForTicket(user)) {
+      throw new Error('PROFILE_INCOMPLETE');
+    }
     if (extraHolders.length < requiredHolders) {
       throw new Error('HOLDER_REQUIRED');
     }

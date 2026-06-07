@@ -1,13 +1,22 @@
 import Link from 'next/link';
-import { getTicketAccessNotice, type TicketAccessUser } from '@/lib/ticket-access';
+import {
+  getTicketAccessNotice,
+  type TicketAccessNotice as TicketAccessNoticeData,
+  type TicketAccessUser,
+} from '@/lib/ticket-access';
 
 type TicketAccessNoticeProps = {
   user: TicketAccessUser;
   className?: string;
+  getNotice?: (user: TicketAccessUser) => TicketAccessNoticeData | null;
 };
 
-export function TicketAccessNotice({ user, className }: TicketAccessNoticeProps) {
-  const notice = getTicketAccessNotice(user);
+export function TicketAccessNotice({
+  user,
+  className,
+  getNotice = getTicketAccessNotice,
+}: TicketAccessNoticeProps) {
+  const notice = getNotice(user);
   if (!notice) return null;
 
   return (

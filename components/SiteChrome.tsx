@@ -7,7 +7,7 @@ import { getSessionNavUser } from '@/lib/auth';
 
 type SiteChromeProps = {
   children: React.ReactNode;
-  current?: 'events' | 'cart' | 'account' | 'settings' | 'contact' | 'about';
+  current?: 'events' | 'account' | 'settings' | 'contact' | 'about';
   mainClassName?: string;
 };
 

@@ -3308,6 +3308,28 @@ body.nav-lock {
   border-color: rgba(255, 80, 80, 0.35);
 }
 
+.ticket-success {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0 3rem;
+}
+
+.ticket-success__card {
+  width: 100%;
+  max-width: 32rem;
+}
+
+.ticket-success__title {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.ticket-success__lead {
+  margin-bottom: 1rem;
+}
+
 /* —— Contact (centered, one viewport) —— */
 .site-page__stack:has(.contact-page) {
   min-height: 100vh;

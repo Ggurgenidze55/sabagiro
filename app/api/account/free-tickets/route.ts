@@ -3,7 +3,11 @@ import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail } from '@/lib/email/dispatch';
 import { createFreeTicketForVerifiedUser, deliverTicketEmail } from '@/lib/tickets';
-import { remainingFreeTicketsForEvent } from '@/lib/ticket-purchase-limit';
+import {
+  countFreeTicketsForEvent,
+  remainingFreeTicketsForEvent,
+} from '@/lib/ticket-purchase-limit';
+import { resolveNextTicketHolder } from '@/lib/resolve-ticket-holder';
 import { canPurchaseTickets } from '@/lib/verification';
 import { formatValidationError, freeTicketGenerateSchema } from '@/lib/validators';
 
@@ -39,16 +43,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const existingFree = await countFreeTicketsForEvent(user.id, body.productSlug);
+    const resolved = resolveNextTicketHolder(existingFree, user, body);
+    if (!resolved.ok) {
+      return NextResponse.json(
+        { error: resolved.error, code: resolved.code },
+        { status: 400 },
+      );
+    }
+
     const ticket = await createFreeTicketForVerifiedUser({
       owner: user,
       productSlug: body.productSlug,
-      holder: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        personalId: body.personalId,
-        email: body.email,
-        phone: body.phone,
-      },
+      holder: resolved.holder,
     });
 
     const email = await dispatchEmail('account:free-ticket', () => deliverTicketEmail(ticket), {
@@ -77,6 +84,12 @@ export async function POST(request: Request) {
           code: 'NOT_FREE_ENTRY',
         },
         { status: 403 },
+      );
+    }
+    if (message === 'HOLDER_REQUIRED') {
+      return NextResponse.json(
+        { error: 'Enter guest holder details for this ticket.', code: 'HOLDER_REQUIRED' },
+        { status: 400 },
       );
     }
     if (message === 'EMAIL_NOT_SENT') {

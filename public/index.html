@@ -33,7 +33,6 @@
     <link rel="stylesheet" href="/fonts/sabagiro-fonts.css" />
     <link rel="preload" href="/events.snapshot.json" as="fetch" crossorigin />
     <link rel="prefetch" href="/events" />
-    <link rel="prefetch" href="/cart" />
     <link rel="prefetch" href="/location" />
     <link rel="prefetch" href="/login" />
     <style>
@@ -1469,7 +1468,6 @@
           <ul class="nav">
             <li><a href="/" class="hoverable">Home</a></li>
             <li><a href="/events" class="hoverable">Events</a></li>
-            <li data-nav="cart" hidden><a href="/cart" class="hoverable">Cart</a></li>
             <li data-nav="free-tickets" hidden>
               <a href="/account/free-tickets" class="hoverable">Free tickets</a>
             </li>
@@ -1663,14 +1661,10 @@
           .then(function (data) {
             var loggedIn = !!(data && data.user);
             var isAdmin = loggedIn && data.user.role === 'ADMIN';
-            var canCart =
-              loggedIn &&
-              (isAdmin || data.user.verificationStatus === 'VERIFIED');
             setNavGroup('[data-nav="guest"]', !loggedIn);
             setNavGroup('[data-nav="account"]', loggedIn);
             setNavGroup('[data-nav="admin"]', isAdmin);
             setNavGroup('[data-nav="user"]', loggedIn);
-            setNavGroup('[data-nav="cart"]', canCart);
             setNavGroup(
               '[data-nav="free-tickets"]',
               loggedIn &&
@@ -1688,7 +1682,6 @@
             setNavGroup('[data-nav="account"]', false);
             setNavGroup('[data-nav="admin"]', false);
             setNavGroup('[data-nav="user"]', false);
-            setNavGroup('[data-nav="cart"]', false);
             setNavGroup('[data-nav="free-tickets"]', false);
           });
       })();

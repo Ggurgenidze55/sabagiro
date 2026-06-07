@@ -6,6 +6,7 @@ import { FreeTicketGenerator } from '@/components/FreeTicketGenerator';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { showFreeTicketsInNav } from '@/lib/ticket-access';
+import { isProfileCompleteForTicket } from '@/lib/user-ticket-holder';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,7 +48,11 @@ export default async function FreeTicketsPage() {
       </div>
 
       <SectionDivider />
-      <FreeTicketGenerator quota={user.freeTicketsQuota} usedByEvent={freeUsedByEvent} />
+      <FreeTicketGenerator
+        quota={user.freeTicketsQuota}
+        usedByEvent={freeUsedByEvent}
+        profileComplete={isProfileCompleteForTicket(user)}
+      />
     </SiteChrome>
   );
 }
