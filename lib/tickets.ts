@@ -1,13 +1,18 @@
 import { randomBytes } from 'node:crypto';
+import { revalidatePath } from 'next/cache';
 import type { Ticket, TicketSource, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import { getProduct } from '@/lib/products';
 import type { SendEmailResult } from '@/lib/email/client';
 import { sendTicketEmail } from '@/lib/email/index';
 import { qrDataUrl, scanUrl } from '@/lib/qr';
-import { VERIFIED_FREE_ENTRY_LIMIT } from '@/lib/free-entry-access';
+import { getVerifiedMemberFreeLimit } from '@/lib/free-entry-access';
 
 export { scanUrl, qrDataUrl };
+
+function invalidateAccountPage() {
+  revalidatePath('/account');
+}
 
 function newQrToken() {
   return randomBytes(16).toString('hex');
@@ -77,6 +82,7 @@ export async function createTicketForUser(opts: {
     });
   }
 
+  invalidateAccountPage();
   return { ticket, email: emailResult };
 }
 
@@ -107,7 +113,9 @@ export async function createFreeTicketForVerifiedUser(opts: {
       },
     });
 
-    const limit = isAllVerifiedFree ? VERIFIED_FREE_ENTRY_LIMIT : opts.owner.freeTicketsQuota;
+    const limit = isAllVerifiedFree
+      ? getVerifiedMemberFreeLimit(opts.owner)
+      : opts.owner.freeTicketsQuota;
     if (usedForEvent >= limit) {
       throw new Error('NO_FREE_TICKETS');
     }
@@ -140,6 +148,7 @@ export async function createFreeTicketForVerifiedUser(opts: {
       },
     });
 
+    invalidateAccountPage();
     return ticket;
   });
 }

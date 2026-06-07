@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Sabagiro</string>
+    <string name="native_back_label">← Back</string>
 </resources>

@@ -396,13 +396,24 @@ export function AdminEventsPanel() {
             </label>
           </div>
           <div className="form-row">
-            <label className="form-field">
+            <label className="form-field accent-color-field">
               <span>Accent</span>
-              <input
-                type="color"
-                value={form.accent}
-                onChange={(e) => setForm({ ...form, accent: e.target.value })}
-              />
+              <div className="accent-color-field__row">
+                <input
+                  type="color"
+                  className="accent-color-field__input"
+                  value={form.accent}
+                  onChange={(e) => setForm({ ...form, accent: e.target.value })}
+                  aria-label="Event accent color"
+                />
+                <div
+                  className="accent-color-field__preview"
+                  style={{ backgroundColor: form.accent }}
+                  aria-hidden
+                >
+                  <span className="accent-color-field__hex">{form.accent.toUpperCase()}</span>
+                </div>
+              </div>
             </label>
             <label className="form-field">
               <span>Price (₾)</span>

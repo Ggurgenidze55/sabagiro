@@ -17,6 +17,30 @@ struct ContentView: View {
           .transition(.opacity)
       }
     }
+    .overlay(alignment: .topLeading) {
+      if model.showNativeBack {
+        Button(action: { model.goBack() }) {
+          HStack(spacing: 6) {
+            Image(systemName: "chevron.left")
+              .font(.system(size: 15, weight: .semibold))
+            Text("BACK")
+              .font(.system(size: 12, weight: .semibold))
+              .tracking(1.5)
+          }
+          .foregroundStyle(SabagiroTheme.acid)
+          .padding(.horizontal, 14)
+          .padding(.vertical, 10)
+          .background(Color.black.opacity(0.82))
+          .overlay(
+            RoundedRectangle(cornerRadius: 0)
+              .stroke(Color.white.opacity(0.25), lineWidth: 1)
+          )
+        }
+        .padding(.leading, 12)
+        .padding(.top, 8)
+        .accessibilityLabel("Go back")
+      }
+    }
     .overlay(alignment: .top) {
       if model.estimatedProgress > 0 && model.estimatedProgress < 1 {
         GeometryReader { geo in

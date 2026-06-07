@@ -4,6 +4,26 @@
     android:layout_height="match_parent"
     android:background="@color/sabagiro_background">
 
+    <TextView
+        android:id="@+id/nativeBackButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/native_back_button_bg"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingHorizontal="14dp"
+        android:paddingVertical="10dp"
+        android:text="@string/native_back_label"
+        android:textAllCaps="true"
+        android:textColor="@color/sabagiro_acid"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        android:contentDescription="@string/native_back_label" />
+
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"

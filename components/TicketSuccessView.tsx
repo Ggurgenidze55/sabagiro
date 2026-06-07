@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const REDIRECT_SECONDS = 5;
@@ -11,8 +9,11 @@ type TicketSuccessViewProps = {
   eventName?: string;
 };
 
+function goToAccount() {
+  window.location.assign('/account');
+}
+
 export function TicketSuccessView({ source, eventName }: TicketSuccessViewProps) {
-  const router = useRouter();
   const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
 
   useEffect(() => {
@@ -24,34 +25,48 @@ export function TicketSuccessView({ source, eventName }: TicketSuccessViewProps)
 
   useEffect(() => {
     if (secondsLeft > 0) return;
-    router.replace('/account');
-  }, [router, secondsLeft]);
+    goToAccount();
+  }, [secondsLeft]);
 
   const title = source === 'free' ? 'Free ticket ready' : 'Ticket purchased';
   const lead = eventName
-    ? `Your ticket for ${eventName} is in your account. QR code and details are on My Tickets.`
-    : 'Your ticket is in your account. QR code and details are on My Tickets.';
+    ? `Your ticket for ${eventName} is being saved to your account.`
+    : 'Your ticket is being saved to your account.';
 
   return (
     <div className="ticket-success">
-      <div className="payment-card payment-card--success ticket-success__card">
+      <div className="ticket-success__overlay" aria-hidden />
+      <div
+        className="payment-card payment-card--success ticket-success__card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ticket-success-title"
+      >
         <p className="payment-card__eyebrow">Success</p>
-        <h1 className="page-title ticket-success__title">{title}</h1>
+        <h1 id="ticket-success-title" className="page-title ticket-success__title">
+          {title}
+        </h1>
         <p className="page-lead ticket-success__lead">{lead}</p>
         <p className="payment-card__meta">
-          A confirmation email was sent when delivery succeeded.
+          QR code and details will appear on My Tickets. A confirmation email was sent when
+          delivery succeeded.
         </p>
-        <div className="payment-card__actions">
-          <Link href="/account" className="btn">
-            View my tickets
-          </Link>
-          <Link href="/events" className="btn btn--ghost">
-            Browse events
-          </Link>
+
+        <div className="ticket-success__countdown" aria-live="polite">
+          <span className="ticket-success__countdown-num">{secondsLeft}</span>
+          <span className="ticket-success__countdown-label">
+            {secondsLeft > 0 ? 'Opening My Tickets in…' : 'Opening My Tickets…'}
+          </span>
         </div>
-        <p className="payment-card__hint">
-          Redirecting to My Tickets in {secondsLeft}s…
-        </p>
+
+        <div className="payment-card__actions">
+          <button type="button" className="btn" onClick={goToAccount}>
+            View my tickets now
+          </button>
+          <a href="/events" className="btn btn--ghost">
+            Browse events
+          </a>
+        </div>
       </div>
     </div>
   );

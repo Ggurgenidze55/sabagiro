@@ -5,6 +5,17 @@ export type FreeEntryAccessMode = 'ALL_VERIFIED' | 'INVITED_ONLY';
 
 export const VERIFIED_FREE_ENTRY_LIMIT = 1;
 
+/** Per-event free limit for verified members on ALL_VERIFIED events. */
+export function getVerifiedMemberFreeLimit(user: {
+  freeTicketsEnabled?: boolean;
+  freeTicketsQuota?: number;
+}): number {
+  if (user.freeTicketsEnabled && (user.freeTicketsQuota ?? 0) > 0) {
+    return user.freeTicketsQuota!;
+  }
+  return VERIFIED_FREE_ENTRY_LIMIT;
+}
+
 export type FreeEntryEventMeta = {
   isFreeEntry: boolean;
   freeEntryAccess: FreeEntryAccessMode;
@@ -25,7 +36,7 @@ export function freeEntryAccessLabel(access: FreeEntryAccessMode): string {
 
 export function freeEntryAccessAdminHint(access: FreeEntryAccessMode): string {
   return access === 'ALL_VERIFIED'
-    ? 'Every verified member can claim 1 free ticket for this event.'
+    ? 'Every verified member gets 1 free ticket per event. Invited accounts with generator enabled use their full quota (e.g. 20).'
     : 'Only accounts with free ticket generator enabled can claim tickets (uses their per-event quota).';
 }
 
@@ -36,7 +47,9 @@ export function getFreeEntryQuotaLimit(
   if (!event.isFreeEntry) {
     return user.freeTicketsEnabled ? user.freeTicketsQuota : 0;
   }
-  if (event.freeEntryAccess === 'ALL_VERIFIED') return VERIFIED_FREE_ENTRY_LIMIT;
+  if (event.freeEntryAccess === 'ALL_VERIFIED') {
+    return getVerifiedMemberFreeLimit(user);
+  }
   return user.freeTicketsEnabled ? user.freeTicketsQuota : 0;
 }
 
@@ -122,11 +135,15 @@ export function getFreeTicketQuotaNotice(
 ): string | null {
   if (!canAccessFreeTicketForEvent(user, event)) return null;
   if (remaining > 0) {
+    const limit = user ? getFreeEntryQuotaLimit(user as { freeTicketsEnabled: boolean; freeTicketsQuota: number }, event) : 0;
     if (event.isFreeEntry && event.freeEntryAccess === 'ALL_VERIFIED') {
+      if (user?.freeTicketsEnabled && (user.freeTicketsQuota ?? 0) > VERIFIED_FREE_ENTRY_LIMIT) {
+        return `${user.freeTicketsQuota} free ticket(s) per event on your account.`;
+      }
       return `${VERIFIED_FREE_ENTRY_LIMIT} free ticket per verified member for this event.`;
     }
     if (user?.freeTicketsQuota) {
-      return `${user.freeTicketsQuota} free ticket(s) per event on your account.`;
+      return `${limit} free ticket(s) per event on your account.`;
     }
   }
   return null;

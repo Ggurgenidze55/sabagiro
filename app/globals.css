@@ -195,6 +195,57 @@ button {
   flex-shrink: 0;
 }
 
+.app-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(176, 168, 154, 0.35);
+  background: rgba(10, 10, 10, 0.65);
+  color: var(--concrete-light);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.app-back-btn:hover {
+  border-color: var(--acid);
+  color: var(--acid);
+}
+
+.app-back-btn__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.payment-shell {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
+}
+
+.payment-app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  padding: max(0.65rem, env(safe-area-inset-top, 0px)) clamp(1rem, 4vw, 2.5rem) 0.65rem;
+  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+  background: rgba(10, 10, 10, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+html.sabagiro-in-app .payment-page {
+  padding-top: 0.5rem;
+}
+
 .site-brand {
   flex-shrink: 0;
   line-height: 0;
@@ -1367,6 +1418,57 @@ button {
 
 .admin-events .event-date-picker {
   max-width: none;
+}
+
+.accent-color-field__row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+
+.accent-color-field__input {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  min-height: 44px;
+  padding: 0.25rem;
+  border: 1px solid rgba(176, 168, 154, 0.35);
+  background: rgba(10, 10, 10, 0.85);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.accent-color-field__input::-webkit-color-swatch-wrapper {
+  padding: 0.15rem;
+}
+
+.accent-color-field__input::-webkit-color-swatch {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+}
+
+.accent-color-field__input::-moz-color-swatch {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+}
+
+.accent-color-field__preview {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(176, 168, 154, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+
+.accent-color-field__hex {
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  padding: 0.2rem 0.45rem;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--concrete-light);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .admin-events__section:first-child .section-title {
@@ -2729,6 +2831,32 @@ body.nav-lock {
     padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 
+  html.sabagiro-in-app .site-header {
+    grid-template-columns: auto auto 1fr auto;
+  }
+
+  html.sabagiro-in-app .site-header__back {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  html.sabagiro-in-app .site-brand {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    align-self: center;
+  }
+
+  html.sabagiro-in-app .site-header__meta {
+    display: none;
+  }
+
+  html.sabagiro-in-app .mobile-nav {
+    grid-column: 4;
+    grid-row: 1;
+    justify-self: end;
+  }
+
   .site-brand {
     grid-column: 1;
     grid-row: 1;
@@ -3344,6 +3472,7 @@ body.nav-lock {
 }
 
 .ticket-success {
+  position: relative;
   min-height: 50vh;
   display: flex;
   align-items: center;
@@ -3351,9 +3480,44 @@ body.nav-lock {
   padding: 2rem 0 3rem;
 }
 
+.ticket-success__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  z-index: 40;
+}
+
 .ticket-success__card {
+  position: relative;
+  z-index: 50;
   width: 100%;
   max-width: 32rem;
+}
+
+.ticket-success__countdown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 1.25rem 0 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid rgba(200, 255, 0, 0.35);
+  background: rgba(200, 255, 0, 0.06);
+}
+
+.ticket-success__countdown-num {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--acid);
+}
+
+.ticket-success__countdown-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(176, 168, 154, 0.9);
 }
 
 .ticket-success__title {

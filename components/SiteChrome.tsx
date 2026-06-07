@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { AppBackButton } from '@/components/AppBackButton';
 import { SiteAmbientLayers } from '@/components/SiteAmbientLayers';
 import { SiteFooter } from '@/components/SiteFooter';
 import { MobileNav } from '@/components/MobileNav';
@@ -19,6 +20,7 @@ export async function SiteChrome({ children, current, mainClassName }: SiteChrom
       <SiteAmbientLayers />
       <div className="site-page__stack">
         <header className="site-header">
+          <AppBackButton className="site-header__back" fallbackHref="/events" />
           <Link href="/" className="site-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

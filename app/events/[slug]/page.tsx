@@ -5,6 +5,7 @@ import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import {
   canAccessFreeTicketForEvent,
+  getFreeEntryQuotaLimit,
   getFreeTicketEventNotice,
   getFreeTicketQuotaNotice,
   showsOnlineInvitationForUser,
@@ -63,8 +64,7 @@ export default async function EventPage({ params }: PageProps) {
   };
   const canAccessFree = canAccessFreeTicketForEvent(user, eventMeta);
   const showInvitationPrice = showsOnlineInvitationForUser(user, eventMeta);
-
-  const purchaseLimit = user ? getTicketLimitPerEvent(user) : 1;
+  const perEventFreeLimit = user && canAccessFree ? getFreeEntryQuotaLimit(user, eventMeta) : 0;
   const purchaseRemaining =
     user && product.type === 'ticket'
       ? await remainingPurchaseSlots(user, product.slug)
@@ -83,11 +83,7 @@ export default async function EventPage({ params }: PageProps) {
   const existingFree =
     user && canAccessFree ? await countFreeTicketsForEvent(user.id, product.slug) : 0;
   const profileComplete = Boolean(user && isProfileCompleteForTicket(user));
-  const allowsGuestFreeTickets =
-    canAccessFree &&
-    eventMeta.isFreeEntry &&
-    eventMeta.freeEntryAccess === 'INVITED_ONLY' &&
-    (user?.freeTicketsQuota ?? 0) > 1;
+  const allowsGuestFreeTickets = canAccessFree && perEventFreeLimit > 1;
   const canInstantFreeTicket =
     Boolean(user) &&
     canPurchaseTickets(user!) &&
@@ -172,7 +168,9 @@ export default async function EventPage({ params }: PageProps) {
               <p className="notice-banner notice-banner--inline">
                 {ONLINE_INVITATION_LABEL} —{' '}
                 {eventMeta.freeEntryAccess === 'ALL_VERIFIED'
-                  ? `open to all verified members (${VERIFIED_FREE_ENTRY_LIMIT} ticket each).`
+                  ? user?.freeTicketsEnabled && (user.freeTicketsQuota ?? 0) > VERIFIED_FREE_ENTRY_LIMIT
+                    ? `open to all verified members (your account: ${user.freeTicketsQuota} tickets per event).`
+                    : `open to all verified members (${VERIFIED_FREE_ENTRY_LIMIT} ticket each).`
                   : 'complimentary access for invited accounts only.'}
               </p>
               {freeEventNotice ? (

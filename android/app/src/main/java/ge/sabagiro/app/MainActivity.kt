@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         applyWindowInsets()
         setupWebView()
+        setupNativeBackButton()
         setupBackNavigation()
         loadHome()
     }
@@ -88,7 +89,10 @@ class MainActivity : AppCompatActivity() {
                 binding.progressTrack.visibility = View.VISIBLE
                 binding.progressBar.visibility = View.VISIBLE
             },
-            onPageFinished = { hideSplashIfNeeded() },
+            onPageFinished = {
+                updateNativeBackButton()
+                hideSplashIfNeeded()
+            },
             paymentCheckoutActive = { paymentCheckoutActive },
         )
 
@@ -119,6 +123,19 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         }
+    }
+
+    private fun setupNativeBackButton() {
+        binding.nativeBackButton.setOnClickListener {
+            if (binding.webView.canGoBack()) {
+                binding.webView.goBack()
+            }
+        }
+    }
+
+    private fun updateNativeBackButton() {
+        val show = AppConfig.shouldShowNativeBack(binding.webView.url?.let(Uri::parse), binding.webView.canGoBack())
+        binding.nativeBackButton.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun setupBackNavigation() {

@@ -59,6 +59,13 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${bebasNeue.variable} ${shareTechMono.variable}`}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){if(/SabagiroApp/i.test(navigator.userAgent)){document.documentElement.classList.add('sabagiro-in-app');}})();`,
+          }}
+        />
+      </head>
       <body className={shareTechMono.className}>
         {children}
         <SiteAnalytics />

@@ -2,8 +2,8 @@ import type { Role, User } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import {
   getFreeEntryQuotaLimit,
+  getVerifiedMemberFreeLimit,
   type FreeEntryEventMeta,
-  VERIFIED_FREE_ENTRY_LIMIT,
 } from '@/lib/free-entry-access';
 import { canPurchaseTickets } from '@/lib/verification';
 
@@ -106,7 +106,8 @@ export async function remainingFreeTicketsForEvent(
 
   if (meta.isFreeEntry && meta.freeEntryAccess === 'ALL_VERIFIED') {
     if (!canPurchaseTickets(user)) return 0;
-    return Math.max(0, VERIFIED_FREE_ENTRY_LIMIT - used);
+    const limit = getVerifiedMemberFreeLimit(user);
+    return Math.max(0, limit - used);
   }
 
   if (!user.freeTicketsEnabled) return 0;
@@ -119,7 +120,7 @@ export function freeTicketLimitMessage(
 ): string {
   const limit = getFreeEntryQuotaLimit(user, event);
   if (event.isFreeEntry && event.freeEntryAccess === 'ALL_VERIFIED') {
-    return `Free ticket limit reached for this event (${VERIFIED_FREE_ENTRY_LIMIT}/event).`;
+    return `Free ticket limit reached for this event (${limit}/event).`;
   }
   return `Free ticket limit reached for this event (${limit}/event).`;
 }

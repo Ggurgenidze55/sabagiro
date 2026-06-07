@@ -54,6 +54,17 @@ struct SabagiroWebView: UIViewRepresentable {
       AppConfig.shouldStayInApp(url: url, paymentCheckoutActive: model.paymentCheckoutActive)
     }
 
+    private func injectSabagiroShellStyles(_ webView: WKWebView, url: URL) {
+      let host = url.host?.lowercased() ?? ""
+      guard AppConfig.isSabagiroHost(host) || AppConfig.isLocalDevHost(host) else { return }
+      let js = """
+      (function () {
+        document.documentElement.classList.add('sabagiro-ios-shell', 'sabagiro-in-app');
+      })();
+      """
+      webView.evaluateJavaScript(js, completionHandler: nil)
+    }
+
     override func observeValue(
       forKeyPath keyPath: String?,
       of object: Any?,
@@ -67,6 +78,7 @@ struct SabagiroWebView: UIViewRepresentable {
         }
         if keyPath == #keyPath(WKWebView.canGoBack) {
           model.canGoBack = webView.canGoBack
+          model.updateNativeBackVisibility(for: webView.url)
         }
       }
     }
@@ -83,10 +95,12 @@ struct SabagiroWebView: UIViewRepresentable {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
       if let url = webView.url {
         applyPaymentFlowState(for: url)
+        injectSabagiroShellStyles(webView, url: url)
       }
       Task { @MainActor in
         model.isLoading = false
         model.estimatedProgress = 1
+        model.updateNativeBackVisibility(for: webView.url)
       }
     }
 

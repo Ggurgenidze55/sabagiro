@@ -19,6 +19,7 @@ import {
 import { verificationLabel } from '@/lib/verification';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = { title: 'My account — Sabagiro' };
 

@@ -53,4 +53,11 @@ object AppConfig {
 
         return null
     }
+
+    /** Native overlay back — Flitt / bank pages (site pages use in-web back button). */
+    fun shouldShowNativeBack(uri: Uri?, canGoBack: Boolean): Boolean {
+        if (!canGoBack || uri == null) return false
+        val host = uri.host?.lowercase() ?: return false
+        return !(isSabagiroHost(host) || isLocalDevHost(host))
+    }
 }
