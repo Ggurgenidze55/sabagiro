@@ -34,7 +34,7 @@ export const personalIdSchema = z
   .trim()
   .regex(/^\d{11}$/, 'Personal ID must be 11 digits');
 
-const socialUrlSchema = z
+const socialUrlValueSchema = z
   .string()
   .trim()
   .min(8)
@@ -43,16 +43,23 @@ const socialUrlSchema = z
     message: 'Enter a full profile link (https://...)',
   });
 
-export const registerSchema = z.object({
-  email: z.string().trim().email(),
-  phone: z.string().trim().min(9).max(20),
-  password: z.string().min(8).max(128),
-  firstName: z.string().trim().min(2).max(80),
-  lastName: z.string().trim().min(2).max(80),
-  personalId: personalIdSchema,
-  facebookUrl: socialUrlSchema,
-  instagramUrl: socialUrlSchema,
-});
+const optionalSocialUrlSchema = z.preprocess(emptyToUndefined, socialUrlValueSchema.optional());
+
+export const registerSchema = z
+  .object({
+    email: z.string().trim().email(),
+    phone: z.string().trim().min(9).max(20),
+    password: z.string().min(8).max(128),
+    firstName: z.string().trim().min(2).max(80),
+    lastName: z.string().trim().min(2).max(80),
+    personalId: personalIdSchema,
+    facebookUrl: optionalSocialUrlSchema,
+    instagramUrl: optionalSocialUrlSchema,
+  })
+  .refine((data) => Boolean(data.facebookUrl) || Boolean(data.instagramUrl), {
+    message: 'Enter at least one profile link — Facebook or Instagram.',
+    path: ['facebookUrl'],
+  });
 
 export const ticketTierSchema = z.object({
   label: z.string().trim().max(80).optional(),

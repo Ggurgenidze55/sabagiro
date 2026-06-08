@@ -15,7 +15,7 @@ export default async function RegisterPage() {
   return (
     <SiteChrome>
       <h1 className="page-title">REGISTER</h1>
-      <p className="page-lead">Name, ID, email — used on your ticket QR</p>
+      <p className="page-lead">Name, ID, email — and at least one social link (Facebook or Instagram)</p>
       <Suspense fallback={<p className="cart-empty">Loading…</p>}>
         <AuthForm mode="register" />
       </Suspense>

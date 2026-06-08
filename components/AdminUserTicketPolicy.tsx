@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { AdminUserRow } from '@/components/AdminUsersPanel';
+import { IntInput } from '@/components/IntInput';
 
 type AdminUserTicketPolicyFormProps = {
   user: AdminUserRow;
@@ -62,12 +63,11 @@ export function AdminUserTicketPolicyForm({ user, onUpdated, onSaved }: AdminUse
     <form className="form-stack user-policy__form user-policy__form--inline" onSubmit={save}>
       <label className="form-field">
         <span>Paid limit / event</span>
-        <input
-          type="number"
+        <IntInput
           min={0}
           max={20}
           value={ticketLimitPerEvent}
-          onChange={(e) => setTicketLimitPerEvent(Number(e.target.value))}
+          onChange={setTicketLimitPerEvent}
           required
         />
       </label>
@@ -86,12 +86,11 @@ export function AdminUserTicketPolicyForm({ user, onUpdated, onSaved }: AdminUse
       </label>
       <label className="form-field">
         <span>Free quota / event</span>
-        <input
-          type="number"
+        <IntInput
           min={1}
           max={500}
           value={freeTicketsQuota}
-          onChange={(e) => setFreeTicketsQuota(Number(e.target.value))}
+          onChange={setFreeTicketsQuota}
           disabled={!freeTicketsEnabled}
         />
       </label>

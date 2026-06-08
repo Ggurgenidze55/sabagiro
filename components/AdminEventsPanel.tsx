@@ -1,6 +1,7 @@
 'use client';
 
 import { ResponsiveTable } from '@/components/ResponsiveTable';
+import { IntInput } from '@/components/IntInput';
 import { SectionDivider } from '@/components/SectionDivider';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -417,20 +418,18 @@ export function AdminEventsPanel() {
             </label>
             <label className="form-field">
               <span>Price (₾)</span>
-              <input
-                type="number"
+              <IntInput
                 min={0}
                 value={form.isFreeEntry ? 0 : form.priceGel}
                 disabled={form.isFreeEntry}
-                onChange={(e) => setForm({ ...form, priceGel: Number(e.target.value) })}
+                onChange={(priceGel) => setForm({ ...form, priceGel })}
               />
             </label>
             <label className="form-field">
               <span>Sort order</span>
-              <input
-                type="number"
+              <IntInput
                 value={form.sortOrder}
-                onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })}
+                onChange={(sortOrder) => setForm({ ...form, sortOrder })}
               />
             </label>
           </div>
@@ -516,26 +515,24 @@ export function AdminEventsPanel() {
                 </label>
                 <label className="form-field">
                   <span>Qty</span>
-                  <input
-                    type="number"
+                  <IntInput
                     min={1}
                     value={tier.quantity}
-                    onChange={(e) => {
+                    onChange={(quantity) => {
                       const next = [...tiers];
-                      next[index] = { ...tier, quantity: Number(e.target.value) };
+                      next[index] = { ...tier, quantity };
                       setTiers(next);
                     }}
                   />
                 </label>
                 <label className="form-field">
                   <span>Price ₾</span>
-                  <input
-                    type="number"
+                  <IntInput
                     min={0}
                     value={tier.priceGel}
-                    onChange={(e) => {
+                    onChange={(priceGel) => {
                       const next = [...tiers];
-                      next[index] = { ...tier, priceGel: Number(e.target.value) };
+                      next[index] = { ...tier, priceGel };
                       setTiers(next);
                     }}
                   />

@@ -945,6 +945,23 @@ html.sabagiro-in-app .payment-page {
   max-width: 420px;
 }
 
+.form-fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-fieldset__legend {
+  font-size: var(--text-sm);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--concrete-light);
+  margin-bottom: 0.15rem;
+}
+
 .form-field {
   display: flex;
   flex-direction: column;

@@ -23,6 +23,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const fd = new FormData(e.currentTarget);
     const payload = Object.fromEntries(fd.entries());
 
+    if (mode === 'register') {
+      const facebookUrl = String(payload.facebookUrl ?? '').trim();
+      const instagramUrl = String(payload.instagramUrl ?? '').trim();
+      if (!facebookUrl && !instagramUrl) {
+        setLoading(false);
+        setError('Enter at least one profile link — Facebook or Instagram.');
+        return;
+      }
+    }
+
     const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
 
     try {
@@ -69,26 +79,31 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <span>Personal ID (11 digits)</span>
             <input name="personalId" required pattern="\d{11}" inputMode="numeric" />
           </label>
-          <label className="form-field">
-            <span>Facebook profile link</span>
-            <input
-              name="facebookUrl"
-              type="url"
-              required
-              placeholder="https://facebook.com/..."
-            />
-          </label>
-          <label className="form-field">
-            <span>Instagram profile link</span>
-            <input
-              name="instagramUrl"
-              type="url"
-              required
-              placeholder="https://instagram.com/..."
-            />
-          </label>
+          <fieldset className="form-fieldset">
+            <legend className="form-fieldset__legend">Social verification</legend>
+            <p className="form-foot" style={{ marginBottom: '0.85rem', opacity: 0.75 }}>
+              Add <strong>Facebook</strong> or <strong>Instagram</strong> — at least one is required
+              for admin verification.
+            </p>
+            <label className="form-field">
+              <span>Facebook profile link (optional)</span>
+              <input
+                name="facebookUrl"
+                type="url"
+                placeholder="https://facebook.com/..."
+              />
+            </label>
+            <label className="form-field">
+              <span>Instagram profile link (optional)</span>
+              <input
+                name="instagramUrl"
+                type="url"
+                placeholder="https://instagram.com/..."
+              />
+            </label>
+          </fieldset>
           <p className="form-foot" style={{ opacity: 0.7 }}>
-            After signup, admin verifies your links. You can buy tickets once verified.
+            After signup, admin verifies your link(s). You can buy tickets once verified.
           </p>
         </>
       ) : null}
