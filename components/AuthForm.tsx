@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { canAccessAdminPanel, staffAdminLandingPath } from '@/lib/staff-roles';
 
 type Mode = 'login' | 'register';
+type SocialPlatform = 'facebook' | 'instagram' | '';
 
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
@@ -16,6 +17,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const passwordResetDone = search.get('reset') === '1';
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [socialPlatform, setSocialPlatform] = useState<SocialPlatform>('');
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -25,13 +27,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const payload = Object.fromEntries(fd.entries());
 
     if (mode === 'register') {
-      const facebookUrl = String(payload.facebookUrl ?? '').trim();
-      const instagramUrl = String(payload.instagramUrl ?? '').trim();
-      if (!facebookUrl && !instagramUrl) {
+      const platform = String(payload.socialPlatform ?? '').trim();
+      const socialUrl = String(payload.socialUrl ?? '').trim();
+      if (!platform || !socialUrl) {
         setLoading(false);
-        setError('Enter at least one profile link — Facebook or Instagram.');
+        setError('Choose Facebook or Instagram and enter your profile link.');
         return;
       }
+      payload.facebookUrl = platform === 'facebook' ? socialUrl : '';
+      payload.instagramUrl = platform === 'instagram' ? socialUrl : '';
+      delete payload.socialPlatform;
+      delete payload.socialUrl;
     }
 
     const url = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
@@ -88,25 +94,46 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <fieldset className="form-fieldset">
             <legend className="form-fieldset__legend">Social verification</legend>
             <p className="form-foot" style={{ marginBottom: '0.85rem', opacity: 0.75 }}>
-              Add <strong>Facebook</strong> or <strong>Instagram</strong> — at least one is required
-              for admin verification.
+              Choose <strong>Facebook</strong> or <strong>Instagram</strong> and add your profile
+              link for admin verification.
             </p>
             <label className="form-field">
-              <span>Facebook profile link (optional)</span>
-              <input
-                name="facebookUrl"
-                type="url"
-                placeholder="https://facebook.com/..."
-              />
+              <span>Platform</span>
+              <select
+                name="socialPlatform"
+                value={socialPlatform}
+                onChange={(e) => setSocialPlatform(e.target.value as SocialPlatform)}
+                required
+              >
+                <option value="" disabled>
+                  Choose platform
+                </option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+              </select>
             </label>
-            <label className="form-field">
-              <span>Instagram profile link (optional)</span>
-              <input
-                name="instagramUrl"
-                type="url"
-                placeholder="https://instagram.com/..."
-              />
-            </label>
+            {socialPlatform === 'facebook' ? (
+              <label className="form-field">
+                <span>Facebook profile link</span>
+                <input
+                  name="socialUrl"
+                  type="url"
+                  required
+                  placeholder="https://facebook.com/..."
+                />
+              </label>
+            ) : null}
+            {socialPlatform === 'instagram' ? (
+              <label className="form-field">
+                <span>Instagram profile link</span>
+                <input
+                  name="socialUrl"
+                  type="url"
+                  required
+                  placeholder="https://instagram.com/..."
+                />
+              </label>
+            ) : null}
           </fieldset>
           <p className="form-foot" style={{ opacity: 0.7 }}>
             After signup, admin verifies your link(s). You can buy tickets once verified.
