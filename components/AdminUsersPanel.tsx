@@ -6,6 +6,13 @@ import { AdminUserTicketsList } from '@/components/AdminUserTicketsList';
 import { ArtistUserBadge } from '@/components/ArtistUserBadge';
 import { DoorScanUserBadge } from '@/components/DoorScanUserBadge';
 import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
+import {
+  canScanAtDoorByRole,
+  isProtectedStaffTarget,
+  isStaffRole,
+  roleBadgeClass,
+  roleLabel,
+} from '@/lib/staff-roles';
 
 export type AdminUserRow = {
   id: string;
@@ -49,10 +56,16 @@ function UserNameCell({ user }: { user: AdminUserRow }) {
           <ArtistUserBadge />
         </>
       ) : null}
-      {user.doorScanEnabled ? (
+      {user.doorScanEnabled && !canScanAtDoorByRole(user.role) ? (
         <>
           {' '}
           <DoorScanUserBadge />
+        </>
+      ) : null}
+      {isStaffRole(user.role) ? (
+        <>
+          {' '}
+          <span className={roleBadgeClass(user.role)}>{roleLabel(user.role)}</span>
         </>
       ) : null}
       <br />
@@ -88,7 +101,15 @@ function userMatchesSearch(user: AdminUserRow, query: string) {
   return haystack.includes(query);
 }
 
-export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
+export function AdminUsersPanel({
+  users: initial,
+  canAssignRoles = false,
+  canDeleteStaff = false,
+}: {
+  users: AdminUserRow[];
+  canAssignRoles?: boolean;
+  canDeleteStaff?: boolean;
+}) {
   const [users, setUsers] = useState(initial);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
@@ -275,7 +296,11 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
   }
 
   function requestDelete(user: AdminUserRow) {
-    if (user.role === 'ADMIN') return;
+    if (isProtectedStaffTarget(user.role)) return;
+    if (isStaffRole(user.role) && !canDeleteStaff) {
+      setError('Only admin can delete staff accounts');
+      return;
+    }
     if (user.verificationStatus === 'VERIFIED') {
       setConfirmDeleteId(user.id);
       return;
@@ -397,8 +422,17 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                         </button>
                       </td>
                       <td>
-                        {u.role === 'ADMIN' ? (
+                        {isProtectedStaffTarget(u.role) ? (
                           <span className="table-sub">—</span>
+                        ) : isStaffRole(u.role) ? (
+                          <>
+                            <span className={roleBadgeClass(u.role)}>{roleLabel(u.role)}</span>
+                            <br />
+                            <span className="table-sub">
+                              Door scan:{' '}
+                              {canScanAtDoorByRole(u.role) ? 'via role' : u.doorScanEnabled ? 'on' : 'off'}
+                            </span>
+                          </>
                         ) : (
                           <>
                             {u.verificationStatus === 'VERIFIED' ? (
@@ -423,6 +457,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                       <td className="table-actions table-actions--menu">
                         <AdminUserActionsMenu
                           user={u}
+                          canAssignRoles={canAssignRoles}
                           confirmDelete={confirmDeleteId === u.id}
                           deleting={deletingId === u.id}
                           onVerify={() => void setStatus(u.id, 'VERIFIED')}
@@ -542,8 +577,17 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                       <div className="responsive-table__field">
                         <dt>Limits</dt>
                         <dd>
-                          {u.role === 'ADMIN' ? (
+                          {isProtectedStaffTarget(u.role) ? (
                             <span className="table-sub">—</span>
+                          ) : isStaffRole(u.role) ? (
+                            <>
+                              <span className={roleBadgeClass(u.role)}>{roleLabel(u.role)}</span>
+                              <br />
+                              <span className="table-sub">
+                                Door scan:{' '}
+                                {canScanAtDoorByRole(u.role) ? 'via role' : u.doorScanEnabled ? 'on' : 'off'}
+                              </span>
+                            </>
                           ) : (
                             <>
                               {u.verificationStatus === 'VERIFIED' ? (
@@ -571,6 +615,7 @@ export function AdminUsersPanel({ users: initial }: { users: AdminUserRow[] }) {
                     <div className="admin-user-card__actions table-actions table-actions--menu">
                       <AdminUserActionsMenu
                         user={u}
+                        canAssignRoles={canAssignRoles}
                         confirmDelete={confirmDeleteId === u.id}
                         deleting={deletingId === u.id}
                         onVerify={() => void setStatus(u.id, 'VERIFIED')}

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
-import { requireAdmin } from '@/lib/auth';
+import { requireEventsAdmin, requireEventCreator, requireEventEditor } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { sortPublishedEvents } from '@/lib/sort-published-events';
 import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requireEventsAdmin();
     const rows = await prisma.clubEvent.findMany({
       include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
     });
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireEventCreator();
     const body = clubEventSchema.parse(await request.json());
     const slug = normalizeEventSlug(body.slug ?? '', body.title);
 

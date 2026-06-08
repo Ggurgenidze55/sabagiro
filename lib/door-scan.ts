@@ -1,8 +1,9 @@
 import type { Role } from '@/generated/prisma/client';
 import { getSessionUser, requireUser } from '@/lib/auth';
+import { canScanAtDoorByRole } from '@/lib/staff-roles';
 
 export function canScanAtDoor(user: { role: Role; doorScanEnabled: boolean }) {
-  return user.role === 'ADMIN' || user.doorScanEnabled;
+  return canScanAtDoorByRole(user.role) || user.doorScanEnabled;
 }
 
 export async function requireDoorScanner() {

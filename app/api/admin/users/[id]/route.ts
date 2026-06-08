@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdmin, requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { isProtectedStaffTarget, isStaffRole } from '@/lib/staff-roles';
 
 type Params = { params: { id: string } };
 
 export async function DELETE(_request: Request, { params }: Params) {
   try {
-    const admin = await requireAdmin();
+    const actor = await requireUserManager();
 
     const target = await prisma.user.findUnique({
       where: { id: params.id },
@@ -17,11 +18,15 @@ export async function DELETE(_request: Request, { params }: Params) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (target.role === 'ADMIN') {
+    if (isProtectedStaffTarget(target.role)) {
       return NextResponse.json({ error: 'Cannot delete an admin account' }, { status: 403 });
     }
 
-    if (target.id === admin.id) {
+    if (isStaffRole(target.role) && actor.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Only admin can delete staff accounts' }, { status: 403 });
+    }
+
+    if (target.id === actor.id) {
       return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 403 });
     }
 

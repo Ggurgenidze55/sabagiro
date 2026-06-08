@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { requireAdmin } from '@/lib/auth';
+import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import {
@@ -18,7 +18,7 @@ const bodySchema = z.object({
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireUserManager();
     const { status } = bodySchema.parse(await request.json());
 
     const previous = await prisma.user.findUniqueOrThrow({ where: { id: params.id } });

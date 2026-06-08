@@ -9,6 +9,9 @@ datasource db {
 
 enum Role {
   USER
+  EVENT_MANAGER
+  USER_MANAGER
+  MAIN_MODERATOR
   ADMIN
 }
 

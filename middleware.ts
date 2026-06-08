@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
+import { canAccessAdminPanel } from '@/lib/staff-roles';
 
 const SESSION_COOKIE = 'sabagiro_session';
 
-async function getRole(request: NextRequest): Promise<'ADMIN' | 'USER' | null> {
+async function getRole(request: NextRequest): Promise<string | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   if (!token) return null;
   const secret = process.env.AUTH_SECRET;
   if (!secret) return null;
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-    if (payload.role === 'ADMIN') return 'ADMIN';
-    if (payload.role === 'USER') return 'USER';
-    return null;
+    return typeof payload.role === 'string' ? payload.role : null;
   } catch {
     return null;
   }
@@ -33,7 +32,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/admin')) {
-    if (role !== 'ADMIN') {
+    if (!role || !canAccessAdminPanel(role as import('@/generated/prisma/client').Role)) {
       const url = request.nextUrl.clone();
       url.pathname = role ? '/account' : '/login';
       url.searchParams.set('next', pathname);

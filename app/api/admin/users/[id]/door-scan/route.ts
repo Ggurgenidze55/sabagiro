@@ -1,23 +1,27 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import { sendDoorScanDisabledEmail, sendDoorScanEnabledEmail } from '@/lib/email/send';
+import { canScanAtDoorByRole, isProtectedStaffTarget } from '@/lib/staff-roles';
 import { doorScanSchema, formatValidationError } from '@/lib/validators';
 
 type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireUserManager();
     const body = doorScanSchema.parse(await request.json());
 
     const existing = await prisma.user.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    if (existing.role === 'ADMIN') {
-      return NextResponse.json({ error: 'Admin accounts always have door scan access' }, { status: 400 });
+    if (isProtectedStaffTarget(existing.role) || canScanAtDoorByRole(existing.role)) {
+      return NextResponse.json(
+        { error: 'This account already has door scan via staff role' },
+        { status: 400 },
+      );
     }
     if (existing.doorScanEnabled === body.enabled) {
       return NextResponse.json({ ok: true, doorScanEnabled: existing.doorScanEnabled, email: null });

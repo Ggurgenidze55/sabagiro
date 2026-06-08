@@ -1,11 +1,17 @@
 import { SoldTicketsTable } from '@/components/SoldTicketsTable';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { canUseFullAdminTools } from '@/lib/staff-roles';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Tickets — Admin' };
 
 export default async function AdminTicketsPage() {
+  const user = await getSessionUser();
+  if (!user || !canUseFullAdminTools(user.role)) redirect('/account');
+
   const tickets = await prisma.ticket.findMany({
     orderBy: { createdAt: 'desc' },
     include: { user: { select: { email: true } } },

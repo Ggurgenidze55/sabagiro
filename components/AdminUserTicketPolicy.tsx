@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { AdminUserRow } from '@/components/AdminUsersPanel';
 import { IntInput } from '@/components/IntInput';
+import { isProtectedStaffTarget } from '@/lib/staff-roles';
 
 type AdminUserTicketPolicyFormProps = {
   user: AdminUserRow;
@@ -114,7 +115,7 @@ export function AdminUserTicketPolicy({
   user: AdminUserRow;
   onUpdated: (patch: Partial<AdminUserRow>) => void;
 }) {
-  if (user.role === 'ADMIN' || user.verificationStatus !== 'VERIFIED') {
+  if (isProtectedStaffTarget(user.role) || user.verificationStatus !== 'VERIFIED') {
     return null;
   }
   return <AdminUserTicketPolicyForm user={user} onUpdated={onUpdated} />;

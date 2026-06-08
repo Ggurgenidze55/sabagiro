@@ -11,9 +11,17 @@ import {
 import { createPortal } from 'react-dom';
 import { AdminUserTicketPolicyForm } from '@/components/AdminUserTicketPolicy';
 import type { AdminUserRow } from '@/components/AdminUsersPanel';
+import { StaffRoleForm } from '@/components/StaffRoleForm';
+import {
+  canScanAtDoorByRole,
+  isProtectedStaffTarget,
+  roleBadgeClass,
+  roleLabel,
+} from '@/lib/staff-roles';
 
 type AdminUserActionsMenuProps = {
   user: AdminUserRow;
+  canAssignRoles?: boolean;
   confirmDelete: boolean;
   deleting: boolean;
   onVerify: () => void;
@@ -73,6 +81,7 @@ function measureDrop(toggle: HTMLElement, drop: HTMLElement): DropCoords {
 
 export function AdminUserActionsMenu({
   user,
+  canAssignRoles = false,
   confirmDelete,
   deleting,
   onVerify,
@@ -88,7 +97,7 @@ export function AdminUserActionsMenu({
   onDisableDoorScan,
 }: AdminUserActionsMenuProps) {
   const [open, setOpen] = useState(false);
-  const [panel, setPanel] = useState<'menu' | 'limits' | 'delete'>('menu');
+  const [panel, setPanel] = useState<'menu' | 'limits' | 'delete' | 'staff-role'>('menu');
   const [coords, setCoords] = useState<DropCoords | null>(null);
   const [mounted, setMounted] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -174,14 +183,14 @@ export function AdminUserActionsMenu({
     close();
   }
 
-  if (user.role === 'ADMIN') {
-    return <span className="table-sub">ADMIN</span>;
+  if (isProtectedStaffTarget(user.role)) {
+    return <span className={roleBadgeClass(user.role)}>{roleLabel(user.role)}</span>;
   }
 
   const showLimits = user.verificationStatus === 'VERIFIED';
 
   const dropClass = `admin-actions__drop admin-actions__drop--fixed${
-    panel === 'limits' ? ' admin-actions__drop--wide' : ''
+    panel === 'limits' || panel === 'staff-role' ? ' admin-actions__drop--wide' : ''
   }`;
 
   const dropContent = open ? (
@@ -253,25 +262,37 @@ export function AdminUserActionsMenu({
               Add to DJ list
             </button>
           )}
-          {user.doorScanEnabled ? (
+          {canAssignRoles ? (
             <button
               type="button"
               className="admin-actions__item"
               role="menuitem"
-              onClick={() => runAction(onDisableDoorScan)}
+              onClick={() => setPanel('staff-role')}
             >
-              Disable door scan
+              Staff role
             </button>
-          ) : (
-            <button
-              type="button"
-              className="admin-actions__item"
-              role="menuitem"
-              onClick={() => runAction(onEnableDoorScan)}
-            >
-              Enable door scan
-            </button>
-          )}
+          ) : null}
+          {!canScanAtDoorByRole(user.role) ? (
+            user.doorScanEnabled ? (
+              <button
+                type="button"
+                className="admin-actions__item"
+                role="menuitem"
+                onClick={() => runAction(onDisableDoorScan)}
+              >
+                Disable door scan
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="admin-actions__item"
+                role="menuitem"
+                onClick={() => runAction(onEnableDoorScan)}
+              >
+                Enable door scan
+              </button>
+            )
+          ) : null}
           <button
             type="button"
             className="admin-actions__item admin-actions__item--danger"
@@ -322,6 +343,24 @@ export function AdminUserActionsMenu({
             ← Back
           </button>
           <AdminUserTicketPolicyForm user={user} onUpdated={onUpdated} onSaved={close} />
+        </div>
+      ) : null}
+
+      {panel === 'staff-role' && canAssignRoles ? (
+        <div className="admin-actions__panel">
+          <button type="button" className="admin-actions__back" onClick={() => setPanel('menu')}>
+            ← Back
+          </button>
+          <StaffRoleForm
+            userId={user.id}
+            currentRole={user.role}
+            compact
+            onSaved={(role) => {
+              onUpdated({ role });
+              setPanel('menu');
+              close();
+            }}
+          />
         </div>
       ) : null}
     </div>

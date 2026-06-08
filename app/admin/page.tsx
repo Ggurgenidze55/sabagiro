@@ -1,11 +1,20 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { canUseFullAdminTools, staffAdminLandingPath } from '@/lib/staff-roles';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Admin — Sabagiro' };
 
 export default async function AdminOverviewPage() {
+  const user = await getSessionUser();
+  if (!user) redirect('/login?next=/admin');
+  if (!canUseFullAdminTools(user.role)) {
+    redirect(staffAdminLandingPath(user.role));
+  }
+
   const [users, tickets, sold] = await Promise.all([
     prisma.user.count(),
     prisma.ticket.count(),

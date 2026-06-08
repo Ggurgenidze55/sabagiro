@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { normalizeEventSlug } from '@/lib/events';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
-import { requireAdmin } from '@/lib/auth';
+import { requireEventEditor } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
@@ -9,7 +9,7 @@ type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireEventEditor();
     const body = clubEventSchema.partial().parse(await request.json());
 
     const existing = await prisma.clubEvent.findUnique({
@@ -123,7 +123,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
 export async function DELETE(_request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireEventEditor();
     await prisma.clubEvent.delete({ where: { id: params.id } });
     return NextResponse.json({ ok: true });
   } catch (e) {

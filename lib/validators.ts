@@ -188,6 +188,10 @@ export const freeTicketGenerateSchema = z.object({
   phone: z.string().trim().min(9).max(20).optional(),
 });
 
+export const assignStaffRoleSchema = z.object({
+  role: z.enum(['USER', 'EVENT_MANAGER', 'USER_MANAGER', 'MAIN_MODERATOR']),
+});
+
 export const artistSchema = z.object({
   stageName: z.string().trim().max(120).optional(),
   firstName: z.string().trim().min(2).max(80),

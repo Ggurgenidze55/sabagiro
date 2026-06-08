@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { canAccessAdminPanel, staffAdminLandingPath } from '@/lib/staff-roles';
 
 type Mode = 'login' | 'register';
 
@@ -49,8 +50,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
         return;
       }
 
-      if (mode === 'login' && data.role === 'ADMIN' && next.startsWith('/account')) {
-        router.push('/admin');
+      if (
+        mode === 'login' &&
+        data.role &&
+        canAccessAdminPanel(data.role) &&
+        next.startsWith('/account')
+      ) {
+        router.push(staffAdminLandingPath(data.role));
         router.refresh();
         return;
       }

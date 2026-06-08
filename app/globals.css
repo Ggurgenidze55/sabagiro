@@ -2335,6 +2335,72 @@ html.sabagiro-in-app .payment-page {
   box-shadow: 0 0 14px rgba(255, 0, 68, 0.4);
 }
 
+.role-badge {
+  display: inline-block;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid transparent;
+  vertical-align: middle;
+}
+
+.role-badge--admin {
+  color: var(--black);
+  background: var(--acid);
+  border-color: #d4ff33;
+}
+
+.role-badge--event-manager {
+  color: var(--black);
+  background: #7dd3fc;
+  border-color: #38bdf8;
+}
+
+.role-badge--user-manager {
+  color: var(--black);
+  background: #c4b5fd;
+  border-color: #a78bfa;
+}
+
+.role-badge--main-moderator {
+  color: var(--black);
+  background: #fdba74;
+  border-color: #fb923c;
+}
+
+.staff-role-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.staff-role-form--compact .staff-role-form__hint {
+  display: none;
+}
+
+.scan-staff-role {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(176, 168, 154, 0.2);
+}
+
+.scan-staff-role__title {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin: 0 0 0.35rem;
+}
+
+.scan-staff-role__meta {
+  font-size: var(--text-sm);
+  opacity: 0.75;
+  margin: 0 0 0.85rem;
+}
+
 .verify-banner {
   padding: 1.15rem 1.2rem;
   border: 1px solid rgba(176, 168, 154, 0.2);

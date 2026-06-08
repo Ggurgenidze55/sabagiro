@@ -4,6 +4,14 @@ import { cookies } from 'next/headers';
 import { cache } from 'react';
 import type { Role, VerificationStatus } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
+import {
+  canAccessAdminPanel,
+  canAssignStaffRoles,
+  canCreateEvents,
+  canEditEvents,
+  canManageUsers,
+  isStaffRole,
+} from '@/lib/staff-roles';
 
 const SESSION_COOKIE = 'sabagiro_session';
 const SESSION_DAYS = 14;
@@ -84,7 +92,7 @@ export async function getSessionNavUser(): Promise<SessionNavUser | null> {
     const { payload } = await jwtVerify(token, getSecret());
     const userId = payload.sub;
     if (!userId || typeof userId !== 'string') return null;
-    if (payload.role !== 'ADMIN' && payload.role !== 'USER') return null;
+    if (!isStaffRole(String(payload.role)) && payload.role !== 'USER') return null;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -139,9 +147,45 @@ export async function requireUser() {
   return user;
 }
 
+export async function requireStaff() {
+  const user = await requireUser();
+  if (!canAccessAdminPanel(user.role)) throw new Error('FORBIDDEN');
+  return user;
+}
+
 export async function requireAdmin() {
   const user = await requireUser();
   if (user.role !== 'ADMIN') throw new Error('FORBIDDEN');
+  return user;
+}
+
+export async function requireEventCreator() {
+  const user = await requireStaff();
+  if (!canCreateEvents(user.role)) throw new Error('FORBIDDEN');
+  return user;
+}
+
+export async function requireEventEditor() {
+  const user = await requireStaff();
+  if (!canEditEvents(user.role)) throw new Error('FORBIDDEN');
+  return user;
+}
+
+export async function requireEventsAdmin() {
+  const user = await requireStaff();
+  if (!canCreateEvents(user.role) && !canEditEvents(user.role)) throw new Error('FORBIDDEN');
+  return user;
+}
+
+export async function requireUserManager() {
+  const user = await requireStaff();
+  if (!canManageUsers(user.role)) throw new Error('FORBIDDEN');
+  return user;
+}
+
+export async function requireRoleAssigner() {
+  const user = await requireStaff();
+  if (!canAssignStaffRoles(user.role)) throw new Error('FORBIDDEN');
   return user;
 }
 

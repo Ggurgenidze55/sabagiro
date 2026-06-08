@@ -1,12 +1,18 @@
 import { AdminUsersPanel } from '@/components/AdminUsersPanel';
 import { artistDisplayName } from '@/lib/artist-tickets';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { canAssignStaffRoles, canManageUsers, isFullAdmin } from '@/lib/staff-roles';
+import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = { title: 'Users — Admin' };
 
 export default async function AdminUsersPage() {
+  const actor = await getSessionUser();
+  if (!actor || !canManageUsers(actor.role)) redirect('/account');
+
   const [users, artists] = await Promise.all([
     prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
@@ -100,6 +106,8 @@ export default async function AdminUsersPage() {
           doorScanEnabled: u.doorScanEnabled,
             };
           })}
+          canAssignRoles={canAssignStaffRoles(actor.role)}
+          canDeleteStaff={isFullAdmin(actor.role)}
         />
       </div>
     </div>

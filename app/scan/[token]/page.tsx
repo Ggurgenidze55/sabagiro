@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ScanDoorCheck } from '@/components/ScanDoorCheck';
+import { ScanStaffRolePanel } from '@/components/ScanStaffRolePanel';
 import { ScanVerdict } from '@/components/ScanVerdict';
 import { getSessionUser } from '@/lib/auth';
 import { canScanAtDoor } from '@/lib/door-scan';
@@ -9,6 +10,7 @@ import { getPublishedEventBySlug } from '@/lib/events';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
 import { getScanVerdict } from '@/lib/ticket-scan';
 import { canAccessTicketQr, ticketQrContext } from '@/lib/ticket-qr-access';
+import { canAssignStaffRoles } from '@/lib/staff-roles';
 import { qrDataUrl } from '@/lib/qr';
 
 type PageProps = { params: { token: string } };
@@ -34,6 +36,7 @@ export default async function ScanPage({ params }: PageProps) {
 
   const user = await getSessionUser();
   const canDoorScan = user ? canScanAtDoor(user) : false;
+  const canAssignRoles = user ? canAssignStaffRoles(user.role) : false;
   const event = ticket.eventDate ? null : await getPublishedEventBySlug(ticket.productSlug);
   const eventDatesBySlug: Record<string, string | null | undefined> = event
     ? { [ticket.productSlug]: event.eventDate }
@@ -114,6 +117,15 @@ export default async function ScanPage({ params }: PageProps) {
           canCheckIn={canDoorScan && qrAvailable}
           qrExpired={qrExpired && !canDoorScan}
         />
+
+        {canAssignRoles ? (
+          <ScanStaffRolePanel
+            userId={ticket.user.id}
+            userName={`${ticket.user.firstName} ${ticket.user.lastName}`}
+            userEmail={ticket.user.email}
+            currentRole={ticket.user.role}
+          />
+        ) : null}
       </div>
     </div>
   );

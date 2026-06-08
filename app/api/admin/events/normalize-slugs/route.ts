@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import { normalizeAllEventSlugs } from '@/lib/events';
-import { requireAdmin } from '@/lib/auth';
+import { requireEventEditor } from '@/lib/auth';
 
 export async function POST() {
   try {
-    await requireAdmin();
+    await requireEventEditor();
     const updated = await normalizeAllEventSlugs();
     return NextResponse.json({ ok: true, updated });
   } catch (e) {

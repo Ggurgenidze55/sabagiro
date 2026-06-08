@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireEventsAdmin } from '@/lib/auth';
 import { storeEventImage } from '@/lib/event-image-storage';
 
 export const runtime = 'nodejs';
@@ -10,7 +10,7 @@ const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 export async function POST(request: Request) {
   try {
-    await requireAdmin();
+    await requireEventsAdmin();
     const formData = await request.formData();
     const file = formData.get('image');
 

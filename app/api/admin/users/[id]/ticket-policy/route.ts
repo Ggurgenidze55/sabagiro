@@ -1,22 +1,23 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import { sendFreeTicketsEnabledEmail } from '@/lib/email/send';
+import { isProtectedStaffTarget } from '@/lib/staff-roles';
 import { formatValidationError, ticketPolicySchema } from '@/lib/validators';
 
 type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireAdmin();
+    await requireUserManager();
     const body = ticketPolicySchema.parse(await request.json());
 
     const existing = await prisma.user.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    if (existing.role === 'ADMIN') {
+    if (isProtectedStaffTarget(existing.role)) {
       return NextResponse.json({ error: 'Cannot change policy for admin' }, { status: 403 });
     }
 

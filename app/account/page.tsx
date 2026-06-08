@@ -17,6 +17,7 @@ import {
   ticketQrContext,
 } from '@/lib/ticket-qr-access';
 import { verificationLabel } from '@/lib/verification';
+import { canAccessAdminPanel, staffAdminLandingPath } from '@/lib/staff-roles';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -86,10 +87,10 @@ export default async function AccountPage() {
             {user.email} · {user.phone}
           </p>
         </div>
-        {user.role === 'ADMIN' ? (
+        {canAccessAdminPanel(user.role) ? (
           <div className="dash-head__actions">
-            <Link href="/admin" className="btn">
-              Admin
+            <Link href={staffAdminLandingPath(user.role)} className="btn">
+              Staff
             </Link>
           </div>
         ) : null}

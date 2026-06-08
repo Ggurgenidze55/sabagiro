@@ -77,7 +77,13 @@ function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
   return [{ label: 'Standard', quantity: 100, priceGel: ev.priceGel }];
 }
 
-export function AdminEventsPanel() {
+export function AdminEventsPanel({
+  canCreate,
+  canEdit,
+}: {
+  canCreate: boolean;
+  canEdit: boolean;
+}) {
   const [events, setEvents] = useState<ClubEventRow[]>([]);
   const [season, setSeason] = useState('Summer 2025');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -164,6 +170,7 @@ export function AdminEventsPanel() {
   }
 
   function startEdit(ev: ClubEventRow) {
+    if (!canEdit) return;
     setEditingId(ev.id);
     setError('');
     setMsg('');
@@ -195,6 +202,8 @@ export function AdminEventsPanel() {
 
   async function saveEvent(e: React.FormEvent) {
     e.preventDefault();
+    if (editingId && !canEdit) return;
+    if (!editingId && !canCreate) return;
     setError('');
     setMsg('');
     let imagePath = form.imagePath;
@@ -285,6 +294,7 @@ export function AdminEventsPanel() {
 
   return (
     <div className="admin-events">
+      {canEdit ? (
       <section className="admin-events__section">
         <h2 className="section-title">Homepage season</h2>
         <form className="form-stack form-stack--inline" onSubmit={saveSeason}>
@@ -297,7 +307,9 @@ export function AdminEventsPanel() {
           </button>
         </form>
       </section>
+      ) : null}
 
+      {(canCreate || editingId) ? (
       <section className="admin-events__section">
         <SectionDivider index={2} />
         <h2 className="section-title">{editingId ? 'Edit event' : 'New event'}</h2>
@@ -563,6 +575,7 @@ export function AdminEventsPanel() {
           </button>
         </form>
       </section>
+      ) : null}
 
       <section className="admin-events__section">
         <SectionDivider index={3} />
@@ -570,6 +583,7 @@ export function AdminEventsPanel() {
         <p className="page-lead" style={{ marginBottom: '1rem' }}>
           If homepage links show 404, click to fix old slugs (spaces → hyphens).
         </p>
+        {canEdit ? (
         <button
           type="button"
           className="btn btn--ghost"
@@ -591,6 +605,7 @@ export function AdminEventsPanel() {
         >
           FIX EVENT SLUGS
         </button>
+        ) : null}
         <ResponsiveTable
           columns={[
             { id: 'title', header: 'Title', mobileSummary: true },
@@ -631,7 +646,7 @@ export function AdminEventsPanel() {
                   {ev.artistTicketsEnabled ? ' · DJ' : ''}
                 </>
               ),
-              actions: (
+              actions: canEdit ? (
                 <div className="table-actions">
                   <button type="button" className="btn btn--ghost" onClick={() => startEdit(ev)}>
                     Edit
@@ -646,6 +661,8 @@ export function AdminEventsPanel() {
                     Delete
                   </button>
                 </div>
+              ) : (
+                <span className="table-sub">View only</span>
               ),
             },
           }))}

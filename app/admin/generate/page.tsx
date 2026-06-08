@@ -1,8 +1,14 @@
 import { AdminGenerateForm } from '@/components/AdminGenerateForm';
+import { getSessionUser } from '@/lib/auth';
+import { canUseFullAdminTools } from '@/lib/staff-roles';
+import { redirect } from 'next/navigation';
 
 export const metadata = { title: 'Generate ticket — Admin' };
 
-export default function AdminGeneratePage() {
+export default async function AdminGeneratePage() {
+  const user = await getSessionUser();
+  if (!user || !canUseFullAdminTools(user.role)) redirect('/account');
+
   return (
     <div className="centered-page">
       <header className="centered-page__intro">
