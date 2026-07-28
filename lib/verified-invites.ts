@@ -17,8 +17,8 @@ export type VerifiedInviteDispatchResult = {
   errors: string[];
 };
 
-export async function runVerifiedInviteDispatch(opts?: {
-  eventSlug?: string;
+export async function runVerifiedInviteDispatch(opts: {
+  eventSlug: string;
   createdByUserId?: string;
 }): Promise<VerifiedInviteDispatchResult> {
   const [events, users] = await Promise.all([
@@ -26,8 +26,7 @@ export async function runVerifiedInviteDispatch(opts?: {
       where: {
         published: true,
         isFreeEntry: true,
-        verifiedInvitesEnabled: true,
-        ...(opts?.eventSlug ? { slug: opts.eventSlug } : {}),
+        slug: opts.eventSlug,
       },
       orderBy: [{ sortOrder: 'asc' }, { dateLabel: 'asc' }],
     }),

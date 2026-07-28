@@ -4,18 +4,20 @@ import { requireAdmin } from '@/lib/auth';
 import { runVerifiedInviteDispatch } from '@/lib/verified-invites';
 
 const bodySchema = z.object({
-  eventSlug: z.string().trim().min(1).optional(),
+  eventSlug: z.string().trim().min(1),
 });
 
-/** Admin: email verified members invitations now (invitation-only events with auto-invite enabled). */
+/** Admin: email verified members invitations for one invitation-only event. */
 export async function POST(request: Request) {
   try {
     const admin = await requireAdmin();
     const body = bodySchema.safeParse(await request.json().catch(() => ({})));
-    const eventSlug = body.success ? body.data.eventSlug : undefined;
+    if (!body.success) {
+      return NextResponse.json({ error: 'Event is required' }, { status: 400 });
+    }
 
     const result = await runVerifiedInviteDispatch({
-      eventSlug,
+      eventSlug: body.data.eventSlug,
       createdByUserId: admin.id,
     });
     return NextResponse.json({ ok: true, result });

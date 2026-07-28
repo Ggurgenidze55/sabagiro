@@ -1,4 +1,5 @@
 import { contactTopicLabel, type ContactTopic } from '@/lib/contact-topic';
+import { CLUB_RULES, VERIFICATION_REVOCATION_NOTICE } from '@/lib/club-rules';
 import { escapeHtml, renderEmailLayout } from '@/lib/email/layout';
 import { EMAIL_ACID, EMAIL_MUTED } from '@/lib/email/theme';
 import { roleLabel, staffAdminLandingPath } from '@/lib/staff-roles';
@@ -56,24 +57,48 @@ export function welcomeRegistrationEmail(opts: {
   };
 }
 
+function clubRulesEmailHtml(): string {
+  const items = CLUB_RULES.map(
+    (rule) =>
+      `<li style="margin:0 0 12px"><strong>${escapeHtml(rule.title)}</strong> — ${escapeHtml(rule.body)}</li>`,
+  ).join('');
+  return `
+    <p style="margin:20px 0 12px;font-weight:700;letter-spacing:0.04em">COMMUNITY RULES</p>
+    <ul style="margin:0 0 20px;padding-left:20px;line-height:1.55">${items}</ul>
+    <p style="margin:0 0 16px;padding:16px;border:2px solid ${EMAIL_ACID};background:#141414;font-size:13px;line-height:1.6;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:${EMAIL_ACID}">${escapeHtml(VERIFICATION_REVOCATION_NOTICE)}</p>
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Full rules: <a href="${escapeHtml(siteUrl('/rules'))}" style="color:${EMAIL_ACID}">${escapeHtml(siteUrl('/rules'))}</a></p>
+  `;
+}
+
 export function accountVerifiedEmail(opts: {
   firstName: string;
 }): { subject: string; html: string; text: string } {
   const name = escapeHtml(opts.firstName);
+  const rulesUrl = siteUrl('/rules');
   const bodyHtml = `
     <p>Hi ${name}, your account is <strong style="color:${EMAIL_ACID}">verified</strong>.</p>
     <p>You can now buy event tickets. Your QR tickets will be emailed after each successful payment and always available in your account.</p>
+    <p>As a verified member, please read and follow our community rules:</p>
+    ${clubRulesEmailHtml()}
   `;
+  const rulesText = CLUB_RULES.map((rule) => `- ${rule.title}: ${rule.body}`).join('\n');
   return {
     subject: 'Sabagiro — your account is verified',
     html: renderEmailLayout({
-      preheader: 'You can now buy tickets',
+      preheader: 'You can now buy tickets — please read our rules',
       title: 'Account verified',
       bodyHtml,
       ctaLabel: 'BROWSE EVENTS',
       ctaHref: siteUrl('/events'),
     }),
-    text: `Hi ${opts.firstName}, your Sabagiro account is verified. Buy tickets: ${siteUrl('/events')}`,
+    text: `Hi ${opts.firstName}, your Sabagiro account is verified. Buy tickets: ${siteUrl('/events')}
+
+COMMUNITY RULES
+${rulesText}
+
+${VERIFICATION_REVOCATION_NOTICE}
+
+Full rules: ${rulesUrl}`,
   };
 }
 

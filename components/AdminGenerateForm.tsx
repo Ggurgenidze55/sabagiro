@@ -89,6 +89,10 @@ export function AdminGenerateForm() {
 
   return (
     <div>
+      <h2 className="section-title">Individual guest</h2>
+      <p className="page-lead" style={{ marginBottom: '1rem' }}>
+        Guest name + email. Multiple invitations append Guest 1, Guest 2, … to the last name.
+      </p>
       <form className="form-stack" onSubmit={onSubmit}>
         <label className="form-field">
           <span>Event ticket</span>

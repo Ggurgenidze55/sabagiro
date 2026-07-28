@@ -21,7 +21,7 @@ export const ADMIN_MENU_ITEMS: NavDropdownItem[] = [
   { href: '/admin/events', label: 'Manage events' },
   { href: '/admin/artists', label: 'DJ list' },
   { href: '/admin/users', label: 'Users' },
-  { href: '/admin/generate', label: 'Generate tickets' },
+  { href: '/admin/generate', label: 'Send invitations' },
   { href: '/admin/tickets', label: 'All tickets' },
 ];
 
@@ -40,7 +40,7 @@ export function getStaffMenuItems(role: Role): NavDropdownItem[] {
   }
   if (canUseFullAdminTools(role)) {
     items.push(
-      { href: '/admin/generate', label: 'Generate tickets' },
+      { href: '/admin/generate', label: 'Send invitations' },
       { href: '/admin/tickets', label: 'All tickets' },
     );
   }
