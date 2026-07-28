@@ -87,9 +87,9 @@ npm run seed:appstore-review
 
 Re-run seed if the review account was deleted during testing.
 
-## iOS Build 7 — Wallet fix (version 1.0.1)
+## iOS Build 8 — Wallet fix (version 1.0.2)
 
-Version **1.0** is already live on the App Store — new uploads need **1.0.1** (or higher). Build **7** includes the Wallet WKWebView fix.
+Version **1.0.1** did not open Apple Wallet from the app — WKWebView does not present `.pkpass` like Safari. **Build 8** fetches the pass with session cookies and opens **PassKit** (`PKAddPassesViewController`).
 
 ```bash
 cd ios && xcodegen generate && ./archive.sh
@@ -97,13 +97,13 @@ cd ios && xcodegen generate && ./archive.sh
 
 Xcode → **Organizer** → **Distribute App** → App Store Connect.
 
-App Store Connect → **+ Version** → **1.0.1** → select **Build 7** → **Submit for Review**.
+App Store Connect → **+ Version** → **1.0.2** → select **Build 8** → **Submit for Review**.
 
 Review notes:
 
 ```
-Wallet: Add to Apple Wallet uses the same /wallet URL as Safari (WKWebView navigation with login cookies).
-Website updates (invitations, account deletion) load from sabagiro.ge — no extra native changes required.
+Wallet: Add to Apple Wallet in the native app uses PassKit (PKAddPassesViewController) with the same /api/tickets/{id}/wallet endpoint and login cookies as Safari.
+Website updates load from sabagiro.ge — no extra native changes required.
 Demo: appstore.review@sabagiro.ge / SabagiroReview2026!
 Account deletion: Account → Settings → Delete account.
 ```

@@ -96,16 +96,6 @@ struct SabagiroWebView: UIViewRepresentable {
       if let url = webView.url {
         applyPaymentFlowState(for: url)
         injectSabagiroShellStyles(webView, url: url)
-
-        if WalletPassPresenter.isWalletPassUrl(url) {
-          Task { @MainActor in
-            if webView.canGoBack {
-              webView.goBack()
-            } else {
-              webView.load(URLRequest(url: AppConfig.siteURL))
-            }
-          }
-        }
       }
       Task { @MainActor in
         model.isLoading = false
@@ -115,23 +105,12 @@ struct SabagiroWebView: UIViewRepresentable {
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-      if let url = webView.url, WalletPassPresenter.isWalletPassUrl(url) {
-        Task { @MainActor in
-          if webView.canGoBack {
-            webView.goBack()
-          }
-        }
-        WalletPassPresenter.showError(error.localizedDescription)
-      }
       Task { @MainActor in
         model.isLoading = false
       }
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-      if let url = webView.url, WalletPassPresenter.isWalletPassUrl(url) {
-        WalletPassPresenter.showError(error.localizedDescription)
-      }
       Task { @MainActor in
         model.isLoading = false
       }
@@ -161,9 +140,11 @@ struct SabagiroWebView: UIViewRepresentable {
 
       applyPaymentFlowState(for: url)
 
-      // Same flow as Safari: load /wallet with WebView cookies + SabagiroApp UA → iOS opens Wallet sheet.
       if WalletPassPresenter.isWalletPassUrl(url) {
-        decisionHandler(.allow)
+        decisionHandler(.cancel)
+        Task { @MainActor in
+          await WalletPassPresenter.presentPass(from: webView, url: url)
+        }
         return
       }
 

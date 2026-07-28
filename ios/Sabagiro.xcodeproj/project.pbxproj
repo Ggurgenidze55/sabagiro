@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		01FBD7426FC2A054B5589A2C /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DABCDABE0AF4C82D991F559 /* AppConfig.swift */; };
+		0F3C1AD050FF05C928DFD24A /* PassKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A6959130C27639EEBBC7CCFD /* PassKit.framework */; };
 		68EEC9C52562685DF4EBE11E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B29F188075BBFF12E7FD41 /* ContentView.swift */; };
 		87648CE3639FE59430EBDFCB /* SabagiroTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90360783A345F3963D67CF1 /* SabagiroTheme.swift */; };
 		904552207A78A6B423257E33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D76E2ACA350312EA0818316C /* Assets.xcassets */; };
@@ -24,13 +25,33 @@
 		7ECCA82C89F907C944E4E4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		7F9E58B11807607785C0B18A /* Sabagiro.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Sabagiro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9DABCDABE0AF4C82D991F559 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		A6959130C27639EEBBC7CCFD /* PassKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PassKit.framework; path = System/Library/Frameworks/PassKit.framework; sourceTree = SDKROOT; };
 		C146CA8AE11C8F93B79B6A38 /* WebViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewModel.swift; sourceTree = "<group>"; };
 		C2B29F188075BBFF12E7FD41 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D76E2ACA350312EA0818316C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D90360783A345F3963D67CF1 /* SabagiroTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SabagiroTheme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		0E156F122AC0B4172A0B064E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F3C1AD050FF05C928DFD24A /* PassKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
+		3158225C0B8CB123AB9AB708 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A6959130C27639EEBBC7CCFD /* PassKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		3E238CE06C604676640E76DA /* Sabagiro */ = {
 			isa = PBXGroup;
 			children = (
@@ -51,6 +72,7 @@
 			isa = PBXGroup;
 			children = (
 				3E238CE06C604676640E76DA /* Sabagiro */,
+				3158225C0B8CB123AB9AB708 /* Frameworks */,
 				E68B093DCF4A1F6ADDAA6813 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -72,6 +94,7 @@
 			buildPhases = (
 				98ED62705EE799449EC2E6C3 /* Sources */,
 				32573C35F9C25DCA7DAEB6FF /* Resources */,
+				0E156F122AC0B4172A0B064E /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -202,7 +225,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = R85UAY2KY6;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -216,7 +239,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -282,7 +305,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = R85UAY2KY6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -302,7 +325,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;

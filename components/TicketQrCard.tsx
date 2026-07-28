@@ -186,20 +186,14 @@ export function TicketQrCard({
                 <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
               )}
               {showAppleWallet ? (
-                inNativeApp ? (
-                  <a href={appleWalletHref} className="wallet-badge wallet-badge--apple">
-                    Add to Apple Wallet
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    className="wallet-badge wallet-badge--apple"
-                    onClick={addToAppleWallet}
-                    disabled={appleWalletBusy}
-                  >
-                    {appleWalletBusy ? 'Opening Apple Wallet…' : 'Add to Apple Wallet'}
-                  </button>
-                )
+                <button
+                  type="button"
+                  className="wallet-badge wallet-badge--apple"
+                  onClick={addToAppleWallet}
+                  disabled={appleWalletBusy}
+                >
+                  {appleWalletBusy ? 'Opening Apple Wallet…' : 'Add to Apple Wallet'}
+                </button>
               ) : null}
               {showGoogleWallet ? (
                 <button
