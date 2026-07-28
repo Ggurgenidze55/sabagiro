@@ -49,7 +49,13 @@ function ticketMatchesSearch(ticket: SoldTicketRow, query: string) {
   return haystack.includes(query);
 }
 
-export function SoldTicketsTable({ tickets }: { tickets: SoldTicketRow[] }) {
+export function SoldTicketsTable({
+  tickets,
+  totalCount,
+}: {
+  tickets: SoldTicketRow[];
+  totalCount?: number;
+}) {
   const [search, setSearch] = useState('');
   const searchNorm = normalizeSearch(search);
 
@@ -103,7 +109,9 @@ export function SoldTicketsTable({ tickets }: { tickets: SoldTicketRow[] }) {
             : 'No sold tickets yet'
           : searchNorm
             ? `${filtered.length} match${filtered.length === 1 ? '' : 'es'}${filtered.length !== tickets.length ? ` (${tickets.length} loaded)` : ''}`
-            : `${filtered.length} ticket${filtered.length === 1 ? '' : 's'}`}
+            : totalCount != null && totalCount > tickets.length
+              ? `${filtered.length} shown · ${totalCount} total in database`
+              : `${filtered.length} ticket${filtered.length === 1 ? '' : 's'}`}
       </p>
 
       <ResponsiveTable

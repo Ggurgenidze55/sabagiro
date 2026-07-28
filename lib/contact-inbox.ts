@@ -2,7 +2,7 @@ import type { ContactTopic } from '@/lib/contact-topic';
 
 /** Inboxes that receive contact form submissions (comma-separated in env). */
 export function getContactInboxEmails(): string[] {
-  const raw = process.env.CONTACT_INBOX_EMAIL?.trim() || 'info.sabagiro@gmail.com';
+  const raw = process.env.CONTACT_INBOX_EMAIL?.trim() || 'info@sabagiro.ge';
 
   const emails = raw
     .split(/[,;]/)
@@ -13,7 +13,7 @@ export function getContactInboxEmails(): string[] {
 }
 
 export function getContactInboxEmail(): string {
-  return getContactInboxEmails()[0] ?? 'info.sabagiro@gmail.com';
+  return getContactInboxEmails()[0] ?? 'info@sabagiro.ge';
 }
 
 const TOPIC_INBOX_ENV: Record<ContactTopic, string> = {

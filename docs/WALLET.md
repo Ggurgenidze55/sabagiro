@@ -8,7 +8,15 @@ Users can add tickets to **Apple Wallet** from `/account` → **Add to Apple Wal
 2. Pass Type ID certificate
 3. Vercel env vars (below)
 
-Until configured, the wallet button stays hidden.
+Until configured, the wallet button stays hidden. The button is shown **only on iPhone and iPad** (not Android, macOS, or Windows).
+
+---
+
+## Local certs folder
+
+Keep `.p12`, `.cer`, `.pem`, and test `.pkpass` files in **`~/Desktop/sabagiro-wallet-certs`** only — **not** inside `sabagiro/` or `ios/`. macOS/Xcode preview of wallet passes can crash Xcode (`WalletSupportUI`).
+
+The server pass template lives at `wallet/apple/ticket-template.pass/` (under `wallet/`, not `ios/` — keep sample `.pkpass` files out of the repo; see `sabagiro-wallet-certs` on Desktop).
 
 ---
 
@@ -59,12 +67,35 @@ base64 -i signerCert.pem | tr -d '\n'
 3. Pass should show event name, holder, QR for door scan
 
 API: `GET /api/tickets/{id}/wallet` → `.pkpass` file  
-Status: `GET /api/wallet/status` → `{ appleWallet: true }`
+Status: `GET /api/wallet/status` → `{ appleWallet: true }` (also checks User-Agent — iOS only)
+
+---
+
+## 6. Live pass updates (USED at door)
+
+When a ticket is scanned, Apple Wallet can refresh the pass to show **USED** status.
+
+Requires:
+
+1. Passes added **after** this feature is deployed (they include `webServiceURL`)
+2. Optional but recommended — **APNs push key** for instant background refresh:
+
+| Variable | Description |
+|----------|-------------|
+| `APPLE_WALLET_APNS_KEY_ID` | Key ID from Apple Developer → Keys |
+| `APPLE_WALLET_APNS_KEY` | `.p8` contents (PEM or base64) |
+| `APPLE_WALLET_APNS_ENV` | `production` (default) or `sandbox` |
+
+Create key: Developer → **Keys** → **+** → enable **Apple Push Notifications service (APNs)**.
+
+Without APNs, Wallet still updates when the user opens the pass or Wallet refreshes in the background (slower).
+
+PassKit web service: `https://www.sabagiro.ge/api/wallet/passkit/v1/...`
 
 ---
 
 ## Notes
 
 - QR on the pass uses the same scan URL as email/site (`/scan/{token}`)
-- Google Wallet is **not** included yet (separate setup)
-- Pass updates (void on cancel) can be added later with PassKit web service
+- **Google Wallet** (Android) — see `docs/GOOGLE-WALLET.md`
+- Older passes (added before web service) must be **re-added** to Wallet to receive live updates

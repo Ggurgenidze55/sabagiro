@@ -7,6 +7,7 @@ export type HomepageEventItem = {
   tag: string;
   dayLabel: string;
   dateLabel: string;
+  doorsOpen?: string;
   accent: string;
   isFeatured: boolean;
   isFreeEntry: boolean;
@@ -29,6 +30,7 @@ export async function getHomepageEventsPayload(): Promise<HomepageEventsPayload>
       tag: e.tag,
       dayLabel: e.dayLabel,
       dateLabel: e.dateLabel,
+      doorsOpen: e.doorsOpen?.trim() || undefined,
       accent: e.accent,
       isFeatured: e.isFeatured,
       isFreeEntry: e.isFreeEntry,

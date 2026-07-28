@@ -3,16 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { INVITATION_GENERATOR_TITLE } from '@/lib/invitation';
 import { ticketSuccessUrl } from '@/lib/ticket-success-url';
 
 type EventOption = { slug: string; title: string };
 
-type HolderDraft = {
+type GuestDraft = {
   firstName: string;
   lastName: string;
-  personalId: string;
   email: string;
-  phone: string;
 };
 
 type FreeTicketGeneratorProps = {
@@ -21,12 +20,10 @@ type FreeTicketGeneratorProps = {
   profileComplete: boolean;
 };
 
-const emptyHolder = (): HolderDraft => ({
+const emptyGuest = (): GuestDraft => ({
   firstName: '',
   lastName: '',
-  personalId: '',
   email: '',
-  phone: '',
 });
 
 export function FreeTicketGenerator({
@@ -40,7 +37,7 @@ export function FreeTicketGenerator({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [localUsedByEvent, setLocalUsedByEvent] = useState(usedByEvent);
-  const [holder, setHolder] = useState<HolderDraft>(emptyHolder);
+  const [guest, setGuest] = useState<GuestDraft>(emptyGuest);
 
   useEffect(() => {
     setLocalUsedByEvent(usedByEvent);
@@ -63,15 +60,15 @@ export function FreeTicketGenerator({
   }, []);
 
   const usedForSelected = selectedSlug ? (localUsedByEvent[selectedSlug] ?? 0) : 0;
-  const needsHolderForm = usedForSelected > 0;
+  const needsGuestForm = usedForSelected > 0;
 
   const remainingForSelected = useMemo(() => {
     if (!selectedSlug) return quota;
     return Math.max(0, quota - usedForSelected);
   }, [quota, selectedSlug, usedForSelected]);
 
-  function updateHolderField(field: keyof HolderDraft, value: string) {
-    setHolder((prev) => ({ ...prev, [field]: value }));
+  function updateGuestField(field: keyof GuestDraft, value: string) {
+    setGuest((prev) => ({ ...prev, [field]: value }));
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -81,12 +78,10 @@ export function FreeTicketGenerator({
     setLoading(true);
     try {
       const payload: Record<string, string> = { productSlug: selectedSlug };
-      if (needsHolderForm) {
-        payload.firstName = holder.firstName.trim();
-        payload.lastName = holder.lastName.trim();
-        payload.personalId = holder.personalId.trim();
-        payload.email = holder.email.trim();
-        payload.phone = holder.phone.trim();
+      if (needsGuestForm) {
+        payload.firstName = guest.firstName.trim();
+        payload.lastName = guest.lastName.trim();
+        payload.email = guest.email.trim();
       }
 
       const res = await fetch('/api/account/free-tickets', {
@@ -96,7 +91,7 @@ export function FreeTicketGenerator({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error || 'Could not generate ticket');
+        setError(data.error || 'Could not generate invitation');
         return;
       }
       router.push(ticketSuccessUrl({ source: 'free', slug: selectedSlug }));
@@ -110,24 +105,22 @@ export function FreeTicketGenerator({
 
   const canSubmit =
     profileComplete &&
-    (needsHolderForm
-      ? holder.firstName.trim().length >= 2 &&
-        holder.lastName.trim().length >= 2 &&
-        /^\d{11}$/.test(holder.personalId.trim()) &&
-        holder.email.trim().includes('@') &&
-        holder.phone.trim().length >= 9
+    (needsGuestForm
+      ? guest.firstName.trim().length >= 2 &&
+        guest.lastName.trim().length >= 2 &&
+        guest.email.trim().includes('@')
       : true);
 
   return (
     <section style={{ marginBottom: '2.5rem' }}>
-      <h2 className="section-title section-title--flush">Free Ticket Generator</h2>
+      <h2 className="section-title section-title--flush">{INVITATION_GENERATOR_TITLE}</h2>
       <p className="page-lead" style={{ marginBottom: '0.5rem' }}>
-        All events · {quota} ticket(s) per event. Your first ticket uses your account
-        details; additional tickets need guest holder details.
+        All events · {quota} invitation(s) per event. Your first invitation uses your account
+        details; additional invitations need guest name and email only.
       </p>
-      {!profileComplete && !needsHolderForm ? (
+      {!profileComplete && !needsGuestForm ? (
         <p className="notice-banner notice-banner--inline" style={{ marginBottom: '1rem' }}>
-          Complete your profile in Settings before generating your first ticket.{' '}
+          Complete your profile in Settings before generating your first invitation.{' '}
           <Link href="/account/settings" className="btn btn--ghost">
             Settings
           </Link>
@@ -147,7 +140,7 @@ export function FreeTicketGenerator({
             value={selectedSlug}
             onChange={(e) => {
               setSelectedSlug(e.target.value);
-              setHolder(emptyHolder());
+              setGuest(emptyGuest());
               setError('');
             }}
           >
@@ -166,35 +159,25 @@ export function FreeTicketGenerator({
             )}
           </select>
         </label>
-        {needsHolderForm ? (
+        {needsGuestForm ? (
           <div className="notice-banner notice-banner--inline" style={{ maxWidth: '100%' }}>
             <p className="table-sub" style={{ marginBottom: '0.6rem' }}>
-              Ticket #{usedForSelected + 1} — guest holder details (required)
+              Invitation #{usedForSelected + 1} — guest details (required)
             </p>
             <div className="form-row">
               <label className="form-field">
                 <span>First name</span>
                 <input
-                  value={holder.firstName}
-                  onChange={(e) => updateHolderField('firstName', e.target.value)}
+                  value={guest.firstName}
+                  onChange={(e) => updateGuestField('firstName', e.target.value)}
                   required
                 />
               </label>
               <label className="form-field">
                 <span>Last name</span>
                 <input
-                  value={holder.lastName}
-                  onChange={(e) => updateHolderField('lastName', e.target.value)}
-                  required
-                />
-              </label>
-              <label className="form-field">
-                <span>Personal ID</span>
-                <input
-                  value={holder.personalId}
-                  onChange={(e) => updateHolderField('personalId', e.target.value)}
-                  pattern="\d{11}"
-                  inputMode="numeric"
+                  value={guest.lastName}
+                  onChange={(e) => updateGuestField('lastName', e.target.value)}
                   required
                 />
               </label>
@@ -202,16 +185,8 @@ export function FreeTicketGenerator({
                 <span>Email</span>
                 <input
                   type="email"
-                  value={holder.email}
-                  onChange={(e) => updateHolderField('email', e.target.value)}
-                  required
-                />
-              </label>
-              <label className="form-field">
-                <span>Phone</span>
-                <input
-                  value={holder.phone}
-                  onChange={(e) => updateHolderField('phone', e.target.value)}
+                  value={guest.email}
+                  onChange={(e) => updateGuestField('email', e.target.value)}
                   required
                 />
               </label>
@@ -220,14 +195,14 @@ export function FreeTicketGenerator({
         ) : null}
         {error ? <p className="form-error">{error}</p> : null}
         {remainingForSelected <= 0 && selectedSlug ? (
-          <p className="form-error">Free ticket limit reached for this event.</p>
+          <p className="form-error">Invitation limit reached for this event.</p>
         ) : null}
         <button
           type="submit"
           className="btn"
           disabled={loading || events.length === 0 || remainingForSelected <= 0 || !canSubmit}
         >
-          {loading ? '…' : needsHolderForm ? 'Generate guest ticket' : 'Generate free ticket'}
+          {loading ? '…' : needsGuestForm ? 'Send guest invitation' : 'Generate invitation'}
         </button>
       </form>
     </section>

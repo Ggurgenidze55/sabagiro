@@ -1,4 +1,5 @@
 import { extraHolderCount } from '@/lib/ticket-holders';
+import { invitationGuestToHolder } from '@/lib/invitation';
 import {
   holderFromUser,
   isProfileCompleteForTicket,
@@ -6,7 +7,7 @@ import {
   type TicketHolderFields,
   type UserWithHolderFields,
 } from '@/lib/user-ticket-holder';
-import { ticketHolderSchema } from '@/lib/validators';
+import { invitationGuestSchema } from '@/lib/validators';
 
 type ResolveResult =
   | { ok: true; holder: TicketHolderFields }
@@ -26,14 +27,14 @@ export function resolveNextTicketHolder(
     return { ok: true, holder: holderFromUser(user) };
   }
 
-  const parsed = ticketHolderSchema.safeParse(manual);
+  const parsed = invitationGuestSchema.safeParse(manual);
   if (!parsed.success) {
     return {
       ok: false,
       code: 'HOLDER_REQUIRED',
-      error: 'Enter holder details for the guest receiving this ticket.',
+      error: 'Enter guest first name, last name, and email for this invitation.',
     };
   }
 
-  return { ok: true, holder: parsed.data };
+  return { ok: true, holder: invitationGuestToHolder(parsed.data) };
 }

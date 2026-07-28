@@ -8,6 +8,7 @@ import { DoorScanUserBadge } from '@/components/DoorScanUserBadge';
 import type { AdminUserTicketRow } from '@/lib/admin-user-ticket';
 import {
   canScanAtDoorByRole,
+  canUserManagerActOnTarget,
   isProtectedStaffTarget,
   isStaffRole,
   roleBadgeClass,
@@ -103,12 +104,14 @@ function userMatchesSearch(user: AdminUserRow, query: string) {
 
 export function AdminUsersPanel({
   users: initial,
+  actorRole,
   canAssignRoles = false,
-  canDeleteStaff = false,
+  canManageDj = false,
 }: {
   users: AdminUserRow[];
+  actorRole: string;
   canAssignRoles?: boolean;
-  canDeleteStaff?: boolean;
+  canManageDj?: boolean;
 }) {
   const [users, setUsers] = useState(initial);
   const [error, setError] = useState('');
@@ -235,7 +238,16 @@ export function AdminUsersPanel({
           : u,
       ),
     );
-    setMsg('User removed from DJ list.');
+    if (data.email?.sent) {
+      setMsg('User removed from DJ list — notification email sent.');
+    } else if (data.email?.skipped) {
+      setMsg('User removed from DJ list (email skipped — RESEND not configured).');
+    } else if (data.email && !data.email.sent) {
+      setMsg('User removed from DJ list.');
+      setError(data.email.error || 'List removal notification email failed to send.');
+    } else {
+      setMsg('User removed from DJ list.');
+    }
   }
 
   async function setDoorScan(user: AdminUserRow, enabled: boolean) {
@@ -296,9 +308,8 @@ export function AdminUsersPanel({
   }
 
   function requestDelete(user: AdminUserRow) {
-    if (isProtectedStaffTarget(user.role)) return;
-    if (isStaffRole(user.role) && !canDeleteStaff) {
-      setError('Only admin can delete staff accounts');
+    if (!canUserManagerActOnTarget(actorRole, user.role)) {
+      setError('You cannot delete this account');
       return;
     }
     if (user.verificationStatus === 'VERIFIED') {
@@ -457,7 +468,9 @@ export function AdminUsersPanel({
                       <td className="table-actions table-actions--menu">
                         <AdminUserActionsMenu
                           user={u}
+                          actorRole={actorRole}
                           canAssignRoles={canAssignRoles}
+                          canManageDj={canManageDj}
                           confirmDelete={confirmDeleteId === u.id}
                           deleting={deletingId === u.id}
                           onVerify={() => void setStatus(u.id, 'VERIFIED')}
@@ -615,7 +628,9 @@ export function AdminUsersPanel({
                     <div className="admin-user-card__actions table-actions table-actions--menu">
                       <AdminUserActionsMenu
                         user={u}
+                        actorRole={actorRole}
                         canAssignRoles={canAssignRoles}
+                        canManageDj={canManageDj}
                         confirmDelete={confirmDeleteId === u.id}
                         deleting={deletingId === u.id}
                         onVerify={() => void setStatus(u.id, 'VERIFIED')}

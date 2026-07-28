@@ -749,6 +749,14 @@
         margin-top: 0.25rem;
       }
 
+      .event-doors-open {
+        font-size: 0.68rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: color-mix(in srgb, var(--ev-accent) 60%, var(--concrete));
+        margin-top: 0.2rem;
+      }
+
       .event-tag {
         font-size: 0.7rem;
         letter-spacing: 0.2em;
@@ -1469,7 +1477,7 @@
             <li><a href="/" class="hoverable">Home</a></li>
             <li><a href="/events" class="hoverable">Events</a></li>
             <li data-nav="free-tickets" hidden>
-              <a href="/account/free-tickets" class="hoverable">Free tickets</a>
+              <a href="/account/free-tickets" class="hoverable">Invitations</a>
             </li>
             <li><a href="/location" class="hoverable">Location</a></li>
             <li data-nav="guest" class="nav-highlight"><a href="/login" class="hoverable">Log in</a></li>
@@ -1484,19 +1492,12 @@
                 <li><a href="/account/settings" class="hoverable" role="menuitem">Settings</a></li>
               </ul>
             </li>
-            <li class="nav-drop" data-nav="admin" hidden>
+            <li class="nav-drop" data-nav="staff" hidden>
               <button type="button" class="nav-drop-toggle hoverable" aria-haspopup="menu" aria-expanded="false">
-                Admin
+                Staff
                 <span class="nav-drop-caret" aria-hidden="true">▾</span>
               </button>
-              <ul class="nav-drop-menu" role="menu" aria-label="Admin menu">
-                <li><a href="/account" class="hoverable" role="menuitem">Tickets</a></li>
-                <li><a href="/account/settings" class="hoverable" role="menuitem">Settings</a></li>
-                <li><a href="/admin/events" class="hoverable" role="menuitem">Manage events</a></li>
-                <li><a href="/admin/users" class="hoverable" role="menuitem">Users</a></li>
-                <li><a href="/admin/generate" class="hoverable" role="menuitem">Generate tickets</a></li>
-                <li><a href="/admin/tickets" class="hoverable" role="menuitem">All tickets</a></li>
-              </ul>
+              <ul class="nav-drop-menu" id="staff-nav-menu" role="menu" aria-label="Staff menu"></ul>
             </li>
             <li><a href="/about" class="hoverable">About</a></li>
             <li><a href="/contact" class="hoverable">Contact</a></li>
@@ -1530,8 +1531,9 @@
 
           <div class="app-downloads" aria-label="Download the Sabagiro app">
             <a
-              href="/download/android"
+              href="/downloads/sabagiro-android.apk"
               class="app-download app-download--android hoverable"
+              download="sabagiro-android.apk"
             >
               <img
                 src="/club/badge-google-play.svg"
@@ -1541,20 +1543,21 @@
                 decoding="async"
               />
             </a>
-            <span
-              class="app-download app-download--ios app-download--soon"
-              aria-label="Sabagiro on the App Store — coming soon"
+            <a
+              href="https://apps.apple.com/app/sabagiro/id6778074347"
+              class="app-download app-download--ios hoverable"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Download Sabagiro on the App Store"
             >
               <img
                 src="/club/badge-app-store.svg"
-                alt=""
+                alt="Download Sabagiro on the App Store"
                 width="155"
                 height="40"
                 decoding="async"
-                aria-hidden="true"
               />
-              <span class="app-download__soon">Coming soon</span>
-            </span>
+            </a>
           </div>
         </section>
 
@@ -1567,7 +1570,7 @@
           <ul class="events-list" id="events-list">
             <li class="events-loading">Loading events…</li>
           </ul>
-          <script type="application/json" id="homepage-events-data">{"season":"Garden Summer 2026","events":[{"slug":"phaza-0","title":"Phaza 0","lineup":"AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT","tag":"Sabagiro, Garden, AGAVA, Wayward Atom, Masa Trippin, Pino, Vaska, COBERT, Lisi, Event, Night club","dayLabel":"SAT","dateLabel":"27 JUN","accent":"#ff0000","isFeatured":true,"isFreeEntry":true,"shopUrl":"/events/phaza-0"}]}</script>
+          <script type="application/json" id="homepage-events-data">{"season":"Summer 2025","events":[{"slug":"phaza-0","title":"Phaza 0","lineup":"AGAVA, Wayward Atom, Masa Trippin, Pino, VASKA, Cobert, Generali Minerali, Kavel, Rindi,","tag":"Sabagiro, Garden stage.","dayLabel":"SAT","dateLabel":"27 JUN","accent":"#a96800","isFeatured":true,"isFreeEntry":true,"shopUrl":"/events/phaza-0"}]}</script>
           <script>
             (function renderHomepageEventsEarly() {
               function esc(s) {
@@ -1606,6 +1609,7 @@
                       esc(ev.title) +
                       '</p>' +
                       (ev.lineup ? '<p class="event-lineup">' + esc(ev.lineup) + '</p>' : '') +
+                      (ev.doorsOpen ? '<p class="event-doors-open">Doors open ' + esc(ev.doorsOpen) + '</p>' : '') +
                       (ev.tag ? '<p class="event-tag">' + esc(ev.tag) + '</p>' : '') +
                       '</div><span class="event-arrow" aria-hidden="true">→</span></a></li>'
                     );
@@ -1654,6 +1658,30 @@
           });
         }
 
+        function escNav(s) {
+          return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        function paintStaffMenu(items) {
+          var menu = document.getElementById('staff-nav-menu');
+          if (!menu) return;
+          menu.innerHTML = (items || [])
+            .map(function (item) {
+              return (
+                '<li><a href="' +
+                escNav(item.href) +
+                '" class="hoverable" role="menuitem">' +
+                escNav(item.label) +
+                '</a></li>'
+              );
+            })
+            .join('');
+          setNavGroup('[data-nav="staff"]', items && items.length > 0);
+        }
+
         fetch('/api/auth/session', { credentials: 'same-origin' })
           .then(function (r) {
             return r.json();
@@ -1663,7 +1691,7 @@
             var isAdmin = loggedIn && data.user.role === 'ADMIN';
             setNavGroup('[data-nav="guest"]', !loggedIn);
             setNavGroup('[data-nav="account"]', loggedIn);
-            setNavGroup('[data-nav="admin"]', isAdmin);
+            paintStaffMenu(data.staffMenu || []);
             setNavGroup('[data-nav="user"]', loggedIn);
             setNavGroup(
               '[data-nav="free-tickets"]',
@@ -1680,7 +1708,7 @@
           .catch(function () {
             setNavGroup('[data-nav="guest"]', true);
             setNavGroup('[data-nav="account"]', false);
-            setNavGroup('[data-nav="admin"]', false);
+            paintStaffMenu([]);
             setNavGroup('[data-nav="user"]', false);
             setNavGroup('[data-nav="free-tickets"]', false);
           });
@@ -1822,6 +1850,7 @@
                 esc(ev.title) +
                 '</p>' +
                 (ev.lineup ? '<p class="event-lineup">' + esc(ev.lineup) + '</p>' : '') +
+                (ev.doorsOpen ? '<p class="event-doors-open">Doors open ' + esc(ev.doorsOpen) + '</p>' : '') +
                 (ev.tag ? '<p class="event-tag">' + esc(ev.tag) + '</p>' : '') +
                 '</div><span class="event-arrow" aria-hidden="true">→</span></a></li>'
               );
@@ -1832,7 +1861,7 @@
         function loadSnapshotFallback() {
           var list = document.getElementById('events-list');
           if (!list || !list.querySelector('.events-loading')) return;
-          fetch('/events.snapshot.json')
+          fetch('/events.snapshot.json', { cache: 'no-store' })
             .then(function (r) {
               return r.json();
             })
@@ -1842,7 +1871,7 @@
 
         loadSnapshotFallback();
 
-        fetch('/api/events')
+        fetch('/api/events', { cache: 'no-store' })
           .then(function (r) {
             return r.json();
           })
@@ -2067,12 +2096,16 @@
             }
           }
 
-          requestAnimationFrame(render);
+          /* Static matrix — single frame, no animation loop */
         }
 
-        resize();
-        window.addEventListener('resize', resize);
-        render();
+        function paintStaticMatrix() {
+          resize();
+          render();
+        }
+
+        paintStaticMatrix();
+        window.addEventListener('resize', paintStaticMatrix);
       })();
     </script>
   </body>

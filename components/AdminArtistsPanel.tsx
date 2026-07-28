@@ -105,7 +105,16 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
       setError(data.error || 'Delete failed');
       return;
     }
-    setMsg('Artist removed.');
+    if (data.email?.sent) {
+      setMsg('Artist removed — notification email sent.');
+    } else if (data.email?.skipped) {
+      setMsg('Artist removed (email skipped — RESEND_API_KEY not set).');
+    } else if (data.email && !data.email.sent) {
+      setMsg('Artist removed.');
+      setError(data.email?.error || 'Check Resend settings.');
+    } else {
+      setMsg('Artist removed.');
+    }
     await reload();
   }
 

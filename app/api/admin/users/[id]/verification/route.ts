@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireUserManager } from '@/lib/auth';
+import { canUserManagerActOnTarget } from '@/lib/staff-roles';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import {
@@ -18,10 +19,13 @@ const bodySchema = z.object({
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireUserManager();
+    const actor = await requireUserManager();
     const { status } = bodySchema.parse(await request.json());
 
     const previous = await prisma.user.findUniqueOrThrow({ where: { id: params.id } });
+    if (!canUserManagerActOnTarget(actor.role, previous.role)) {
+      return NextResponse.json({ error: 'Cannot change verification for this account' }, { status: 403 });
+    }
 
     const user = await prisma.user.update({
       where: { id: params.id },

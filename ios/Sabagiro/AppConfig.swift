@@ -1,8 +1,14 @@
 import Foundation
 
 enum AppConfig {
-  /// Production site loaded in the app shell.
+  /// Production website + API (Next.js on Vercel). WebView loads this; all `/api/*` calls use same origin + cookies.
   static let siteURL = URL(string: "https://www.sabagiro.ge")!
+
+  /// API base — same host as site (session cookie works for `/api/auth`, `/api/tickets`, `/api/wallet`, etc.)
+  static var apiBaseURL: URL { siteURL }
+
+  /// Appended to WKWebView UA; wallet API accepts this token for native iOS requests.
+  static let appUserAgentToken = "SabagiroApp/1.0 iOS"
 
   private static let sabagiroHostSuffixes = ["sabagiro.ge", "vercel.app"]
   private static let paymentGatewayHostSuffixes = ["flitt.com"]

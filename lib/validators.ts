@@ -96,11 +96,16 @@ export const passwordSchema = z.object({
 
 export const adminGenerateSchema = z.object({
   email: z.string().trim().email(),
-  phone: z.string().trim().min(9).max(20),
   firstName: z.string().trim().min(2).max(80),
   lastName: z.string().trim().min(2).max(80),
-  personalId: personalIdSchema,
   productSlug: z.string().min(1),
+  quantity: z.coerce.number().int().min(1).max(20).default(1),
+});
+
+export const invitationGuestSchema = z.object({
+  firstName: z.string().trim().min(2).max(80),
+  lastName: z.string().trim().min(2).max(80),
+  email: z.string().trim().email(),
 });
 
 export const clubEventSchema = z.object({
@@ -116,11 +121,17 @@ export const clubEventSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Pick event date from calendar'),
+  doorsOpen: z
+    .string()
+    .trim()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$|^$/, 'Doors open must be HH:MM (24h)')
+    .optional(),
   accent: z.string().trim().regex(/^#[0-9a-fA-F]{6}$/),
   priceGel: z.coerce.number().int().min(0).max(10000),
   isFreeEntry: z.boolean().optional(),
   freeEntryAccess: z.enum(['ALL_VERIFIED', 'INVITED_ONLY']).optional(),
   artistTicketsEnabled: z.boolean().optional(),
+  verifiedInvitesEnabled: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   published: z.boolean().optional(),
   sortOrder: z.coerce.number().int().optional(),
@@ -183,9 +194,7 @@ export const freeTicketGenerateSchema = z.object({
   productSlug: z.string().min(1),
   firstName: z.string().trim().min(2).max(80).optional(),
   lastName: z.string().trim().min(2).max(80).optional(),
-  personalId: personalIdSchema.optional(),
   email: z.string().trim().email().optional(),
-  phone: z.string().trim().min(9).max(20).optional(),
 });
 
 export const assignStaffRoleSchema = z.object({

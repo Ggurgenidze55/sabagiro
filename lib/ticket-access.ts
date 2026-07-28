@@ -80,7 +80,7 @@ export function getFreeTicketAccessNotice(
 
   if (!user) {
     return {
-      message: 'Register and log in to get your free ticket.',
+      message: 'Register and log in to get your invitation.',
       hint: 'Create an account, then complete admin verification.',
       primaryHref: '/register',
       primaryLabel: 'Register',
@@ -94,7 +94,7 @@ export function getFreeTicketAccessNotice(
   }
 
   return {
-    message: 'Free ticket generator is not enabled on your account.',
+    message: 'Invitation generator is not enabled on your account.',
     hint: 'Complimentary access is for invited guests only.',
     primaryHref: '/contact',
     primaryLabel: 'Contact',

@@ -127,7 +127,7 @@ export default async function AccountPage() {
           {user.verificationStatus === 'VERIFIED' ? (
             <p className="page-lead">
               {user.freeTicketsEnabled
-                ? `Purchase limit: ${purchaseLimit} paid ticket(s) per event. Free limit: ${user.freeTicketsQuota} free ticket(s) per event.`
+                ? `Purchase limit: ${purchaseLimit} paid ticket(s) per event. Invitation limit: ${user.freeTicketsQuota} invitation(s) per event.`
                 : 'Your account is active. You can purchase tickets.'}
             </p>
           ) : null}

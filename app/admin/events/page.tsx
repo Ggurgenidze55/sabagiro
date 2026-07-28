@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { AdminEventsPanel } from '@/components/AdminEventsPanel';
 import { getSessionUser } from '@/lib/auth';
-import { canCreateEvents, canEditEvents, canViewEventsAdmin } from '@/lib/staff-roles';
+import { canCreateEvents, canEditEvents, canUseFullAdminTools, canViewEventsAdmin, staffDeniedRedirectPath } from '@/lib/staff-roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,10 +9,11 @@ export const metadata = { title: 'Events — Admin' };
 
 export default async function AdminEventsPage() {
   const user = await getSessionUser();
-  if (!user || !canViewEventsAdmin(user.role)) redirect('/account');
+  if (!user || !canViewEventsAdmin(user.role)) redirect(staffDeniedRedirectPath(user?.role));
 
   const canCreate = canCreateEvents(user.role);
   const canEdit = canEditEvents(user.role);
+  const canDispatchInvites = canUseFullAdminTools(user.role);
 
   return (
     <div className="centered-page">
@@ -27,7 +28,11 @@ export default async function AdminEventsPage() {
         </p>
       </header>
       <div className="centered-page__body">
-        <AdminEventsPanel canCreate={canCreate} canEdit={canEdit} />
+        <AdminEventsPanel
+          canCreate={canCreate}
+          canEdit={canEdit}
+          canDispatchInvites={canDispatchInvites}
+        />
       </div>
     </div>
   );

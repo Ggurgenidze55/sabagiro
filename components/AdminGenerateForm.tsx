@@ -2,15 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { scanUrl } from '@/lib/qr';
+import { ADMIN_GENERATE_QUANTITY_MAX, ADMIN_GENERATE_QUANTITY_MIN } from '@/lib/invitation';
 
 type EventOption = { slug: string; title: string };
 
 export function AdminGenerateForm() {
   const [events, setEvents] = useState<EventOption[]>([]);
   const [productSlug, setProductSlug] = useState('');
+  const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
-  const [result, setResult] = useState<{ qrToken: string; productName: string; emailSent: boolean } | null>(null);
+  const [result, setResult] = useState<{
+    quantity: number;
+    emailsSent: number;
+    qrToken?: string;
+    productName?: string;
+  } | null>(null);
   const [qrImage, setQrImage] = useState<string | null>(null);
+
+  const singleTicket = quantity === 1;
 
   useEffect(() => {
     fetch('/api/events')
@@ -34,8 +43,13 @@ export function AdminGenerateForm() {
     setResult(null);
     setQrImage(null);
     const fd = new FormData(e.currentTarget);
-    const body = Object.fromEntries(fd.entries());
-    body.productSlug = productSlug;
+    const body: Record<string, string> = {
+      productSlug,
+      email: String(fd.get('email') ?? ''),
+      firstName: String(fd.get('firstName') ?? ''),
+      lastName: String(fd.get('lastName') ?? ''),
+      quantity: String(quantity),
+    };
 
     const res = await fetch('/api/admin/tickets/generate', {
       method: 'POST',
@@ -47,21 +61,30 @@ export function AdminGenerateForm() {
       setError(data.error || 'Failed');
       return;
     }
-    const emailSent = Boolean(data.email?.sent);
+
+    const emailsSent = Number(data.emailsSent ?? (data.email?.sent ? 1 : 0));
+    const sentQty = Number(data.quantity ?? 1);
+
     setResult({
-      qrToken: data.ticket.qrToken,
-      productName: data.ticket.productName,
-      emailSent,
+      quantity: sentQty,
+      emailsSent,
+      qrToken: singleTicket ? data.ticket?.qrToken : undefined,
+      productName: data.ticket?.productName,
     });
-    if (!emailSent) {
+
+    if (emailsSent < sentQty) {
       setError(
         data.email?.skipped
-          ? 'Ticket created — email skipped (RESEND_API_KEY not set)'
-          : data.email?.error || 'Ticket created but email failed to send',
+          ? `${sentQty} invitation(s) created — email skipped (RESEND_API_KEY not set)`
+          : data.email?.error ||
+              `${emailsSent} of ${sentQty} email(s) sent — check email settings`,
       );
     }
-    const QRCode = (await import('qrcode')).default;
-    setQrImage(await QRCode.toDataURL(scanUrl(data.ticket.qrToken), { width: 280, margin: 1 }));
+
+    if (singleTicket && data.ticket?.qrToken) {
+      const QRCode = (await import('qrcode')).default;
+      setQrImage(await QRCode.toDataURL(scanUrl(data.ticket.qrToken), { width: 280, margin: 1 }));
+    }
   }
 
   return (
@@ -87,40 +110,63 @@ export function AdminGenerateForm() {
           </select>
         </label>
         <label className="form-field">
+          <span>Number of invitations</span>
+          <select
+            name="quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+          >
+            {Array.from(
+              { length: ADMIN_GENERATE_QUANTITY_MAX - ADMIN_GENERATE_QUANTITY_MIN + 1 },
+              (_, i) => ADMIN_GENERATE_QUANTITY_MIN + i,
+            ).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="form-field">
           <span>First name</span>
-          <input name="firstName" required />
+          <input name="firstName" required minLength={2} />
         </label>
         <label className="form-field">
           <span>Last name</span>
-          <input name="lastName" required />
+          <input name="lastName" required minLength={2} />
         </label>
-        <label className="form-field">
-          <span>Personal ID</span>
-          <input name="personalId" required pattern="\d{11}" />
-        </label>
+        {!singleTicket ? (
+          <p className="form-foot form-foot--note">
+            {quantity} emails — each ticket named Last name Guest 1, Guest 2, … Guest {quantity}.
+          </p>
+        ) : null}
         <label className="form-field">
           <span>Email</span>
           <input name="email" type="email" required />
         </label>
-        <label className="form-field">
-          <span>Phone</span>
-          <input name="phone" required />
-        </label>
         {error ? <p className="form-error">{error}</p> : null}
         <button type="submit" className="btn" disabled={events.length === 0 || !productSlug}>
-          GENERATE TICKET + QR
+          {singleTicket ? 'SEND INVITATION + QR' : `SEND ${quantity} INVITATIONS BY EMAIL`}
         </button>
       </form>
-      {result && qrImage ? (
+      {result ? (
         <div className="admin-qr-result">
           <p className="form-ok">
-            {result.productName} — ticket created.
-            {result.emailSent ? ' Email sent.' : ' Check email settings above.'}
+            {result.productName ? `${result.productName} — ` : ''}
+            {result.quantity === 1
+              ? 'Invitation created.'
+              : `${result.emailsSent} of ${result.quantity} invitation email(s) sent.`}
+            {result.quantity === 1 && result.emailsSent === 1 ? ' Email sent.' : null}
           </p>
-          <img src={qrImage} alt="Generated QR" className="ticket-card__qr" width={280} height={280} />
-          <a href={scanUrl(result.qrToken)} className="ticket-card__link">
-            {scanUrl(result.qrToken)}
-          </a>
+          {qrImage ? (
+            <>
+              <img src={qrImage} alt="Generated QR" className="ticket-card__qr" width={280} height={280} />
+              {result.qrToken ? (
+                <a href={scanUrl(result.qrToken)} className="ticket-card__link">
+                  {scanUrl(result.qrToken)}
+                </a>
+              ) : null}
+            </>
+          ) : null}
         </div>
       ) : null}
     </div>

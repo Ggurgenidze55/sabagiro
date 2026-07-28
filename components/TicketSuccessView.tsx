@@ -28,7 +28,7 @@ export function TicketSuccessView({ source, eventName }: TicketSuccessViewProps)
     goToAccount();
   }, [secondsLeft]);
 
-  const title = source === 'free' ? 'Free ticket ready' : 'Ticket purchased';
+  const title = source === 'free' ? 'Invitation ready' : 'Ticket purchased';
   const lead = eventName
     ? `Your ticket for ${eventName} is being saved to your account.`
     : 'Your ticket is being saved to your account.';

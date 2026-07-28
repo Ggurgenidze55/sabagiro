@@ -36,8 +36,8 @@ export function freeEntryAccessLabel(access: FreeEntryAccessMode): string {
 
 export function freeEntryAccessAdminHint(access: FreeEntryAccessMode): string {
   return access === 'ALL_VERIFIED'
-    ? 'Every verified member gets 1 free ticket per event. Invited accounts with generator enabled use their full quota (e.g. 20).'
-    : 'Only accounts with free ticket generator enabled can claim tickets (uses their per-event quota).';
+    ? 'Every verified member gets 1 invitation per event. Invited accounts with generator enabled use their full quota (e.g. 20).'
+    : 'Only accounts with invitation generator enabled can claim invitations (uses their per-event quota).';
 }
 
 export function getFreeEntryQuotaLimit(
@@ -88,7 +88,7 @@ export function getFreeTicketEventNotice(
       message: 'Register and log in to claim your online invitation.',
       hint:
         event.freeEntryAccess === 'ALL_VERIFIED'
-          ? 'After admin verification, verified members get 1 free ticket for this event.'
+          ? 'After admin verification, verified members get 1 invitation for this event.'
           : 'Complimentary access is for invited accounts only.',
       primaryHref: '/register',
       primaryLabel: 'Register',
@@ -119,7 +119,7 @@ export function getFreeTicketEventNotice(
   }
 
   return {
-    message: 'This event is invitation-only — free ticket generator is not enabled on your account.',
+    message: 'This event is invitation-only — invitation generator is not enabled on your account.',
     hint: 'Contact us if you believe you should have complimentary access.',
     primaryHref: '/contact',
     primaryLabel: 'Contact',
@@ -138,12 +138,12 @@ export function getFreeTicketQuotaNotice(
     const limit = user ? getFreeEntryQuotaLimit(user as { freeTicketsEnabled: boolean; freeTicketsQuota: number }, event) : 0;
     if (event.isFreeEntry && event.freeEntryAccess === 'ALL_VERIFIED') {
       if (user?.freeTicketsEnabled && (user.freeTicketsQuota ?? 0) > VERIFIED_FREE_ENTRY_LIMIT) {
-        return `${user.freeTicketsQuota} free ticket(s) per event on your account.`;
+        return `${user.freeTicketsQuota} invitation(s) per event on your account.`;
       }
-      return `${VERIFIED_FREE_ENTRY_LIMIT} free ticket per verified member for this event.`;
+      return `${VERIFIED_FREE_ENTRY_LIMIT} invitation per verified member for this event.`;
     }
     if (user?.freeTicketsQuota) {
-      return `${limit} free ticket(s) per event on your account.`;
+      return `${limit} invitation(s) per event on your account.`;
     }
   }
   return null;

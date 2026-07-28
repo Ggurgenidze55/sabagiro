@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { formatScannedAt } from '@/lib/ticket-scan';
 import { loadTicketQrContext } from '@/lib/ticket-qr-access';
 import { isQrExpired } from '@/lib/ticket-qr-guard';
+import { notifyWalletPassUpdate } from '@/lib/wallet/notify-pass-update';
 
 type Params = { params: { token: string } };
 
@@ -51,6 +52,10 @@ export async function POST(_request: Request, { params }: Params) {
     await prisma.ticket.update({
       where: { id: ticket.id },
       data: { status: 'USED', scannedAt },
+    });
+
+    notifyWalletPassUpdate(ticket.id).catch((err) => {
+      console.error('[wallet] pass update notify failed', err);
     });
 
     return NextResponse.json({

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
+import { artistDisplayName } from '@/lib/artist-tickets';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { sendArtistRosterRemovedEmail } from '@/lib/email/send';
 import { artistUpdateSchema, formatValidationError } from '@/lib/validators';
 import { findOrCreateUserForAdmin } from '@/lib/tickets';
 
@@ -66,8 +68,24 @@ export async function DELETE(_request: Request, { params }: Params) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
+    const email = await sendArtistRosterRemovedEmail({
+      to: existing.email,
+      firstName: existing.firstName,
+      displayName: artistDisplayName(existing),
+    });
+
     await prisma.artist.delete({ where: { id: params.id } });
-    return NextResponse.json({ ok: true });
+
+    if (!email.sent) {
+      console.error('[artist] roster removal email failed', {
+        artistId: existing.id,
+        to: existing.email,
+        error: email.error,
+        skipped: email.skipped,
+      });
+    }
+
+    return NextResponse.json({ ok: true, email });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';
     const status = message === 'UNAUTHORIZED' ? 401 : message === 'FORBIDDEN' ? 403 : 500;

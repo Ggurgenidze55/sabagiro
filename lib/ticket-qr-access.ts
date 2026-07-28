@@ -1,5 +1,8 @@
-/** QR hidden from site / email image URL this many days after event date (end of day, Tbilisi). */
-export const QR_RETENTION_DAYS_AFTER_EVENT = 7;
+/** Days after event (Tbilisi end-of-day) before QR is hidden and ticket row is purged. */
+export const TICKET_RETENTION_DAYS_AFTER_EVENT = 4;
+
+/** @deprecated Use TICKET_RETENTION_DAYS_AFTER_EVENT */
+export const QR_RETENTION_DAYS_AFTER_EVENT = TICKET_RETENTION_DAYS_AFTER_EVENT;
 
 /** If ticket has no event date, hide QR this many days after purchase. */
 export const QR_FALLBACK_RETENTION_DAYS = 90;
@@ -12,7 +15,7 @@ export type TicketQrContext = {
   status: string;
 };
 
-function endOfEventDayMs(value: string): number | null {
+export function endOfEventDayMs(value: string): number | null {
   const trimmed = value.trim();
   if (!trimmed) return null;
 
@@ -34,7 +37,7 @@ export function getQrExpiryMs(ticket: TicketQrContext): number | null {
 
   const eventEnd = ticket.eventDate ? endOfEventDayMs(ticket.eventDate) : null;
   if (eventEnd != null) {
-    return eventEnd + QR_RETENTION_DAYS_AFTER_EVENT * 24 * 60 * 60 * 1000;
+    return eventEnd + TICKET_RETENTION_DAYS_AFTER_EVENT * 24 * 60 * 60 * 1000;
   }
 
   if (ticket.createdAt) {

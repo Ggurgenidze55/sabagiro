@@ -120,7 +120,7 @@ export function freeTicketLimitMessage(
 ): string {
   const limit = getFreeEntryQuotaLimit(user, event);
   if (event.isFreeEntry && event.freeEntryAccess === 'ALL_VERIFIED') {
-    return `Free ticket limit reached for this event (${limit}/event).`;
+    return `Invitation limit reached for this event (${limit}/event).`;
   }
-  return `Free ticket limit reached for this event (${limit}/event).`;
+  return `Invitation limit reached for this event (${limit}/event).`;
 }

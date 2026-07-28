@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { NavDropdown } from '@/components/NavDropdown';
 import { LogoutButton } from '@/components/LogoutButton';
 import type { SessionNavUser } from '@/lib/auth';
-import { ACCOUNT_MENU_ITEMS, getStaffMenuItems } from '@/lib/nav-menus';
-import { canAccessAdminPanel } from '@/lib/staff-roles';
+import { ACCOUNT_MENU_ITEMS, getStaffMenuItems, showStaffNav } from '@/lib/nav-menus';
+import { INVITATION_NAV_LABEL } from '@/lib/invitation';
 import { showFreeTicketsInNav } from '@/lib/ticket-access';
 
 type SiteNavProps = {
@@ -29,7 +29,7 @@ export function SiteNav({ user, current }: SiteNavProps) {
       {showFreeTickets ? (
         <li>
           <Link href="/account/free-tickets" prefetch>
-            Free tickets
+            {INVITATION_NAV_LABEL}
           </Link>
         </li>
       ) : null}
@@ -46,7 +46,7 @@ export function SiteNav({ user, current }: SiteNavProps) {
             menuLabel="Account menu"
             highlight
           />
-          {canAccessAdminPanel(user.role) ? (
+          {showStaffNav(user.role) ? (
             <NavDropdown
               label="Staff"
               items={getStaffMenuItems(user.role)}

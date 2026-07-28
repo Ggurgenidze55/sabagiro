@@ -34,6 +34,7 @@ export function eventToProduct(event: ClubEvent): Product {
     venueTag: event.tag || undefined,
     tag: `${event.dateLabel} · ${event.dayLabel}`,
     eventDate: event.eventDate ?? undefined,
+    doorsOpen: event.doorsOpen?.trim() || undefined,
     isFreeEntry: event.isFreeEntry,
     freeEntryAccess: (event as ClubEvent & { freeEntryAccess?: 'ALL_VERIFIED' | 'INVITED_ONLY' })
       .freeEntryAccess ?? 'INVITED_ONLY',

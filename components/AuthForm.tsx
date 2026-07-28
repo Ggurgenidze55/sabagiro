@@ -112,6 +112,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <option value="instagram">Instagram</option>
               </select>
             </label>
+            {socialPlatform === 'facebook' || socialPlatform === 'instagram' ? (
+              <p className="form-error" style={{ margin: '0 0 0.65rem' }}>
+                Your Instagram/Facebook profile must be public for verification
+              </p>
+            ) : null}
             {socialPlatform === 'facebook' ? (
               <label className="form-field">
                 <span>Facebook profile link</span>

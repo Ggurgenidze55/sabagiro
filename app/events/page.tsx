@@ -7,6 +7,7 @@ import {
   getPublicEventPriceDisplay,
 } from '@/lib/event-price-display';
 import { canAccessFreeTicketForEvent, showsOnlineInvitationForUser } from '@/lib/free-entry-access';
+import { formatDoorsOpenLabel } from '@/lib/format-doors-open';
 import { listTicketProducts } from '@/lib/products';
 
 export const revalidate = 30;
@@ -46,6 +47,7 @@ export default async function EventsPage() {
               priceGel: product.priceGel,
               ticketsRemaining: product.ticketsRemaining,
             });
+            const doorsOpenLabel = formatDoorsOpenLabel(product.doorsOpen);
 
             return (
             <article
@@ -56,6 +58,7 @@ export default async function EventsPage() {
               {product.tag ? <span className="product-card__tag">{product.tag}</span> : null}
               <h2 className="product-card__title">{product.name}</h2>
               {product.lineup ? <p className="product-card__lineup">{product.lineup}</p> : null}
+              {doorsOpenLabel ? <p className="product-card__doors-open">{doorsOpenLabel}</p> : null}
               {product.venueTag ? <p className="product-card__venue-tag">{product.venueTag}</p> : null}
               {!product.lineup && !product.venueTag ? (
                 <p className="product-card__meta">{product.description}</p>

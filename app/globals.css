@@ -587,6 +587,14 @@ html.sabagiro-in-app .payment-page {
   line-height: 1.7;
 }
 
+.product-card__doors-open {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--card-accent, var(--acid)) 65%, var(--concrete));
+}
+
 .product-card__venue-tag {
   margin: 0.35rem 0 0;
   font-size: var(--text-2xs);
@@ -638,6 +646,14 @@ html.sabagiro-in-app .payment-page {
   line-height: 1.05;
   color: var(--event-accent);
   text-shadow: 0 0 40px color-mix(in srgb, var(--event-accent) 35%, transparent);
+}
+
+.event-page__doors-open {
+  margin: 0.65rem 0 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--event-accent) 75%, var(--concrete));
 }
 
 .event-page__lineup {
@@ -1303,6 +1319,15 @@ html.sabagiro-in-app .payment-page {
   border-top: 1px solid rgba(176, 168, 154, 0.18);
 }
 
+.ticket-card__scan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
 .ticket-card--collapsed {
   padding-block: 0.85rem;
 }
@@ -1332,16 +1357,26 @@ html.sabagiro-in-app .payment-page {
 
 .ticket-card__qr {
   display: block;
-  margin: 0.5rem auto 0;
+  margin: 0;
   background: #fff;
   padding: 0.35rem;
+  flex-shrink: 0;
+}
+
+.ticket-card__wallet-error {
+  margin: 0;
+  text-align: center;
+  font-size: var(--text-xs);
+  max-width: 18rem;
 }
 
 .wallet-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0.85rem auto 0;
+  width: 100%;
+  max-width: 16.5rem;
+  margin: 0;
   padding: 0.55rem 0.9rem;
   min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.85);
@@ -1361,9 +1396,26 @@ html.sabagiro-in-app .payment-page {
   color: var(--acid);
 }
 
+.wallet-badge--google {
+  cursor: pointer;
+  font-family: inherit;
+  border-color: rgba(66, 133, 244, 0.85);
+}
+
+.wallet-badge--google:hover:not(:disabled) {
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+.wallet-badge--google:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
 .ticket-card__link {
-  display: inline-block;
-  margin-top: 0.75rem;
+  display: block;
+  margin: 0;
+  text-align: center;
   font-size: var(--text-xs);
   letter-spacing: 0.14em;
   color: var(--acid);
@@ -1437,55 +1489,38 @@ html.sabagiro-in-app .payment-page {
   max-width: none;
 }
 
-.accent-color-field__row {
-  display: flex;
-  align-items: stretch;
-  gap: 0.65rem;
-}
-
 .accent-color-field__input {
-  flex: 0 0 4.5rem;
-  width: 4.5rem;
+  display: block;
+  width: 100%;
   min-height: 44px;
-  padding: 0.25rem;
-  border: 1px solid rgba(176, 168, 154, 0.35);
-  background: rgba(10, 10, 10, 0.85);
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--acid);
+  background: rgba(10, 10, 10, 0.92);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
 }
 
 .accent-color-field__input::-webkit-color-swatch-wrapper {
-  padding: 0.15rem;
-}
-
-.accent-color-field__input::-webkit-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0;
-}
-
-.accent-color-field__input::-moz-color-swatch {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 0;
-}
-
-.accent-color-field__preview {
-  flex: 1;
-  min-height: 44px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(176, 168, 154, 0.35);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  min-height: 28px;
 }
 
-.accent-color-field__hex {
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  padding: 0.2rem 0.45rem;
-  background: rgba(0, 0, 0, 0.55);
-  color: var(--concrete-light);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.accent-color-field__input::-webkit-color-swatch {
+  border: none;
+  border-radius: 0;
+  width: 3.25rem;
+  height: 1.35rem;
+}
+
+.accent-color-field__input::-moz-color-swatch {
+  border: none;
+  border-radius: 0;
+  width: 3.25rem;
+  height: 1.35rem;
 }
 
 .admin-events__section:first-child .section-title {
@@ -1695,6 +1730,12 @@ html.sabagiro-in-app .payment-page {
 
 .settings-grid__col {
   min-width: 0;
+}
+
+.settings-grid__col--danger {
+  grid-column: 1 / -1;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgba(255, 0, 68, 0.15);
 }
 
 .settings-grid .btn {

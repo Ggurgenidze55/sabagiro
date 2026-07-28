@@ -1,5 +1,11 @@
+import { isSabagiroAppUserAgent } from '@/lib/app-shell';
 import { SABAGIRO_SHARE_IMAGE } from '@/lib/share-image';
 import { getSiteBaseUrl } from '@/lib/site-url';
+
+export type AnalyticsHeadOptions = {
+  /** When true, skip GA4 and Meta Pixel (native iOS/Android WebView shell). */
+  inNativeApp?: boolean;
+};
 
 function escapeScriptValue(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -33,15 +39,20 @@ export function buildHomepageSeoHeadHtml(): string {
 }
 
 /** HTML snippets for static homepage + server-rendered injection. */
-export function buildAnalyticsHeadHtml(): string {
+export function buildAnalyticsHeadHtml(options: AnalyticsHeadOptions = {}): string {
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
   const googleVerify = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const skipThirdParty = options.inNativeApp === true;
 
   const parts: string[] = [];
 
   if (googleVerify) {
     parts.push(`<meta name="google-site-verification" content="${googleVerify}" />`);
+  }
+
+  if (skipThirdParty) {
+    return parts.join('\n');
   }
 
   if (gaId) {
@@ -79,6 +90,10 @@ export function hasAnalyticsConfigured(): boolean {
     process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim() ||
       process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim(),
   );
+}
+
+export function isNativeAppRequest(userAgent: string | null | undefined): boolean {
+  return isSabagiroAppUserAgent(userAgent ?? '');
 }
 
 export { getSiteBaseUrl };

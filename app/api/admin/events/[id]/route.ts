@@ -3,6 +3,7 @@ import { normalizeEventSlug } from '@/lib/events';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
 import { requireEventEditor } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { regenerateHomepageEventsSnapshot } from '@/lib/regenerate-homepage-events';
 import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
 type Params = { params: { id: string } };
@@ -52,6 +53,8 @@ export async function PATCH(request: Request, { params }: Params) {
     const dateLabel = derivedLabels?.dateLabel ?? body.dateLabel ?? existing.dateLabel;
     const eventDate =
       body.eventDate !== undefined ? body.eventDate || null : existing.eventDate;
+    const doorsOpen =
+      body.doorsOpen !== undefined ? body.doorsOpen.trim() : existing.doorsOpen;
 
     const tiersInput = body.tiers?.length
       ? body.tiers
@@ -92,6 +95,7 @@ export async function PATCH(request: Request, { params }: Params) {
           dayLabel,
           dateLabel,
           eventDate,
+          doorsOpen,
           ...(body.accent !== undefined ? { accent: body.accent } : {}),
           priceGel,
           ...(body.isFreeEntry !== undefined ? { isFreeEntry: body.isFreeEntry } : {}),
@@ -101,12 +105,19 @@ export async function PATCH(request: Request, { params }: Params) {
           ...(body.artistTicketsEnabled !== undefined
             ? { artistTicketsEnabled: body.artistTicketsEnabled }
             : {}),
+          ...(body.verifiedInvitesEnabled !== undefined
+            ? { verifiedInvitesEnabled: body.verifiedInvitesEnabled }
+            : {}),
           ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
           ...(body.published !== undefined ? { published: body.published } : {}),
           ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),
         } as Parameters<typeof tx.clubEvent.update>[0]['data'],
         include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
       });
+    });
+
+    regenerateHomepageEventsSnapshot().catch((err) => {
+      console.error('[admin/events] homepage snapshot regen failed', err);
     });
 
     return NextResponse.json({ event });
@@ -125,6 +136,9 @@ export async function DELETE(_request: Request, { params }: Params) {
   try {
     await requireEventEditor();
     await prisma.clubEvent.delete({ where: { id: params.id } });
+    regenerateHomepageEventsSnapshot().catch((err) => {
+      console.error('[admin/events] homepage snapshot regen failed', err);
+    });
     return NextResponse.json({ ok: true });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';

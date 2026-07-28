@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { canUseAppleWallet } from '@/lib/apple-wallet-device';
 import { requireUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { isAppleWalletConfigured } from '@/lib/wallet/apple-config';
@@ -11,8 +12,16 @@ export const runtime = 'nodejs';
 
 type Params = { params: { id: string } };
 
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
   try {
+    const userAgent = request.headers.get('user-agent') ?? '';
+    if (!canUseAppleWallet(userAgent)) {
+      return NextResponse.json(
+        { error: 'Apple Wallet is only available on iPhone and iPad.' },
+        { status: 403 },
+      );
+    }
+
     if (!isAppleWalletConfigured()) {
       return NextResponse.json(
         { error: 'Apple Wallet is not configured yet. Contact Sabagiro support.' },
@@ -56,7 +65,7 @@ export async function GET(_request: Request, { params }: Params) {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.apple.pkpass',
-        'Content-Disposition': `attachment; filename="sabagiro-${ticket.id.slice(-8)}.pkpass"`,
+        'Content-Disposition': `inline; filename="sabagiro-${ticket.id.slice(-8)}.pkpass"`,
         'Cache-Control': 'private, no-store',
       },
     });

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
-import { canAccessAdminPanel } from '@/lib/staff-roles';
 
 const SESSION_COOKIE = 'sabagiro_session';
 
@@ -32,9 +31,9 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/admin')) {
-    if (!role || !canAccessAdminPanel(role as import('@/generated/prisma/client').Role)) {
+    if (!role) {
       const url = request.nextUrl.clone();
-      url.pathname = role ? '/account' : '/login';
+      url.pathname = '/login';
       url.searchParams.set('next', pathname);
       return NextResponse.redirect(url);
     }

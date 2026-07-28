@@ -28,6 +28,42 @@ export function isProtectedStaffTarget(role: Role | string): boolean {
   return role === 'ADMIN';
 }
 
+/** Non-admin staff accounts (Event/User Manager, Main Moderator). */
+export function isManagedStaffTarget(role: Role | string): boolean {
+  return isStaffRole(role) && role !== 'ADMIN';
+}
+
+/** User Manager / Main Moderator actions on a member (verify, limits, door scan, delete). */
+export function canUserManagerActOnTarget(
+  actorRole: Role | string,
+  targetRole: Role | string,
+): boolean {
+  if (isProtectedStaffTarget(targetRole)) return false;
+  if (isManagedStaffTarget(targetRole) && actorRole !== 'ADMIN') return false;
+  return true;
+}
+
+/** Role assignment: Main Moderator may promote members only; Admin manages all staff. */
+export function canAssignRoleToTarget(
+  actorRole: Role | string,
+  targetRole: Role | string,
+): boolean {
+  if (isProtectedStaffTarget(targetRole)) return false;
+  if (actorRole === 'ADMIN') return true;
+  if (actorRole === 'MAIN_MODERATOR') return targetRole === 'USER';
+  return false;
+}
+
+export function canManageDjList(role: Role | string): boolean {
+  return role === 'ADMIN';
+}
+
+/** Redirect staff without page access to their landing area instead of /account. */
+export function staffDeniedRedirectPath(role: Role | string | null | undefined): string {
+  if (role && canAccessAdminPanel(role)) return staffAdminLandingPath(role);
+  return '/account';
+}
+
 export function roleLabel(role: Role | string): string {
   switch (role) {
     case 'ADMIN':
@@ -63,7 +99,7 @@ export function canCreateEvents(role: Role | string): boolean {
 }
 
 export function canEditEvents(role: Role | string): boolean {
-  return role === 'ADMIN' || role === 'USER_MANAGER';
+  return role === 'ADMIN' || role === 'EVENT_MANAGER';
 }
 
 export function canViewEventsAdmin(role: Role | string): boolean {

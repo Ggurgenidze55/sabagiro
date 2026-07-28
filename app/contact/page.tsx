@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ContactForm } from '@/components/ContactForm';
 import { SiteChrome } from '@/components/SiteChrome';
-import { getContactInboxEmails } from '@/lib/contact-inbox';
+import { getContactInboxEmail, getContactInboxEmails } from '@/lib/contact-inbox';
 import { INSTAGRAM_URL } from '@/lib/social';
 
 export const metadata = {
@@ -11,6 +11,7 @@ export const metadata = {
 
 export default function ContactPage() {
   const inboxes = getContactInboxEmails();
+  const primaryInbox = getContactInboxEmail();
 
   return (
     <SiteChrome current="contact" mainClassName="site-main--contact">
@@ -61,7 +62,7 @@ export default function ContactPage() {
           <section className="contact-form-panel">
             <h2 className="section-title section-title--flush">Send a message</h2>
             <p className="contact-form-panel__hint">
-              To info.sabagiro@gmail.com · confirmation copy · reply 1–2 days
+              To {primaryInbox} · confirmation copy · reply 1–2 days
             </p>
             <ContactForm />
           </section>

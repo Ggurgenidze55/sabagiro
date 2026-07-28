@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     if (message === 'FREE_ENTRY_ONLY') {
       return NextResponse.json(
         {
-          error: 'This event is free entry — use Free tickets in your account, not checkout.',
+          error: 'This event is free entry — use Invitations in your account, not checkout.',
           code: 'FREE_ENTRY_ONLY',
         },
         { status: 403 },

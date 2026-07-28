@@ -17,7 +17,8 @@ export default async function AccountSettingsPage() {
         <header className="centered-page__intro">
           <h1 className="page-title">SETTINGS</h1>
           <p className="page-lead">
-            Email, phone, and password can be updated. Name/personal ID are locked after registration
+            Email, phone, and password can be updated. Name/personal ID are locked after registration.
+            You can permanently delete your account below.
           </p>
         </header>
         <ProfileSettings user={user} />

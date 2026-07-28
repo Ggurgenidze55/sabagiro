@@ -1,36 +1,53 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { createTicketForUser, findOrCreateUserForAdmin } from '@/lib/tickets';
+import { adminInvitationHolder } from '@/lib/invitation';
 import { adminGenerateSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
   try {
     const admin = await requireAdmin();
     const body = adminGenerateSchema.parse(await request.json());
-    const user = await findOrCreateUserForAdmin({
-      email: body.email,
-      phone: body.phone,
+    const guest = {
       firstName: body.firstName,
       lastName: body.lastName,
-      personalId: body.personalId,
+      email: body.email,
+    };
+
+    const user = await findOrCreateUserForAdmin({
+      email: body.email,
+      firstName: body.firstName,
+      lastName: body.lastName,
     });
 
-    const { ticket, email } = await createTicketForUser({
-      user,
-      productSlug: body.productSlug,
-      source: 'ADMIN',
-      createdByUserId: admin.id,
-      priceGel: 0,
-      holder: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        personalId: body.personalId,
-        email: body.email,
-        phone: body.phone,
-      },
-    });
+    const tickets = [];
+    const emails = [];
 
-    return NextResponse.json({ ok: true, ticket, email });
+    for (let i = 1; i <= body.quantity; i++) {
+      const holder = adminInvitationHolder(guest, i, body.quantity);
+
+      const result = await createTicketForUser({
+        user,
+        productSlug: body.productSlug,
+        source: 'ADMIN',
+        createdByUserId: admin.id,
+        priceGel: 0,
+        holder,
+      });
+
+      tickets.push(result.ticket);
+      emails.push(result.email);
+    }
+
+    const emailsSent = emails.filter((e) => e.sent).length;
+
+    return NextResponse.json({
+      ok: true,
+      quantity: body.quantity,
+      emailsSent,
+      ticket: tickets[0],
+      email: emails[0],
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';
     const status =

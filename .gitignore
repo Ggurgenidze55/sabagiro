@@ -16,6 +16,11 @@
 # misc
 .DS_Store
 *.pem
+*.cer
+*.p12
+*.certSigningRequest
+ios/pass.cer
+public/club/*.pkg
 .env
 .env*.local
 
@@ -31,6 +36,11 @@ next-env.d.ts
 # vercel
 .vercel
 .env*
+
+# wallet dev samples — keep on Desktop in sabagiro-wallet-certs only (pkpass crashes Xcode preview)
+wallet-dev/
+*.pkpass
+wallet/apple/**/.metadata_never_index
 
 # ios / xcode
 ios/DerivedData/

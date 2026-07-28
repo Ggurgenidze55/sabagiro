@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getSessionUser } from '@/lib/auth';
+import { getStaffMenuItems, showStaffNav } from '@/lib/nav-menus';
 
 export async function GET() {
   const user = await getSessionUser();
   if (!user) {
-    return NextResponse.json({ user: null });
+    return NextResponse.json({ user: null, staffMenu: [] });
   }
 
   return NextResponse.json({
@@ -17,5 +18,6 @@ export async function GET() {
       firstName: user.firstName,
       lastName: user.lastName,
     },
+    staffMenu: showStaffNav(user.role) ? getStaffMenuItems(user.role) : [],
   });
 }

@@ -18,6 +18,7 @@ export type Product = {
   lineup?: string;
   venueTag?: string;
   eventDate?: string;
+  doorsOpen?: string;
   isFreeEntry?: boolean;
   freeEntryAccess?: FreeEntryAccessMode;
   tiers?: TierAvailability[];

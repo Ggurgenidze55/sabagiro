@@ -12,6 +12,12 @@ type HolderDraft = {
   phone: string;
 };
 
+type GuestDraft = {
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
 type EventTicketButtonProps = {
   slug: string;
   isFreeEntry: boolean;
@@ -26,7 +32,7 @@ function mapApiError(data: { error?: string; code?: string }): string {
     return 'Verification is required before you can get tickets.';
   }
   if (data.code === 'NO_FREE_TICKETS') {
-    return data.error || 'Free ticket limit reached.';
+    return data.error || 'Invitation limit reached.';
   }
   if (data.code === 'PROFILE_INCOMPLETE') {
     return data.error || 'Complete your profile in Settings first.';
@@ -58,19 +64,28 @@ export function EventTicketButton({
     email: '',
     phone: '',
   });
+  const [guest, setGuest] = useState<GuestDraft>({
+    firstName: '',
+    lastName: '',
+    email: '',
+  });
 
   const buttonLabel =
     label ??
     (isFreeEntry
       ? needsHolderForm
-        ? 'Generate guest ticket'
-        : 'Get free ticket'
+        ? 'Send guest invitation'
+        : 'Get invitation'
       : needsHolderForm
         ? 'Buy guest ticket'
         : 'Buy ticket');
 
   function updateHolderField(field: keyof HolderDraft, value: string) {
     setHolder((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function updateGuestField(field: keyof GuestDraft, value: string) {
+    setGuest((prev) => ({ ...prev, [field]: value }));
   }
 
   async function submit(payload: Record<string, unknown>) {
@@ -140,13 +155,19 @@ export function EventTicketButton({
     if (disabled || loading) return;
     setError('');
     setLoading(true);
-    const holderPayload = {
-      firstName: holder.firstName.trim(),
-      lastName: holder.lastName.trim(),
-      personalId: holder.personalId.trim(),
-      email: holder.email.trim(),
-      phone: holder.phone.trim(),
-    };
+    const holderPayload = isFreeEntry
+      ? {
+          firstName: guest.firstName.trim(),
+          lastName: guest.lastName.trim(),
+          email: guest.email.trim(),
+        }
+      : {
+          firstName: holder.firstName.trim(),
+          lastName: holder.lastName.trim(),
+          personalId: holder.personalId.trim(),
+          email: holder.email.trim(),
+          phone: holder.phone.trim(),
+        };
     try {
       if (isFreeEntry) {
         await submit({ productSlug: slug, ...holderPayload });
@@ -167,52 +188,68 @@ export function EventTicketButton({
       <div className="event-ticket-action">
         <form className="form-stack event-ticket-action__form" onSubmit={handleFormSubmit}>
           <p className="table-sub" style={{ marginBottom: '0.25rem' }}>
-            Ticket #{ticketNumber} — guest holder details (required)
+            Invitation #{ticketNumber} — guest details (required)
           </p>
           <div className="form-row">
             <label className="form-field">
               <span>First name</span>
               <input
-                value={holder.firstName}
-                onChange={(e) => updateHolderField('firstName', e.target.value)}
+                value={isFreeEntry ? guest.firstName : holder.firstName}
+                onChange={(e) =>
+                  isFreeEntry
+                    ? updateGuestField('firstName', e.target.value)
+                    : updateHolderField('firstName', e.target.value)
+                }
                 required
               />
             </label>
             <label className="form-field">
               <span>Last name</span>
               <input
-                value={holder.lastName}
-                onChange={(e) => updateHolderField('lastName', e.target.value)}
+                value={isFreeEntry ? guest.lastName : holder.lastName}
+                onChange={(e) =>
+                  isFreeEntry
+                    ? updateGuestField('lastName', e.target.value)
+                    : updateHolderField('lastName', e.target.value)
+                }
                 required
               />
             </label>
-            <label className="form-field">
-              <span>Personal ID</span>
-              <input
-                value={holder.personalId}
-                onChange={(e) => updateHolderField('personalId', e.target.value)}
-                pattern="\d{11}"
-                inputMode="numeric"
-                required
-              />
-            </label>
+            {!isFreeEntry ? (
+              <label className="form-field">
+                <span>Personal ID</span>
+                <input
+                  value={holder.personalId}
+                  onChange={(e) => updateHolderField('personalId', e.target.value)}
+                  pattern="\d{11}"
+                  inputMode="numeric"
+                  required
+                />
+              </label>
+            ) : null}
             <label className="form-field">
               <span>Email</span>
               <input
                 type="email"
-                value={holder.email}
-                onChange={(e) => updateHolderField('email', e.target.value)}
+                value={isFreeEntry ? guest.email : holder.email}
+                onChange={(e) =>
+                  isFreeEntry
+                    ? updateGuestField('email', e.target.value)
+                    : updateHolderField('email', e.target.value)
+                }
                 required
               />
             </label>
-            <label className="form-field">
-              <span>Phone</span>
-              <input
-                value={holder.phone}
-                onChange={(e) => updateHolderField('phone', e.target.value)}
-                required
-              />
-            </label>
+            {!isFreeEntry ? (
+              <label className="form-field">
+                <span>Phone</span>
+                <input
+                  value={holder.phone}
+                  onChange={(e) => updateHolderField('phone', e.target.value)}
+                  required
+                />
+              </label>
+            ) : null}
           </div>
           <button type="submit" className="btn" disabled={disabled || loading}>
             {loading ? '…' : buttonLabel}

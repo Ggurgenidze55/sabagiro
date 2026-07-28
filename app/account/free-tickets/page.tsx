@@ -5,12 +5,13 @@ import { SiteChrome } from '@/components/SiteChrome';
 import { FreeTicketGenerator } from '@/components/FreeTicketGenerator';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { INVITATION_PAGE_TITLE } from '@/lib/invitation';
 import { showFreeTicketsInNav } from '@/lib/ticket-access';
 import { isProfileCompleteForTicket } from '@/lib/user-ticket-holder';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Free tickets — Sabagiro' };
+export const metadata = { title: 'Invitations — Sabagiro' };
 
 export default async function FreeTicketsPage() {
   const user = await getSessionUser();
@@ -35,9 +36,9 @@ export default async function FreeTicketsPage() {
     <SiteChrome current="account">
       <div className="dash-head">
         <div>
-          <h1 className="page-title">FREE TICKETS</h1>
+          <h1 className="page-title">{INVITATION_PAGE_TITLE}</h1>
           <p className="page-lead">
-            All events · {user.freeTicketsQuota} free ticket(s) per event
+            All events · {user.freeTicketsQuota} invitation(s) per event
           </p>
         </div>
         <div className="dash-head__actions">

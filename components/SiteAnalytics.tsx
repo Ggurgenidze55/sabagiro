@@ -1,10 +1,20 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import { isSabagiroAppShell } from '@/lib/app-shell';
 
 const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID?.trim();
 
 export function SiteAnalytics() {
-  if (!gaId && !pixelId) return null;
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    setEnabled(!isSabagiroAppShell());
+  }, []);
+
+  if (!enabled || (!gaId && !pixelId)) return null;
 
   return (
     <>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin, requireUserManager } from '@/lib/auth';
+import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { isProtectedStaffTarget, isStaffRole } from '@/lib/staff-roles';
+import { canUserManagerActOnTarget } from '@/lib/staff-roles';
 
 type Params = { params: { id: string } };
 
@@ -18,12 +18,8 @@ export async function DELETE(_request: Request, { params }: Params) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (isProtectedStaffTarget(target.role)) {
-      return NextResponse.json({ error: 'Cannot delete an admin account' }, { status: 403 });
-    }
-
-    if (isStaffRole(target.role) && actor.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Only admin can delete staff accounts' }, { status: 403 });
+    if (!canUserManagerActOnTarget(actor.role, target.role)) {
+      return NextResponse.json({ error: 'Cannot delete this account' }, { status: 403 });
     }
 
     if (target.id === actor.id) {

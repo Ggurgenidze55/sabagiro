@@ -28,10 +28,10 @@ export function describeTicketIssuance(
   if (ticket.source === 'FREE') {
     return {
       holderNote: 'Ticket Holder (Entry)',
-      actorNote: 'Free ticket issued by',
+      actorNote: 'Invitation issued by',
       actorLabel,
       ownerLabel,
-      detail: `${actorLabel} (free ticket · account ${ownerLabel})`,
+      detail: `${actorLabel} (invitation · account ${ownerLabel})`,
     };
   }
 
@@ -59,7 +59,7 @@ export function sourceLabel(source: TicketSource) {
     case 'PURCHASE':
       return 'Purchase';
     case 'FREE':
-      return 'Free';
+      return 'Invitation';
     case 'ADMIN':
       return 'Admin';
     case 'ARTIST':

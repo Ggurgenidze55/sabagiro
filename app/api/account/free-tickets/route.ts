@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     if (!canPurchaseTickets(user)) {
       return NextResponse.json(
-        { error: 'Free tickets are available only for verified accounts.', code: 'NOT_VERIFIED' },
+        { error: 'Invitations are available only for verified accounts.', code: 'NOT_VERIFIED' },
         { status: 403 },
       );
     }
@@ -42,8 +42,8 @@ export async function POST(request: Request) {
         {
           error:
             eventMeta.isFreeEntry && eventMeta.freeEntryAccess === 'INVITED_ONLY'
-              ? 'Free ticket generator is not enabled on your account.'
-              : 'You cannot claim a free ticket for this event.',
+              ? 'Invitation generator is not enabled on your account.'
+              : 'You cannot claim an invitation for this event.',
           code: 'NO_FREE_TICKETS',
         },
         { status: 403 },
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     }
     if (message === 'NO_FREE_TICKETS') {
       return NextResponse.json(
-        { error: 'Free ticket limit reached.', code: 'NO_FREE_TICKETS' },
+        { error: 'Invitation limit reached.', code: 'NO_FREE_TICKETS' },
         { status: 409 },
       );
     }

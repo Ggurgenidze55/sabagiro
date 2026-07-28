@@ -7,6 +7,7 @@ import type { SendEmailResult } from '@/lib/email/client';
 import { sendTicketEmail } from '@/lib/email/index';
 import { qrDataUrl, scanUrl } from '@/lib/qr';
 import { getVerifiedMemberFreeLimit } from '@/lib/free-entry-access';
+import { invitationAccountDefaults, INVITATION_TIER_LABEL } from '@/lib/invitation';
 
 export { scanUrl, qrDataUrl };
 
@@ -138,7 +139,7 @@ export async function createFreeTicketForVerifiedUser(opts: {
         productName: product.name,
         eventDate: product.eventDate ?? null,
         priceGel: 0,
-        tierLabel: 'Free',
+        tierLabel: INVITATION_TIER_LABEL,
         holderFirstName: opts.holder.firstName,
         holderLastName: opts.holder.lastName,
         holderPersonalId: opts.holder.personalId,
@@ -169,19 +170,27 @@ export async function deliverTicketEmail(ticket: Ticket): Promise<SendEmailResul
   return result;
 }
 
-export async function findOrCreateUserForAdmin(input: Holder & { role?: 'USER' }) {
+export async function findOrCreateUserForAdmin(input: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  personalId?: string;
+  role?: 'USER';
+}) {
   const existing = await prisma.user.findUnique({ where: { email: input.email } });
   if (existing) return existing;
 
   const { hashPassword } = await import('@/lib/auth');
   const tempPassword = randomBytes(12).toString('base64url');
+  const defaults = invitationAccountDefaults(input);
   return prisma.user.create({
     data: {
-      email: input.email,
-      phone: input.phone,
-      firstName: input.firstName,
-      lastName: input.lastName,
-      personalId: input.personalId,
+      email: input.email.trim(),
+      phone: input.phone?.trim() || defaults.phone,
+      firstName: input.firstName.trim(),
+      lastName: input.lastName.trim(),
+      personalId: input.personalId?.trim() || defaults.personalId,
       passwordHash: await hashPassword(tempPassword),
       role: 'USER',
       verificationStatus: 'VERIFIED',

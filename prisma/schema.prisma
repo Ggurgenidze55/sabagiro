@@ -84,6 +84,7 @@ model User {
   orders               Order[]
   passwordResetTokens  PasswordResetToken[]
   artist               Artist?
+  verifiedInviteDispatches VerifiedInviteDispatch[]
 
   @@index([verificationStatus])
 }
@@ -162,11 +163,13 @@ model ClubEvent {
   dayLabel    String
   dateLabel   String
   eventDate   String?
+  doorsOpen   String           @default("")
   accent      String            @default("#f9c108")
   priceGel    Int               @default(45)
   isFreeEntry      Boolean           @default(false)
   freeEntryAccess  FreeEntryAccess   @default(INVITED_ONLY)
   artistTicketsEnabled Boolean       @default(false)
+  verifiedInvitesEnabled Boolean     @default(false)
   isFeatured       Boolean           @default(false)
   published   Boolean           @default(true)
   sortOrder   Int               @default(0)
@@ -229,6 +232,20 @@ model ArtistTicketDispatch {
   @@index([weekKey])
 }
 
+model VerifiedInviteDispatch {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventSlug   String
+  dispatchKey String
+  ticketId    String   @unique
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, eventSlug, dispatchKey])
+  @@index([eventSlug])
+}
+
 model Ticket {
   id               String       @id @default(cuid())
   qrToken          String       @unique
@@ -251,9 +268,33 @@ model Ticket {
   scannedAt        DateTime?
   createdAt        DateTime     @default(now())
   artistDispatch   ArtistTicketDispatch?
+  verifiedInviteDispatch VerifiedInviteDispatch?
+  walletPassAuth   WalletPassAuth?
 
   @@index([userId])
   @@index([createdByUserId])
   @@index([productSlug])
   @@index([createdAt])
+}
+
+model WalletPassAuth {
+  ticketId              String   @id
+  ticket                Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authenticationToken   String   @unique
+  updatedAt             DateTime @updatedAt
+}
+
+model WalletPassRegistration {
+  id                      String   @id @default(cuid())
+  deviceLibraryIdentifier String
+  pushToken               String
+  passTypeIdentifier      String
+  serialNumber            String
+  ticketId                String
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  @@unique([deviceLibraryIdentifier, passTypeIdentifier, serialNumber])
+  @@index([ticketId])
+  @@index([serialNumber])
 }

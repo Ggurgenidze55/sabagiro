@@ -1,7 +1,38 @@
 import { contactTopicLabel, type ContactTopic } from '@/lib/contact-topic';
 import { escapeHtml, renderEmailLayout } from '@/lib/email/layout';
 import { EMAIL_ACID, EMAIL_MUTED } from '@/lib/email/theme';
+import { roleLabel, staffAdminLandingPath } from '@/lib/staff-roles';
 import { siteUrl } from '@/lib/site-url';
+
+function staffRoleBulletHtml(role: string): string {
+  const items: string[] = [];
+  switch (role) {
+    case 'EVENT_MANAGER':
+      items.push('Create and edit club events (Staff → Manage events)');
+      items.push('Log in at sabagiro.ge on your phone or computer');
+      break;
+    case 'USER_MANAGER':
+      items.push('Verify members and manage accounts');
+      items.push('Set ticket limits and free-ticket access');
+      break;
+    case 'MAIN_MODERATOR':
+      items.push('Review and verify member accounts');
+      items.push('Promote members to staff roles');
+      items.push(
+        'Scan tickets at the door — stay logged in, open a guest QR link, tap CONFIRM ENTRY',
+      );
+      break;
+    case 'USER':
+      items.push('Staff tools are no longer available on this account');
+      items.push('Your tickets and member account stay as they are');
+      break;
+    default:
+      items.push('Open your Sabagiro account for details');
+  }
+  return `<ul style="margin:12px 0 0;padding-left:20px;line-height:1.55">${items
+    .map((line) => `<li>${escapeHtml(line)}</li>`)
+    .join('')}</ul>`;
+}
 
 export function welcomeRegistrationEmail(opts: {
   firstName: string;
@@ -111,6 +142,54 @@ export function doorScanEnabledEmail(opts: {
   };
 }
 
+export function staffRoleChangedEmail(opts: {
+  firstName: string;
+  role: string;
+  previousRole: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const newLabel = escapeHtml(roleLabel(opts.role));
+  const prevLabel = escapeHtml(roleLabel(opts.previousRole));
+  const promoted = opts.previousRole === 'USER' && opts.role !== 'USER';
+  const demoted = opts.previousRole !== 'USER' && opts.role === 'USER';
+  const title = demoted ? 'Staff access removed' : promoted ? 'Staff role assigned' : 'Staff role updated';
+  const intro = demoted
+    ? `<p>Hi ${name}, your Sabagiro staff access was removed. Your role is now <strong>Member</strong> (was ${prevLabel}).</p>`
+    : promoted
+      ? `<p>Hi ${name}, you have been assigned <strong style="color:${EMAIL_ACID}">${newLabel}</strong> on Sabagiro.</p>`
+      : `<p>Hi ${name}, your Sabagiro staff role changed from <strong>${prevLabel}</strong> to <strong style="color:${EMAIL_ACID}">${newLabel}</strong>.</p>`;
+  const bodyHtml = `
+    ${intro}
+    ${staffRoleBulletHtml(opts.role)}
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:16px 0 0">If this looks wrong, contact Sabagiro admin.</p>
+  `;
+  const ctaHref = opts.role === 'USER' ? siteUrl('/account') : siteUrl(staffAdminLandingPath(opts.role));
+  const ctaLabel = opts.role === 'USER' ? 'YOUR ACCOUNT' : 'OPEN STAFF';
+  const textBullets =
+    opts.role === 'MAIN_MODERATOR'
+      ? ' You can scan tickets at the door via guest QR links.'
+      : opts.role === 'EVENT_MANAGER'
+        ? ' Manage events from Staff.'
+        : opts.role === 'USER_MANAGER'
+          ? ' Manage member accounts.'
+          : opts.role === 'USER'
+            ? ' Staff access removed.'
+            : '';
+  return {
+    subject: demoted
+      ? 'Sabagiro — staff access removed'
+      : `Sabagiro — your role is now ${roleLabel(opts.role)}`,
+    html: renderEmailLayout({
+      preheader: demoted ? 'Staff access removed' : `Role: ${roleLabel(opts.role)}`,
+      title,
+      bodyHtml,
+      ctaLabel,
+      ctaHref,
+    }),
+    text: `Hi ${opts.firstName}, your Sabagiro role changed from ${roleLabel(opts.previousRole)} to ${roleLabel(opts.role)}.${textBullets} ${ctaHref}`,
+  };
+}
+
 export function doorScanDisabledEmail(opts: {
   firstName: string;
 }): { subject: string; html: string; text: string } {
@@ -129,6 +208,29 @@ export function doorScanDisabledEmail(opts: {
       ctaHref: siteUrl('/account'),
     }),
     text: `Hi ${opts.firstName}, door scan access was removed from your Sabagiro account. Account: ${siteUrl('/account')}`,
+  };
+}
+
+export function artistRosterRemovedEmail(opts: {
+  firstName: string;
+  displayName: string;
+}): { subject: string; html: string; text: string } {
+  const name = escapeHtml(opts.firstName);
+  const rosterName = escapeHtml(opts.displayName);
+  const bodyHtml = `
+    <p>Hi ${name}, you have been removed from the <strong>Sabagiro DJ / artist list</strong>${rosterName !== name ? ` as <strong>${rosterName}</strong>` : ''}.</p>
+    <p>You will no longer receive automatic complimentary DJ tickets by email. Contact Sabagiro if you think this is a mistake.</p>
+  `;
+  return {
+    subject: 'Sabagiro — removed from artist list',
+    html: renderEmailLayout({
+      preheader: 'Removed from the Sabagiro DJ / artist list',
+      title: 'Artist list',
+      bodyHtml,
+      ctaLabel: 'YOUR ACCOUNT',
+      ctaHref: siteUrl('/account'),
+    }),
+    text: `Hi ${opts.firstName}, you were removed from the Sabagiro artist list as ${opts.displayName}. Contact Sabagiro if this is a mistake. Account: ${siteUrl('/account')}`,
   };
 }
 

@@ -135,6 +135,13 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
         doorScanEnabled: true,
       },
     });
+    if (!user) return null;
+
+    const jwtRole = typeof payload.role === 'string' ? payload.role : null;
+    if (jwtRole !== user.role) {
+      await setSessionCookie(toSessionUser(user));
+    }
+
     return user;
   } catch {
     return null;

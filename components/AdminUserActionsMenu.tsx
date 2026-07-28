@@ -13,15 +13,20 @@ import { AdminUserTicketPolicyForm } from '@/components/AdminUserTicketPolicy';
 import type { AdminUserRow } from '@/components/AdminUsersPanel';
 import { StaffRoleForm } from '@/components/StaffRoleForm';
 import {
+  canAssignRoleToTarget,
   canScanAtDoorByRole,
+  canUserManagerActOnTarget,
   isProtectedStaffTarget,
+  isStaffRole,
   roleBadgeClass,
   roleLabel,
 } from '@/lib/staff-roles';
 
 type AdminUserActionsMenuProps = {
   user: AdminUserRow;
+  actorRole: string;
   canAssignRoles?: boolean;
+  canManageDj?: boolean;
   confirmDelete: boolean;
   deleting: boolean;
   onVerify: () => void;
@@ -81,7 +86,9 @@ function measureDrop(toggle: HTMLElement, drop: HTMLElement): DropCoords {
 
 export function AdminUserActionsMenu({
   user,
+  actorRole,
   canAssignRoles = false,
+  canManageDj = false,
   confirmDelete,
   deleting,
   onVerify,
@@ -187,7 +194,16 @@ export function AdminUserActionsMenu({
     return <span className={roleBadgeClass(user.role)}>{roleLabel(user.role)}</span>;
   }
 
-  const showLimits = user.verificationStatus === 'VERIFIED';
+  const canManage = canUserManagerActOnTarget(actorRole, user.role);
+  const canAssign = canAssignRoles && canAssignRoleToTarget(actorRole, user.role);
+
+  if (!canManage && !canAssign) {
+    return isStaffRole(user.role) ? (
+      <span className={roleBadgeClass(user.role)}>{roleLabel(user.role)}</span>
+    ) : null;
+  }
+
+  const showLimits = canManage && user.verificationStatus === 'VERIFIED';
 
   const dropClass = `admin-actions__drop admin-actions__drop--fixed${
     panel === 'limits' || panel === 'staff-role' ? ' admin-actions__drop--wide' : ''
@@ -224,15 +240,19 @@ export function AdminUserActionsMenu({
     >
       {panel === 'menu' ? (
         <>
-          <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onVerify)}>
-            Verify
-          </button>
-          <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onReject)}>
-            Reject
-          </button>
-          <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onPending)}>
-            Pending
-          </button>
+          {canManage ? (
+            <>
+              <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onVerify)}>
+                Verify
+              </button>
+              <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onReject)}>
+                Reject
+              </button>
+              <button type="button" className="admin-actions__item" role="menuitem" onClick={() => runAction(onPending)}>
+                Pending
+              </button>
+            </>
+          ) : null}
           {showLimits ? (
             <button
               type="button"
@@ -243,26 +263,28 @@ export function AdminUserActionsMenu({
               Limits / free tickets
             </button>
           ) : null}
-          {user.isArtist ? (
-            <button
-              type="button"
-              className="admin-actions__item"
-              role="menuitem"
-              onClick={() => runAction(onRemoveArtist)}
-            >
-              Remove from DJ list
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="admin-actions__item"
-              role="menuitem"
-              onClick={() => runAction(onAddArtist)}
-            >
-              Add to DJ list
-            </button>
-          )}
-          {canAssignRoles ? (
+          {canManageDj ? (
+            user.isArtist ? (
+              <button
+                type="button"
+                className="admin-actions__item"
+                role="menuitem"
+                onClick={() => runAction(onRemoveArtist)}
+              >
+                Remove from DJ list
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="admin-actions__item"
+                role="menuitem"
+                onClick={() => runAction(onAddArtist)}
+              >
+                Add to DJ list
+              </button>
+            )
+          ) : null}
+          {canAssign ? (
             <button
               type="button"
               className="admin-actions__item"
@@ -272,7 +294,7 @@ export function AdminUserActionsMenu({
               Staff role
             </button>
           ) : null}
-          {!canScanAtDoorByRole(user.role) ? (
+          {canManage && !canScanAtDoorByRole(user.role) ? (
             user.doorScanEnabled ? (
               <button
                 type="button"
@@ -293,14 +315,16 @@ export function AdminUserActionsMenu({
               </button>
             )
           ) : null}
-          <button
-            type="button"
-            className="admin-actions__item admin-actions__item--danger"
-            role="menuitem"
-            onClick={() => setPanel('delete')}
-          >
-            Delete user
-          </button>
+          {canManage ? (
+            <button
+              type="button"
+              className="admin-actions__item admin-actions__item--danger"
+              role="menuitem"
+              onClick={() => setPanel('delete')}
+            >
+              Delete user
+            </button>
+          ) : null}
         </>
       ) : null}
 
@@ -346,7 +370,7 @@ export function AdminUserActionsMenu({
         </div>
       ) : null}
 
-      {panel === 'staff-role' && canAssignRoles ? (
+      {panel === 'staff-role' && canAssign ? (
         <div className="admin-actions__panel">
           <button type="button" className="admin-actions__back" onClick={() => setPanel('menu')}>
             ← Back

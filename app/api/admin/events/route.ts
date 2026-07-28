@@ -3,6 +3,7 @@ import { normalizeEventSlug } from '@/lib/events';
 import { labelsFromEventDate } from '@/lib/event-date-labels';
 import { requireEventsAdmin, requireEventCreator, requireEventEditor } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { regenerateHomepageEventsSnapshot } from '@/lib/regenerate-homepage-events';
 import { sortPublishedEvents } from '@/lib/sort-published-events';
 import { clubEventSchema, formatValidationError } from '@/lib/validators';
 
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
         dayLabel,
         dateLabel,
         eventDate: body.eventDate,
+        doorsOpen: body.doorsOpen?.trim() ?? '',
         accent: body.accent,
         priceGel: body.isFreeEntry ? 0 : tiersInput[0].priceGel,
         isFreeEntry: body.isFreeEntry ?? false,
@@ -63,6 +65,7 @@ export async function POST(request: Request) {
           ? (body.freeEntryAccess ?? 'INVITED_ONLY')
           : 'INVITED_ONLY',
         artistTicketsEnabled: body.artistTicketsEnabled ?? false,
+        verifiedInvitesEnabled: body.verifiedInvitesEnabled ?? false,
         isFeatured: body.isFeatured ?? false,
         published: body.published ?? true,
         sortOrder: body.sortOrder ?? 0,
@@ -76,6 +79,10 @@ export async function POST(request: Request) {
         },
       } as Parameters<typeof prisma.clubEvent.create>[0]['data'],
       include: { ticketTiers: { orderBy: { sortOrder: 'asc' } } },
+    });
+
+    regenerateHomepageEventsSnapshot().catch((err) => {
+      console.error('[admin/events] homepage snapshot regen failed', err);
     });
 
     return NextResponse.json({ event });

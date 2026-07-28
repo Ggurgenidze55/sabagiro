@@ -7,9 +7,11 @@ import {
   accountRejectedEmail,
   accountVerifiedEmail,
   artistRosterAddedEmail,
+  artistRosterRemovedEmail,
   doorScanDisabledEmail,
   doorScanEnabledEmail,
   freeTicketsEnabledEmail,
+  staffRoleChangedEmail,
   contactFormAckEmail,
   contactFormNotificationEmail,
   passwordChangedEmail,
@@ -78,6 +80,20 @@ export function sendDoorScanDisabledEmail(opts: {
   return sendEmail({ to: opts.to, ...msg });
 }
 
+export function sendStaffRoleChangedEmail(opts: {
+  to: string;
+  firstName: string;
+  role: string;
+  previousRole: string;
+}): Promise<SendEmailResult> {
+  const msg = staffRoleChangedEmail({
+    firstName: opts.firstName,
+    role: opts.role,
+    previousRole: opts.previousRole,
+  });
+  return sendEmail({ to: opts.to, ...msg });
+}
+
 export function sendArtistRosterAddedEmail(opts: {
   to: string;
   firstName: string;
@@ -85,6 +101,15 @@ export function sendArtistRosterAddedEmail(opts: {
   weeklyTickets: boolean;
 }): Promise<SendEmailResult> {
   const msg = artistRosterAddedEmail(opts);
+  return sendEmail({ to: opts.to, ...msg });
+}
+
+export function sendArtistRosterRemovedEmail(opts: {
+  to: string;
+  firstName: string;
+  displayName: string;
+}): Promise<SendEmailResult> {
+  const msg = artistRosterRemovedEmail(opts);
   return sendEmail({ to: opts.to, ...msg });
 }
 

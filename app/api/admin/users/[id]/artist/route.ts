@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { artistDisplayName } from '@/lib/artist-tickets';
 import { requireAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { sendArtistRosterAddedEmail } from '@/lib/email/send';
+import { sendArtistRosterAddedEmail, sendArtistRosterRemovedEmail } from '@/lib/email/send';
 
 type Params = { params: { id: string } };
 
@@ -42,7 +42,21 @@ export async function POST(_request: Request, { params }: Params) {
           where: { id: existing.id },
           data: { userId: user.id },
         });
-        return NextResponse.json({ ok: true, ...artistPayload(linked) });
+        const email = await sendArtistRosterAddedEmail({
+          to: linked.email,
+          firstName: linked.firstName,
+          displayName: artistDisplayName(linked),
+          weeklyTickets: linked.weeklyTickets,
+        });
+        if (!email.sent) {
+          console.error('[artist] roster email failed', {
+            artistId: linked.id,
+            to: linked.email,
+            error: email.error,
+            skipped: email.skipped,
+          });
+        }
+        return NextResponse.json({ ok: true, ...artistPayload(linked), email });
       }
       return NextResponse.json({ error: 'User is already on the artist list' }, { status: 409 });
     }
@@ -106,7 +120,22 @@ export async function DELETE(_request: Request, { params }: Params) {
       return NextResponse.json({ error: 'User is not on the artist list' }, { status: 404 });
     }
 
+    const email = await sendArtistRosterRemovedEmail({
+      to: artist.email,
+      firstName: artist.firstName,
+      displayName: artistDisplayName(artist),
+    });
+
     await prisma.artist.delete({ where: { id: artist.id } });
+
+    if (!email.sent) {
+      console.error('[artist] roster removal email failed', {
+        artistId: artist.id,
+        to: artist.email,
+        error: email.error,
+        skipped: email.skipped,
+      });
+    }
 
     return NextResponse.json({
       ok: true,
@@ -114,6 +143,7 @@ export async function DELETE(_request: Request, { params }: Params) {
       isArtist: false,
       artistLabel: null,
       artistActive: false,
+      email,
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Failed';

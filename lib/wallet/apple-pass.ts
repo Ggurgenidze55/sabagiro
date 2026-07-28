@@ -2,21 +2,21 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Ticket } from '@/generated/prisma/client';
 import { PKPass } from 'passkit-generator';
-import sharp from 'sharp';
+import { formatScannedAt } from '@/lib/ticket-scan';
 import { getAppleWalletConfig } from '@/lib/wallet/apple-config';
+import { getOrCreateWalletPassAuth, walletPassWebServiceUrl } from '@/lib/wallet/pass-auth';
 import { scanUrl } from '@/lib/qr';
 import { siteUrl } from '@/lib/site-url';
 
-const PASS_MODEL = join(process.cwd(), 'wallet/apple/SabagiroTicket.pass');
-const LOGO_PNG = join(process.cwd(), 'public/club/sabagiro-logo.png');
+const PASS_MODEL = join(process.cwd(), 'wallet/apple/ticket-template.pass');
+const ICON_DIR = join(process.cwd(), 'wallet/apple/icons');
 
 async function walletIcons() {
-  const png = await readFile(LOGO_PNG);
   const [icon, icon2x, logo, logo2x] = await Promise.all([
-    sharp(png).resize(29, 29, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
-    sharp(png).resize(58, 58, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
-    sharp(png).resize(160, 50, { fit: 'inside', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
-    sharp(png).resize(320, 100, { fit: 'inside', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer(),
+    readFile(join(ICON_DIR, 'icon.png')),
+    readFile(join(ICON_DIR, 'icon@2x.png')),
+    readFile(join(ICON_DIR, 'logo.png')),
+    readFile(join(ICON_DIR, 'logo@2x.png')),
   ]);
   return { icon, icon2x, logo, logo2x };
 }
@@ -32,12 +32,26 @@ function formatEventDate(value: string | Date | null): string | undefined {
   }).format(date);
 }
 
+function statusLabel(status: Ticket['status']): string {
+  switch (status) {
+    case 'USED':
+      return 'USED';
+    case 'CANCELLED':
+      return 'CANCELLED';
+    default:
+      return 'VALID';
+  }
+}
+
 export async function buildAppleWalletPass(ticket: Ticket): Promise<Buffer> {
   const { passTypeIdentifier, teamIdentifier, certificates } = getAppleWalletConfig();
+  const auth = await getOrCreateWalletPassAuth(ticket.id);
   const icons = await walletIcons();
   const holder = `${ticket.holderFirstName} ${ticket.holderLastName}`.trim();
   const scanLink = scanUrl(ticket.qrToken);
   const eventDate = formatEventDate(ticket.eventDate);
+  const used = ticket.status === 'USED';
+  const cancelled = ticket.status === 'CANCELLED';
 
   const pass = await PKPass.from(
     {
@@ -51,6 +65,11 @@ export async function buildAppleWalletPass(ticket: Ticket): Promise<Buffer> {
       organizationName: 'Sabagiro',
       description: `Sabagiro — ${ticket.productName}`,
       logoText: 'SABAGIRO',
+      webServiceURL: walletPassWebServiceUrl(),
+      authenticationToken: auth.authenticationToken,
+      backgroundColor: used || cancelled ? 'rgb(28, 28, 28)' : 'rgb(10, 10, 10)',
+      foregroundColor: used || cancelled ? 'rgb(136, 136, 136)' : 'rgb(242, 235, 227)',
+      labelColor: used || cancelled ? 'rgb(136, 136, 136)' : 'rgb(249, 193, 8)',
     },
   );
 
@@ -64,7 +83,8 @@ export async function buildAppleWalletPass(ticket: Ticket): Promise<Buffer> {
   pass.headerFields.push({
     key: 'status',
     label: 'STATUS',
-    value: ticket.status,
+    value: statusLabel(ticket.status),
+    changeMessage: used ? 'Ticket scanned — %@' : cancelled ? 'Ticket cancelled — %@' : undefined,
   });
 
   pass.primaryFields.push({
@@ -95,6 +115,14 @@ export async function buildAppleWalletPass(ticket: Ticket): Promise<Buffer> {
     });
   }
 
+  if (used && ticket.scannedAt) {
+    pass.backFields.push({
+      key: 'scanned',
+      label: 'Scanned at',
+      value: formatScannedAt(ticket.scannedAt) ?? ticket.scannedAt.toISOString(),
+    });
+  }
+
   pass.backFields.push(
     {
       key: 'id',
@@ -118,12 +146,14 @@ export async function buildAppleWalletPass(ticket: Ticket): Promise<Buffer> {
     },
   );
 
-  pass.setBarcodes({
-    message: scanLink,
-    format: 'PKBarcodeFormatQR',
-    messageEncoding: 'iso-8859-1',
-    altText: ticket.qrToken.slice(0, 8).toUpperCase(),
-  });
+  if (!cancelled) {
+    pass.setBarcodes({
+      message: scanLink,
+      format: 'PKBarcodeFormatQR',
+      messageEncoding: 'iso-8859-1',
+      altText: used ? 'USED' : ticket.qrToken.slice(0, 8).toUpperCase(),
+    });
+  }
 
   return pass.getAsBuffer();
 }

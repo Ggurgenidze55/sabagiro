@@ -79,6 +79,11 @@ class SabagiroWebViewClient(
 
         applyPaymentFlowState(uri)
 
+        if (uri.host?.lowercase() == "pay.google.com") {
+            view.context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+            return true
+        }
+
         if (uri.path?.endsWith(".apk", ignoreCase = true) == true) {
             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

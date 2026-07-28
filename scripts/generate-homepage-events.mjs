@@ -26,6 +26,7 @@ function mapEvents(events) {
     tag: e.tag,
     dayLabel: e.dayLabel,
     dateLabel: e.dateLabel,
+    doorsOpen: e.doorsOpen?.trim() || undefined,
     accent: e.accent,
     isFeatured: e.isFeatured,
     isFreeEntry: e.isFreeEntry,

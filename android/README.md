@@ -30,23 +30,36 @@ Checkout opens **pay.flitt.com** in the same WebView. After payment, Flitt retur
 
 Allowed in-app hosts: `sabagiro.ge`, `vercel.app`, `flitt.com`, plus bank 3DS pages while checkout is active.
 
+## Google Wallet
+
+Tapping **Add to Google Wallet** on `/account` fetches a signed save link and opens `pay.google.com` (handled in `SabagiroWebViewClient`). Requires server env vars — see `docs/GOOGLE-WALLET.md`.
+
 ## Splash
 
 Yellow loader + Sabagiro logo on `#0a0a0a` background until the first page load completes (matches iOS shell).
 
-## Release build
-
-1. Copy `keystore.properties.example` → `keystore.properties` and fill in your keystore paths/passwords.
-2. Build and publish to the website download folder:
+## Release build (APK — website download)
 
 ```bash
-cd android
-./gradlew assembleRelease
-cp app/build/outputs/apk/release/app-release.apk ../public/downloads/sabagiro-android.apk
+npm run android:publish-apk
 ```
 
-Or from repo root: `npm run android:publish-apk` (after a release build).
+Or manually: `./gradlew assembleRelease` → copy APK to `public/downloads/`.
 
-**Play Protect:** sideload installs show “App blocked” until the app is on Google Play. Users must tap **More details → Install anyway**. Steps: **https://www.sabagiro.ge/download/android**
+**Play Protect:** sideload installs show “App blocked” until the app is on Google Play. Steps: **https://www.sabagiro.ge/download/android**
 
-Keep `sabagiro-release.keystore` and `keystore.properties` backed up locally — they are gitignored.
+## Google Play (.aab)
+
+Full checklist: **`docs/GOOGLE-PLAY.md`**
+
+```bash
+cd ~/Desktop/sabagiro/android
+chmod +x bundle-release.sh
+./bundle-release.sh
+```
+
+Upload `~/Desktop/sabagiro-play.aab` in Play Console → **Production → Create release**.
+
+Or **Android Studio → Build → Generate Signed Bundle / APK → Android App Bundle**.
+
+Keep `sabagiro-release.keystore` and `keystore.properties` backed up — they are gitignored.

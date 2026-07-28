@@ -2,7 +2,7 @@ import { AdminArtistsPanel } from '@/components/AdminArtistsPanel';
 import { artistDisplayName } from '@/lib/artist-tickets';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { canUseFullAdminTools } from '@/lib/staff-roles';
+import { canUseFullAdminTools, staffDeniedRedirectPath } from '@/lib/staff-roles';
 import { redirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
@@ -11,7 +11,7 @@ export const metadata = { title: 'DJ list — Admin — Sabagiro' };
 
 export default async function AdminArtistsPage() {
   const user = await getSessionUser();
-  if (!user || !canUseFullAdminTools(user.role)) redirect('/account');
+  if (!user || !canUseFullAdminTools(user.role)) redirect(staffDeniedRedirectPath(user?.role));
 
   const rows = await prisma.artist.findMany({
     orderBy: [{ stageName: 'asc' }, { lastName: 'asc' }],

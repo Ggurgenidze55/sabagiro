@@ -29,6 +29,7 @@ import {
   getPublicEventPriceLabel,
   ONLINE_INVITATION_LABEL,
 } from '@/lib/event-price-display';
+import { formatDoorsOpenLabel } from '@/lib/format-doors-open';
 import { getProduct } from '@/lib/products';
 
 export const dynamic = 'force-dynamic';
@@ -124,6 +125,7 @@ export default async function EventPage({ params }: PageProps) {
     priceGel: product.priceGel,
     ticketsRemaining: product.ticketsRemaining,
   });
+  const doorsOpenLabel = formatDoorsOpenLabel(product.doorsOpen);
 
   return (
     <SiteChrome current="events">
@@ -134,6 +136,7 @@ export default async function EventPage({ params }: PageProps) {
         <header className="event-page__head">
           {product.tag ? <p className="event-page__tag">{product.tag}</p> : null}
           <h1 className="event-page__title">{product.name}</h1>
+          {doorsOpenLabel ? <p className="event-page__doors-open">{doorsOpenLabel}</p> : null}
         </header>
 
         {product.imagePath ? (
@@ -180,7 +183,7 @@ export default async function EventPage({ params }: PageProps) {
             </>
           ) : canAccessFree ? (
             <p className="notice-banner notice-banner--inline">
-              {ONLINE_INVITATION_LABEL} — your account includes free tickets for this event.
+              {ONLINE_INVITATION_LABEL} — your account includes invitations for this event.
             </p>
           ) : (
             <TicketAccessNotice user={user} />
@@ -221,7 +224,7 @@ export default async function EventPage({ params }: PageProps) {
 
           {canGuestFreeTicket ? (
             <p className="event-page__hint">
-              Additional free tickets require guest holder details.
+              Additional invitations require guest name and email.
             </p>
           ) : null}
 

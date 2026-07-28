@@ -3,22 +3,22 @@ import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import { sendFreeTicketsEnabledEmail } from '@/lib/email/send';
-import { isProtectedStaffTarget } from '@/lib/staff-roles';
+import { canUserManagerActOnTarget } from '@/lib/staff-roles';
 import { formatValidationError, ticketPolicySchema } from '@/lib/validators';
 
 type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireUserManager();
+    const actor = await requireUserManager();
     const body = ticketPolicySchema.parse(await request.json());
 
     const existing = await prisma.user.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    if (isProtectedStaffTarget(existing.role)) {
-      return NextResponse.json({ error: 'Cannot change policy for admin' }, { status: 403 });
+    if (!canUserManagerActOnTarget(actor.role, existing.role)) {
+      return NextResponse.json({ error: 'Cannot change policy for this account' }, { status: 403 });
     }
 
     if (body.freeTicketsEnabled && body.freeTicketsQuota < 1) {

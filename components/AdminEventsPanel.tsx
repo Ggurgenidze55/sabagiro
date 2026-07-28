@@ -20,11 +20,13 @@ type ClubEventRow = {
   dayLabel: string;
   dateLabel: string;
   eventDate: string | null;
+  doorsOpen: string;
   accent: string;
   priceGel: number;
   isFreeEntry: boolean;
   freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
   artistTicketsEnabled: boolean;
+  verifiedInvitesEnabled: boolean;
   isFeatured: boolean;
   published: boolean;
   sortOrder: number;
@@ -49,6 +51,7 @@ const defaultFormBase = {
   dayLabel: '',
   dateLabel: '',
   eventDate: '',
+  doorsOpen: '',
   accent: '#f9c108',
   priceGel: 45,
   isFreeEntry: false,
@@ -64,6 +67,7 @@ const defaultForm: typeof defaultFormBase & {
   ...defaultFormBase,
   freeEntryAccess: 'INVITED_ONLY',
   artistTicketsEnabled: false,
+  verifiedInvitesEnabled: false,
 };
 
 function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
@@ -80,9 +84,11 @@ function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
 export function AdminEventsPanel({
   canCreate,
   canEdit,
+  canDispatchInvites,
 }: {
   canCreate: boolean;
   canEdit: boolean;
+  canDispatchInvites?: boolean;
 }) {
   const [events, setEvents] = useState<ClubEventRow[]>([]);
   const [season, setSeason] = useState('Summer 2025');
@@ -93,6 +99,8 @@ export function AdminEventsPanel({
   const [msg, setMsg] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [inviteDispatchBusy, setInviteDispatchBusy] = useState(false);
+  const [inviteDispatchSlug, setInviteDispatchSlug] = useState<string | null>(null);
   const eventDateRef = useRef<HTMLInputElement>(null);
   const eventFormRef = useRef<HTMLFormElement>(null);
 
@@ -185,11 +193,13 @@ export function AdminEventsPanel({
       dayLabel: ev.dayLabel,
       dateLabel: ev.dateLabel,
       eventDate: ev.eventDate ?? '',
+      doorsOpen: ev.doorsOpen ?? '',
       accent: ev.accent,
       priceGel: ev.priceGel,
       isFreeEntry: ev.isFreeEntry,
       freeEntryAccess: ev.freeEntryAccess ?? 'INVITED_ONLY',
       artistTicketsEnabled: ev.artistTicketsEnabled ?? false,
+      verifiedInvitesEnabled: ev.verifiedInvitesEnabled ?? false,
       isFeatured: ev.isFeatured,
       published: ev.published,
       sortOrder: ev.sortOrder,
@@ -240,6 +250,7 @@ export function AdminEventsPanel({
       isFreeEntry: form.isFreeEntry,
       freeEntryAccess: form.isFreeEntry ? form.freeEntryAccess : 'INVITED_ONLY',
       artistTicketsEnabled: form.artistTicketsEnabled,
+      verifiedInvitesEnabled: form.isFreeEntry ? form.verifiedInvitesEnabled : false,
       sortOrder: Number(form.sortOrder),
       tiers: form.isFreeEntry
         ? [{ label: 'Free entry', quantity: 9999, priceGel: 0 }]
@@ -292,8 +303,63 @@ export function AdminEventsPanel({
     load();
   }
 
+  async function runVerifiedInviteDispatch(eventSlug?: string, eventTitle?: string) {
+    const targetLabel = eventTitle ? `"${eventTitle}"` : 'all enabled invitation-only events';
+    if (
+      !window.confirm(
+        `Send invitation emails now to all verified members for ${targetLabel}? Already sent or existing tickets are skipped.`,
+      )
+    ) {
+      return;
+    }
+    setInviteDispatchBusy(true);
+    setInviteDispatchSlug(eventSlug ?? null);
+    setError('');
+    setMsg('');
+    try {
+      const res = await fetch('/api/admin/verified-invites/dispatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventSlug ? { eventSlug } : {}),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Dispatch failed');
+        return;
+      }
+      const r = data.result;
+      setMsg(
+        `Verified invites — ${r.created} ticket(s) created, ${r.skipped} skipped, ${r.emailsSent} email(s) sent (${r.events} event(s), ${r.verifiedUsers} verified users).`,
+      );
+      if (r.errors?.length) {
+        setError(r.errors.slice(0, 3).join(' · '));
+      }
+    } finally {
+      setInviteDispatchBusy(false);
+      setInviteDispatchSlug(null);
+    }
+  }
+
   return (
     <div className="admin-events">
+      {canDispatchInvites ? (
+        <section className="admin-events__section">
+          <p className="page-lead" style={{ marginBottom: '0.75rem' }}>
+            Verified members — send invitation emails <strong>immediately</strong> for
+            invitation-only events with auto-invite enabled (button per event or all at once).
+          </p>
+          <div className="cart-actions" style={{ marginBottom: '1.5rem' }}>
+            <button
+              type="button"
+              className="btn btn--ghost"
+              onClick={() => runVerifiedInviteDispatch()}
+              disabled={inviteDispatchBusy}
+            >
+              {inviteDispatchBusy && !inviteDispatchSlug ? 'Sending…' : 'SEND ALL VERIFIED INVITES NOW'}
+            </button>
+          </div>
+        </section>
+      ) : null}
       {canEdit ? (
       <section className="admin-events__section">
         <h2 className="section-title">Homepage season</h2>
@@ -408,25 +474,25 @@ export function AdminEventsPanel({
               )}
             </label>
           </div>
+          <label className="form-field">
+            <span>Doors open</span>
+            <input
+              type="time"
+              value={form.doorsOpen}
+              onChange={(e) => setForm({ ...form, doorsOpen: e.target.value })}
+            />
+            <p className="form-foot">24h time when doors open (optional).</p>
+          </label>
           <div className="form-row">
             <label className="form-field accent-color-field">
               <span>Accent</span>
-              <div className="accent-color-field__row">
-                <input
-                  type="color"
-                  className="accent-color-field__input"
-                  value={form.accent}
-                  onChange={(e) => setForm({ ...form, accent: e.target.value })}
-                  aria-label="Event accent color"
-                />
-                <div
-                  className="accent-color-field__preview"
-                  style={{ backgroundColor: form.accent }}
-                  aria-hidden
-                >
-                  <span className="accent-color-field__hex">{form.accent.toUpperCase()}</span>
-                </div>
-              </div>
+              <input
+                type="color"
+                className="accent-color-field__input"
+                value={form.accent}
+                onChange={(e) => setForm({ ...form, accent: e.target.value })}
+                aria-label="Event accent color"
+              />
             </label>
             <label className="form-field">
               <span>Price (₾)</span>
@@ -455,6 +521,7 @@ export function AdminEventsPanel({
                   isFreeEntry: e.target.checked,
                   priceGel: e.target.checked ? 0 : form.priceGel,
                   freeEntryAccess: e.target.checked ? form.freeEntryAccess : 'INVITED_ONLY',
+                  verifiedInvitesEnabled: e.target.checked ? form.verifiedInvitesEnabled : false,
                 })
               }
             />
@@ -493,6 +560,18 @@ export function AdminEventsPanel({
             />
             Send DJ list 1 free ticket (1 day before event date)
           </label>
+          {form.isFreeEntry ? (
+            <label className="form-check">
+              <input
+                type="checkbox"
+                checked={form.verifiedInvitesEnabled}
+                onChange={(e) =>
+                  setForm({ ...form, verifiedInvitesEnabled: e.target.checked })
+                }
+              />
+              Auto-email all verified members (manual send — invitation-only)
+            </label>
+          ) : null}
           <label className="form-check">
             <input
               type="checkbox"
@@ -633,6 +712,12 @@ export function AdminEventsPanel({
               date: (
                 <>
                   {ev.dayLabel} {ev.dateLabel}
+                  {ev.doorsOpen ? (
+                    <>
+                      <br />
+                      <span className="table-sub">doors {ev.doorsOpen}</span>
+                    </>
+                  ) : null}
                 </>
               ),
               price: ev.isFreeEntry ? 'Free entry' : `${ev.priceGel} ₾`,
@@ -644,10 +729,21 @@ export function AdminEventsPanel({
                     : ''}
                   {ev.isFeatured ? ' · ★' : ''}
                   {ev.artistTicketsEnabled ? ' · DJ' : ''}
+                  {ev.verifiedInvitesEnabled ? ' · Verified auto-invite' : ''}
                 </>
               ),
               actions: canEdit ? (
                 <div className="table-actions">
+                  {canDispatchInvites && ev.isFreeEntry && ev.verifiedInvitesEnabled ? (
+                    <button
+                      type="button"
+                      className="btn btn--ghost"
+                      disabled={inviteDispatchBusy}
+                      onClick={() => runVerifiedInviteDispatch(ev.slug, ev.title)}
+                    >
+                      {inviteDispatchSlug === ev.slug ? 'Sending…' : 'Send invites'}
+                    </button>
+                  ) : null}
                   <button type="button" className="btn btn--ghost" onClick={() => startEdit(ev)}>
                     Edit
                   </button>

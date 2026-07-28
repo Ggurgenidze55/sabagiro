@@ -3,21 +3,24 @@ import { requireUserManager } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { dispatchEmail, type EmailDispatchMeta } from '@/lib/email/dispatch';
 import { sendDoorScanDisabledEmail, sendDoorScanEnabledEmail } from '@/lib/email/send';
-import { canScanAtDoorByRole, isProtectedStaffTarget } from '@/lib/staff-roles';
+import { canScanAtDoorByRole, canUserManagerActOnTarget } from '@/lib/staff-roles';
 import { doorScanSchema, formatValidationError } from '@/lib/validators';
 
 type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
   try {
-    await requireUserManager();
+    const actor = await requireUserManager();
     const body = doorScanSchema.parse(await request.json());
 
     const existing = await prisma.user.findUnique({ where: { id: params.id } });
     if (!existing) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    if (isProtectedStaffTarget(existing.role) || canScanAtDoorByRole(existing.role)) {
+    if (!canUserManagerActOnTarget(actor.role, existing.role)) {
+      return NextResponse.json({ error: 'Cannot change door scan for this account' }, { status: 403 });
+    }
+    if (canScanAtDoorByRole(existing.role)) {
       return NextResponse.json(
         { error: 'This account already has door scan via staff role' },
         { status: 400 },

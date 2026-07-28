@@ -52,8 +52,8 @@ export function StaffRoleForm({ userId, currentRole, compact, onSaved }: StaffRo
       </label>
       {!compact ? (
         <p className="form-foot staff-role-form__hint">
-          Event Manager — create · User Manager — edit events &amp; users · Main Moderator — users,
-          scan &amp; assign roles
+          Event Manager — create &amp; edit events · User Manager — members only · Main Moderator —
+          users, scan &amp; promote members
         </p>
       ) : null}
       <button type="button" className="btn btn--ghost" onClick={saveRole} disabled={loading}>
