@@ -63,6 +63,7 @@ const defaultFormBase = {
 const defaultForm: typeof defaultFormBase & {
   freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
   artistTicketsEnabled: boolean;
+  verifiedInvitesEnabled: boolean;
 } = {
   ...defaultFormBase,
   freeEntryAccess: 'INVITED_ONLY',
