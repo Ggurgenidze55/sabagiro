@@ -88,8 +88,11 @@ export function AboutPageContent() {
           walk in.
         </p>
         <p className="about-copy about-copy--muted">
-          Doors 23:00. Exact pin shared with ticket holders before each event. No dress code theatre — respect
-          the space, the crew, and the people on the floor.
+          Doors 23:00. Pin on{' '}
+          <a href="https://maps.app.goo.gl/SGpNvLwpRSML1UjZ9" target="_blank" rel="noopener noreferrer">
+            Google Maps
+          </a>
+          . No dress code theatre — respect the space, the crew, and the people on the floor.
         </p>
       </section>
 

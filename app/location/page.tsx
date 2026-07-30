@@ -4,6 +4,7 @@ import { SectionDivider } from '@/components/SectionDivider';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
+import { CLUB_COORDS_LABEL, CLUB_MAPS_URL } from '@/lib/club-location';
 import { canPurchaseTickets } from '@/lib/verification';
 
 export const metadata = {
@@ -24,20 +25,21 @@ export default async function LocationPage() {
 
       <div className="location-block">
         <figure className="location-map">
-          <Image
-            src="/club/sabagiro-location.png"
-            alt="Sabagiro venue map"
-            width={900}
-            height={600}
-            className="location-map__img"
-            priority
-          />
+          <a href={CLUB_MAPS_URL} target="_blank" rel="noopener noreferrer">
+            <Image
+              src="/club/sabagiro-location.png"
+              alt="Sabagiro venue map"
+              width={900}
+              height={600}
+              className="location-map__img"
+              priority
+            />
+          </a>
         </figure>
         <div className="location-info">
           <h2 className="section-title">Find us</h2>
           <p className="page-lead" style={{ lineHeight: 1.8 }}>
-            Sabagiro — brutalist underground venue. Open air &amp; warehouse nights. Exact pin shared
-            with ticket holders by email before each event.
+            Sabagiro — brutalist underground venue. Open air &amp; warehouse nights.
           </p>
           <ul className="location-list">
             <li>
@@ -45,17 +47,24 @@ export default async function LocationPage() {
               <span>Tbilisi</span>
             </li>
             <li>
+              <span className="location-list__label">Pin</span>
+              <span>{CLUB_COORDS_LABEL}</span>
+            </li>
+            <li>
               <span className="location-list__label">Doors</span>
               <span>23:00</span>
             </li>
           </ul>
           <div className="cart-actions" style={{ marginTop: '1.5rem' }}>
+            <a href={CLUB_MAPS_URL} className="btn" target="_blank" rel="noopener noreferrer">
+              OPEN IN MAPS
+            </a>
             {user && canPurchaseTickets(user) ? (
-              <Link href="/events" className="btn">
+              <Link href="/events" className="btn btn--ghost">
                 BUY TICKETS
               </Link>
             ) : (
-              <Link href={user ? '/account' : '/register'} className="btn">
+              <Link href={user ? '/account' : '/register'} className="btn btn--ghost">
                 {user ? 'Account' : 'Register'}
               </Link>
             )}
