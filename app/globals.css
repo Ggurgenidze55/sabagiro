@@ -1488,8 +1488,11 @@ html.sabagiro-in-app .payment-page {
   display: block;
   border: 1px solid rgba(249, 193, 8, 0.45);
   background: #000;
-  -webkit-touch-callout: default;
-  user-select: none;
+  /* Must allow iOS callout — user-select:none blocks Add to Photos */
+  -webkit-touch-callout: default !important;
+  -webkit-user-select: auto;
+  user-select: auto;
+  pointer-events: auto;
 }
 
 .ticket-status {

@@ -56,6 +56,30 @@ async function shareTicketLink(qrToken: string, title: string): Promise<'shared'
   return 'failed';
 }
 
+/** iOS share sheet shows “Save Image” only when sharing a File (no url/blob link). */
+async function shareImageFileForPhotos(blob: Blob, filename: string): Promise<boolean> {
+  const nav = typeof navigator !== 'undefined' ? navigator : null;
+  if (!nav || typeof nav.share !== 'function') return false;
+  try {
+    const file = new File([blob], filename, { type: 'image/png' });
+    const payload: ShareData = { files: [file] };
+    if (typeof nav.canShare === 'function' && !nav.canShare(payload)) return false;
+    await nav.share(payload);
+    return true;
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') return true;
+    return false;
+  }
+}
+
+function absolutePassUrl(qrToken: string, opts?: { attachment?: boolean }) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const q = opts?.attachment
+    ? `download=1&v=9&t=${Date.now()}`
+    : `download=1&inline=1&v=9&t=${Date.now()}`;
+  return `${origin}/api/scan/${encodeURIComponent(qrToken)}/qr?${q}`;
+}
+
 export function TicketQrCard({
   ticketId,
   productName,
@@ -210,48 +234,44 @@ export function TicketQrCard({
     setError('');
 
     try {
-      let blob: Blob | null = null;
-      const passUrl = qrToken
-        ? `/api/scan/${qrToken}/qr?download=1&v=7&t=${Date.now()}`
-        : null;
+      if (!qrToken && !dataUrl) return;
 
-      if (passUrl) {
-        const res = await fetch(passUrl, { cache: 'no-store', credentials: 'same-origin' });
+      let blob: Blob | null = null;
+      if (qrToken) {
+        const res = await fetch(absolutePassUrl(qrToken, { attachment: android }), {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
         if (!res.ok) throw new Error('Could not prepare ticket image');
         blob = await res.blob();
       } else if (dataUrl) {
-        const res = await fetch(dataUrl);
-        blob = await res.blob();
+        blob = await (await fetch(dataUrl)).blob();
       }
       if (!blob) return;
 
-      // Optional native Photos bridge (only in newer app builds).
       if (inNativeApp && canNativeSaveImageToPhotos()) {
         const saved = await nativeSaveImageToPhotos(blob, filename);
         if (saved) return;
       }
 
-      // Android WebView: no long-press save — HTTP download (or sheet with Save).
-      if (android) {
-        if (passUrl) {
-          window.location.assign(passUrl);
-          return;
-        }
-        setPassPreviewBlob(blob);
-        setPassPreviewUrl((prev) => {
-          if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
-          return URL.createObjectURL(blob!);
-        });
+      // Best web path for Photos: share the PNG file (iOS sheet → Save Image).
+      if (mobileSaveUi && (await shareImageFileForPhotos(blob, filename))) {
         return;
       }
 
-      // iPhone WKWebView: blob: images only offer Share. Use https URL so "Add to Photos" appears.
-      if (mobileSaveUi) {
-        setPassPreviewBlob(null);
+      // Android fallback: trigger WebView download.
+      if (android && qrToken) {
+        window.location.assign(absolutePassUrl(qrToken, { attachment: true }));
+        return;
+      }
+
+      // iPhone fallback: full-screen https image → long-press Add to Photos.
+      if (mobileSaveUi && qrToken) {
+        const httpsUrl = absolutePassUrl(qrToken, { attachment: false });
+        setPassPreviewBlob(blob);
         setPassPreviewUrl((prev) => {
           if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
-          if (passUrl) return `${passUrl}&inline=1`;
-          return URL.createObjectURL(blob!);
+          return httpsUrl;
         });
         return;
       }
@@ -272,17 +292,36 @@ export function TicketQrCard({
     }
   }, [qrToken, dataUrl, ticketId, inNativeApp, android, mobileSaveUi]);
 
-  const saveAndroidFromSheet = useCallback(async () => {
+  const saveImageFromSheet = useCallback(async () => {
+    if (!qrToken && !passPreviewBlob) return;
+    const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
     setDownloadBusy(true);
     try {
-      if (qrToken) {
-        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=8&t=${Date.now()}`);
+      let blob = passPreviewBlob;
+      if (!blob && qrToken) {
+        const res = await fetch(absolutePassUrl(qrToken, { attachment: false }), {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
+        if (!res.ok) throw new Error('Could not prepare ticket image');
+        blob = await res.blob();
+      }
+      if (!blob) return;
+
+      if (await shareImageFileForPhotos(blob, filename)) {
+        closePassPreview();
+        return;
+      }
+      if (android && qrToken) {
+        window.location.assign(absolutePassUrl(qrToken, { attachment: true }));
         closePassPreview();
       }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save ticket');
     } finally {
       setDownloadBusy(false);
     }
-  }, [qrToken, closePassPreview]);
+  }, [qrToken, passPreviewBlob, ticketId, android, closePassPreview]);
 
   const shareTicket = useCallback(async () => {
     if (!qrToken) return;
@@ -409,33 +448,23 @@ export function TicketQrCard({
         >
           <div className="ticket-save-sheet__panel">
             <p className="ticket-save-sheet__hint">
-              {android ? (
-                <>
-                  Tap <strong>Save to gallery</strong> below
-                </>
-              ) : (
-                <>
-                  Press and hold the image → choose <strong>Add to Photos</strong>
-                  <br />
-                  (not Share)
-                </>
-              )}
+              Tap <strong>Save Image</strong>, then choose <strong>Save Image</strong> / Photos
+              <br />
+              or press and hold the picture → <strong>Add to Photos</strong>
             </p>
             <img
               src={passPreviewUrl}
               alt="Sabagiro ticket"
               className="ticket-save-sheet__img"
             />
-            {android ? (
-              <button
-                type="button"
-                className="btn"
-                onClick={saveAndroidFromSheet}
-                disabled={downloadBusy}
-              >
-                {downloadBusy ? 'Saving…' : 'Save to gallery'}
-              </button>
-            ) : null}
+            <button
+              type="button"
+              className="btn"
+              onClick={saveImageFromSheet}
+              disabled={downloadBusy}
+            >
+              {downloadBusy ? 'Saving…' : 'Save Image'}
+            </button>
             <button type="button" className="btn btn--ghost" onClick={closePassPreview}>
               Close
             </button>
