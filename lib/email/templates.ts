@@ -445,7 +445,7 @@ export function ticketPurchaseEmail(opts: {
       title: 'Your ticket',
       bodyHtml,
     }),
-    text: `${textEvent}\n\nHolder: ${opts.holderFirstName} ${opts.holderLastName}\nScan: ${opts.scanLink}\nDownload QR: ${opts.qrDownloadUrl}`,
+    text: `${textEvent}\n\nHolder: ${opts.holderFirstName} ${opts.holderLastName}\nScan: ${opts.scanLink}\nDownload ticket: ${opts.qrDownloadUrl}`,
   };
 }
 
