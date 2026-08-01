@@ -10,7 +10,7 @@ export const runtime = 'nodejs';
 type Params = { params: { token: string } };
 
 /** Public QR PNG for ticket emails (token is the secret). Expires after event + retention. */
-export async function GET(_request: Request, { params }: Params) {
+export async function GET(request: Request, { params }: Params) {
   const ticket = await prisma.ticket.findFirst({
     where: {
       qrToken: params.token,
@@ -39,11 +39,16 @@ export async function GET(_request: Request, { params }: Params) {
   }
 
   const png = await qrPngBuffer(params.token);
+  const download = new URL(request.url).searchParams.get('download') === '1';
+  const filename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
 
   return new NextResponse(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=3600',
+      'Content-Disposition': download
+        ? `attachment; filename="${filename}"`
+        : `inline; filename="${filename}"`,
     },
   });
 }

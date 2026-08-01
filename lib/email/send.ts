@@ -22,6 +22,7 @@ import {
 } from '@/lib/email/templates';
 import { TICKET_QR_CID } from '@/lib/email/theme';
 import { qrPngBase64 } from '@/lib/qr';
+import { siteUrl } from '@/lib/site-url';
 
 export function sendWelcomeRegistrationEmail(opts: {
   to: string;
@@ -120,6 +121,8 @@ export async function sendTicketEmail(payload: {
 }): Promise<SendEmailResult> {
   const { ticket, scanLink, to } = payload;
   const qrContent = await qrPngBase64(ticket.qrToken);
+  const qrFilename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
+  const qrDownloadUrl = siteUrl(`/api/scan/${ticket.qrToken}/qr?download=1`);
   const msg = ticketPurchaseEmail({
     ticketId: ticket.id,
     productName: ticket.productName,
@@ -130,16 +133,22 @@ export async function sendTicketEmail(payload: {
     tierLabel: ticket.tierLabel,
     scanLink,
     qrCid: TICKET_QR_CID,
+    qrDownloadUrl,
   });
   return sendEmail({
     to,
     ...msg,
     attachments: [
       {
-        filename: 'ticket-qr.png',
+        filename: qrFilename,
         content: qrContent,
         contentType: 'image/png',
         inlineContentId: TICKET_QR_CID,
+      },
+      {
+        filename: qrFilename,
+        content: qrContent,
+        contentType: 'image/png',
       },
     ],
   });

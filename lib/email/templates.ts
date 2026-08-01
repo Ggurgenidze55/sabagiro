@@ -322,10 +322,12 @@ export function ticketPurchaseEmail(opts: {
   tierLabel: string;
   scanLink: string;
   qrCid: string;
+  qrDownloadUrl: string;
 }): { subject: string; html: string; text: string } {
   const holder = escapeHtml(`${opts.holderFirstName} ${opts.holderLastName}`);
   const tier = opts.tierLabel ? ` · ${escapeHtml(opts.tierLabel)}` : '';
   const qrCid = escapeHtml(opts.qrCid);
+  const qrDownloadUrl = escapeHtml(opts.qrDownloadUrl);
   const bodyHtml = `
     <!-- sabagiro-ticket:${escapeHtml(opts.ticketId)} -->
     <p style="margin:0 0 16px">Your ticket for <strong style="color:${EMAIL_ACID}">${escapeHtml(opts.productName)}</strong> is below.</p>
@@ -340,7 +342,10 @@ export function ticketPurchaseEmail(opts: {
     </p>
     <p style="margin:0 0 4px;font-weight:700;color:${EMAIL_ACID};letter-spacing:0.04em">${holder}</p>
     <p style="margin:0 0 16px">ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
-    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>.</p>
+    <p style="margin:0 0 16px">
+      <a href="${qrDownloadUrl}" style="display:inline-block;background:${EMAIL_ACID};color:#0a0a0a;text-decoration:none;font-weight:700;letter-spacing:0.12em;padding:12px 18px;font-size:13px">DOWNLOAD QR</a>
+    </p>
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>. PNG also attached to this email.</p>
   `;
   return {
     subject: `Sabagiro ticket — ${opts.productName}`,
@@ -349,7 +354,7 @@ export function ticketPurchaseEmail(opts: {
       title: 'Your ticket',
       bodyHtml,
     }),
-    text: `Ticket: ${opts.productName}. Holder: ${opts.holderFirstName} ${opts.holderLastName}. QR: ${opts.scanLink}`,
+    text: `Ticket: ${opts.productName}. Holder: ${opts.holderFirstName} ${opts.holderLastName}. Scan: ${opts.scanLink}. Download QR: ${opts.qrDownloadUrl}`,
   };
 }
 

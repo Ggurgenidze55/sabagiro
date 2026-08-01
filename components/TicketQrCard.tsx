@@ -143,6 +143,18 @@ export function TicketQrCard({
     }
   }, [appleWalletHref, inNativeApp]);
 
+  const downloadQr = useCallback(() => {
+    if (qrToken) {
+      window.location.href = `/api/scan/${qrToken}/qr?download=1`;
+      return;
+    }
+    if (!dataUrl) return;
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
+    link.click();
+  }, [qrToken, dataUrl, ticketId]);
+
   return (
     <article
       className={`ticket-card${open ? ' ticket-card--open' : ' ticket-card--collapsed'}${qrAvailable ? '' : ' ticket-card--archived'}`}
@@ -185,6 +197,16 @@ export function TicketQrCard({
               ) : (
                 <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
               )}
+              {dataUrl || qrToken ? (
+                <button
+                  type="button"
+                  className="wallet-badge"
+                  onClick={downloadQr}
+                  disabled={!dataUrl && !qrToken}
+                >
+                  Download QR
+                </button>
+              ) : null}
               {showAppleWallet ? (
                 <button
                   type="button"
