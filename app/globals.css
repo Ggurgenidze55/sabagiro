@@ -2302,6 +2302,9 @@ html.sabagiro-in-app .payment-page {
 .location-map__img {
   width: 100%;
   height: auto;
+  max-height: min(72vh, 52rem);
+  object-fit: cover;
+  object-position: center;
   display: block;
 }
 

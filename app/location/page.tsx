@@ -28,9 +28,9 @@ export default async function LocationPage() {
           <a href={CLUB_MAPS_URL} target="_blank" rel="noopener noreferrer">
             <Image
               src="/club/sabagiro-location.png"
-              alt="Sabagiro venue map"
-              width={900}
-              height={600}
+              alt="Sabagiro venue at night"
+              width={1200}
+              height={1600}
               className="location-map__img"
               priority
             />
