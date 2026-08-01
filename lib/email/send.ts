@@ -1,7 +1,9 @@
 import type { Ticket } from '@/generated/prisma/client';
+import { CLUB_COORDS_LABEL, CLUB_MAPS_URL } from '@/lib/club-location';
 import { sendEmail, type SendEmailResult } from '@/lib/email/client';
 import type { ContactTopic } from '@/lib/contact-topic';
 import { getContactInboxEmailsForTopic } from '@/lib/contact-inbox';
+import { prisma } from '@/lib/db';
 import {
   accountPendingEmail,
   accountRejectedEmail,
@@ -19,10 +21,40 @@ import {
   profileEmailChangedEmail,
   ticketPurchaseEmail,
   welcomeRegistrationEmail,
+  type TicketEmailEventInfo,
 } from '@/lib/email/templates';
 import { TICKET_QR_CID } from '@/lib/email/theme';
 import { qrPngBase64 } from '@/lib/qr';
 import { siteUrl } from '@/lib/site-url';
+
+async function loadTicketEmailEvent(productSlug: string): Promise<TicketEmailEventInfo | null> {
+  const event = await prisma.clubEvent.findUnique({
+    where: { slug: productSlug },
+    select: {
+      slug: true,
+      title: true,
+      about: true,
+      lineup: true,
+      tag: true,
+      dayLabel: true,
+      dateLabel: true,
+      doorsOpen: true,
+    },
+  });
+  if (!event) return null;
+  return {
+    title: event.title,
+    dayLabel: event.dayLabel,
+    dateLabel: event.dateLabel,
+    doorsOpen: event.doorsOpen,
+    lineup: event.lineup,
+    tag: event.tag,
+    about: event.about,
+    eventUrl: siteUrl(`/events/${event.slug}`),
+    mapsUrl: CLUB_MAPS_URL,
+    coordsLabel: CLUB_COORDS_LABEL,
+  };
+}
 
 export function sendWelcomeRegistrationEmail(opts: {
   to: string;
@@ -120,7 +152,10 @@ export async function sendTicketEmail(payload: {
   scanLink: string;
 }): Promise<SendEmailResult> {
   const { ticket, scanLink, to } = payload;
-  const qrContent = await qrPngBase64(ticket.qrToken);
+  const [qrContent, event] = await Promise.all([
+    qrPngBase64(ticket.qrToken),
+    loadTicketEmailEvent(ticket.productSlug),
+  ]);
   const qrFilename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
   const qrDownloadUrl = siteUrl(`/api/scan/${ticket.qrToken}/qr?download=1`);
   const msg = ticketPurchaseEmail({
@@ -134,6 +169,7 @@ export async function sendTicketEmail(payload: {
     scanLink,
     qrCid: TICKET_QR_CID,
     qrDownloadUrl,
+    event,
   });
   return sendEmail({
     to,

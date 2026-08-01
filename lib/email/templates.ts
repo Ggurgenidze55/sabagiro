@@ -312,6 +312,19 @@ export function accountRejectedEmail(opts: {
   };
 }
 
+export type TicketEmailEventInfo = {
+  title: string;
+  dayLabel?: string;
+  dateLabel?: string;
+  doorsOpen?: string;
+  lineup?: string;
+  tag?: string;
+  about?: string;
+  eventUrl?: string;
+  mapsUrl?: string;
+  coordsLabel?: string;
+};
+
 export function ticketPurchaseEmail(opts: {
   ticketId: string;
   productName: string;
@@ -323,18 +336,80 @@ export function ticketPurchaseEmail(opts: {
   scanLink: string;
   qrCid: string;
   qrDownloadUrl: string;
+  event?: TicketEmailEventInfo | null;
 }): { subject: string; html: string; text: string } {
   const holder = escapeHtml(`${opts.holderFirstName} ${opts.holderLastName}`);
   const tier = opts.tierLabel ? ` · ${escapeHtml(opts.tierLabel)}` : '';
   const qrCid = escapeHtml(opts.qrCid);
   const qrDownloadUrl = escapeHtml(opts.qrDownloadUrl);
+  const event = opts.event;
+  const eventTitle = escapeHtml(event?.title || opts.productName);
+  const whenParts = [event?.dayLabel, event?.dateLabel]
+    .filter(Boolean)
+    .map((v) => escapeHtml(String(v)))
+    .join(' · ');
+  const doorsLabel = event?.doorsOpen?.trim() ? escapeHtml(event.doorsOpen.trim()) : '';
+  const lineup = event?.lineup?.trim() ? escapeHtml(event.lineup.trim()) : '';
+  const tag = event?.tag?.trim() ? escapeHtml(event.tag.trim()) : '';
+  const about = event?.about?.trim() ? escapeHtml(event.about.trim()) : '';
+  const eventUrl = event?.eventUrl ? escapeHtml(event.eventUrl) : '';
+  const mapsUrl = event?.mapsUrl ? escapeHtml(event.mapsUrl) : '';
+  const coords = event?.coordsLabel ? escapeHtml(event.coordsLabel) : '';
+
+  const eventRows: string[] = [];
+  if (whenParts) {
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">When</strong><br />${whenParts}${doorsLabel ? `<br />Doors ${doorsLabel}` : ''}</p>`,
+    );
+  } else if (doorsLabel) {
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">Doors</strong><br />${doorsLabel}</p>`,
+    );
+  }
+  if (lineup) {
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">Lineup</strong><br />${lineup}</p>`,
+    );
+  }
+  if (tag) {
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">Stage / note</strong><br />${tag}</p>`,
+    );
+  }
+  if (about) {
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">About</strong><br />${about}</p>`,
+    );
+  }
+  if (coords || mapsUrl) {
+    const pinLine = mapsUrl
+      ? `<a href="${mapsUrl}" style="color:${EMAIL_ACID}">${coords || 'Open in Maps'}</a>`
+      : coords;
+    eventRows.push(
+      `<p style="margin:0 0 6px"><strong style="color:${EMAIL_ACID}">Location</strong><br />Sabagiro · Tbilisi${pinLine ? `<br />${pinLine}` : ''}</p>`,
+    );
+  }
+  if (eventUrl) {
+    eventRows.push(
+      `<p style="margin:0"><a href="${eventUrl}" style="color:${EMAIL_ACID}">Event page →</a></p>`,
+    );
+  }
+
+  const eventBlock = eventRows.length
+    ? `<div style="margin:0 0 20px;padding:14px 16px;border:1px solid ${EMAIL_MUTED};background:#141414">
+        <p style="margin:0 0 10px;font-weight:700;letter-spacing:0.08em;color:${EMAIL_ACID}">${eventTitle}</p>
+        ${eventRows.join('')}
+      </div>`
+    : '';
+
   const bodyHtml = `
     <!-- sabagiro-ticket:${escapeHtml(opts.ticketId)} -->
-    <p style="margin:0 0 16px">Your ticket for <strong style="color:${EMAIL_ACID}">${escapeHtml(opts.productName)}</strong> is below.</p>
+    <p style="margin:0 0 16px">Your ticket for <strong style="color:${EMAIL_ACID}">${eventTitle}</strong> is below.</p>
+    ${eventBlock}
     <p style="margin:0 0 20px;line-height:0">
       <img
         src="cid:${qrCid}"
-        alt="Ticket QR code for ${escapeHtml(opts.productName)}"
+        alt="Ticket QR code for ${eventTitle}"
         width="280"
         height="280"
         style="display:block;width:280px;max-width:100%;height:auto;border:4px solid ${EMAIL_ACID};background:#ffffff"
@@ -347,14 +422,30 @@ export function ticketPurchaseEmail(opts: {
     </p>
     <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>. PNG also attached to this email.</p>
   `;
+
+  const textEvent = [
+    event?.title || opts.productName,
+    whenParts ? `When: ${whenParts}` : '',
+    event?.doorsOpen ? `Doors: ${event.doorsOpen}` : '',
+    event?.lineup ? `Lineup: ${event.lineup}` : '',
+    event?.tag ? `Note: ${event.tag}` : '',
+    event?.about ? `About: ${event.about}` : '',
+    'Location: Sabagiro · Tbilisi',
+    event?.coordsLabel || '',
+    event?.mapsUrl || '',
+    event?.eventUrl || '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
   return {
-    subject: `Sabagiro ticket — ${opts.productName}`,
+    subject: `Sabagiro ticket — ${event?.title || opts.productName}`,
     html: renderEmailLayout({
-      preheader: `Ticket for ${opts.productName} — ${opts.holderFirstName}`,
+      preheader: `Ticket for ${event?.title || opts.productName} — ${opts.holderFirstName}`,
       title: 'Your ticket',
       bodyHtml,
     }),
-    text: `Ticket: ${opts.productName}. Holder: ${opts.holderFirstName} ${opts.holderLastName}. Scan: ${opts.scanLink}. Download QR: ${opts.qrDownloadUrl}`,
+    text: `${textEvent}\n\nHolder: ${opts.holderFirstName} ${opts.holderLastName}\nScan: ${opts.scanLink}\nDownload QR: ${opts.qrDownloadUrl}`,
   };
 }
 

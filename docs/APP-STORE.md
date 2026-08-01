@@ -89,7 +89,7 @@ Re-run seed if the review account was deleted during testing.
 
 ## iOS Build 9 — Branding (version 1.0.3)
 
-New brand color `#f7e892` and updated App Icon (black + mark).
+New brand color `#f9c108` and updated App Icon (black + mark).
 
 ```bash
 cd ios && xcodegen generate && ./archive.sh
