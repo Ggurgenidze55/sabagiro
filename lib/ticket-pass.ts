@@ -169,7 +169,17 @@ function buildLines(input: TicketPassInput): TextLine[] {
   lines.push({ text: 'LOCATION', size: 13, color: ACID, tracking: 3 });
   lines.push({ text: 'SABAGIRO | TBILISI', size: 18, color: TEXT });
   if (coords) {
-    lines.push({ text: coords.toUpperCase(), size: 16, color: MUTED });
+    // Split lat / lng so the full pin always fits (single-line coords were clipping).
+    const coordParts = coords
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    const coordLines = coordParts.length > 0 ? coordParts : [coords];
+    for (const part of coordLines) {
+      for (const line of wrapWords(part.toUpperCase(), 18)) {
+        lines.push({ text: line, size: 18, color: MUTED });
+      }
+    }
   }
 
   lines.push({ text: '', size: 20, color: TEXT });
