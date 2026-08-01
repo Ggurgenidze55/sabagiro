@@ -1,6 +1,32 @@
+/* Display — Eurostile (Extended feel via tracking in CSS) */
 @font-face {
   font-family: 'Sabagiro Display';
-  src: url('/fonts/BebasNeue-Regular.ttf') format('truetype');
+  src: url('/fonts/Eurostile.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sabagiro Display';
+  src: url('/fonts/Eurostile-Demi.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sabagiro Display';
+  src: url('/fonts/Eurostile-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Body / UI — BankGothic Md BT */
+@font-face {
+  font-family: 'Sabagiro Mono';
+  src: url('/fonts/BankGothic-Md.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -8,8 +34,8 @@
 
 @font-face {
   font-family: 'Sabagiro Mono';
-  src: url('/fonts/ShareTechMono-Regular.ttf') format('truetype');
-  font-weight: 400;
+  src: url('/fonts/BankGothic-Light.ttf') format('truetype');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }

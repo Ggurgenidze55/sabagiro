@@ -12,6 +12,6 @@
     <path fill="#d4a006" d="M17.7 10.31c.34.27.59.69.59 1.19s-.22.82-.57 1.1l-2.29 1.32-2.5-2.5 2.5-2.5 2.29 1.32z" />
     <path fill="#b08800" d="M3.59 3.16 14.35 9.38 11.08 12.65 3.59 3.16z" />
   </g>
-  <text x="34" y="15.5" fill="#b0a89a" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="6" letter-spacing="0.14em">GET IT ON</text>
-  <text x="34" y="29" fill="#f9c108" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" letter-spacing="-0.02em">Google Play</text>
+  <text x="38" y="15.5" fill="#b0a89a" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="6" letter-spacing="0.14em">GET IT ON</text>
+  <text x="38" y="29" fill="#f9c108" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="13" font-weight="600" letter-spacing="-0.02em">Google Play</text>
 </svg>

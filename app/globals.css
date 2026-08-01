@@ -16,8 +16,8 @@
   --neon-magenta: #ff0044;
   --status-verified: #22c55e;
   --status-verified-hot: #4ade80;
-  --font-display-fallback: system-ui, 'Segoe UI', sans-serif;
-  --font-mono-fallback: ui-monospace, 'SFMono-Regular', monospace;
+  --font-display-fallback: 'Eurostile Extended', Eurostile, system-ui, 'Segoe UI', sans-serif;
+  --font-mono-fallback: 'BankGothic Md BT', 'Bank Gothic', ui-monospace, 'SFMono-Regular', monospace;
   /* Readable small copy (was ~8–10px, now ~11–13px at 16px root) */
   --text-2xs: 0.7rem;
   --text-xs: 0.75rem;

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SiteAnalytics } from '@/components/SiteAnalytics';
-import { bebasNeue, shareTechMono } from '@/lib/site-fonts';
+import { bankGothic, eurostile } from '@/lib/site-fonts';
 import { shareImageOpenGraph, shareImageTwitter } from '@/lib/share-image';
 import { getSiteBaseUrl } from '@/lib/site-url';
 import './globals.css';
@@ -58,7 +58,7 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${bebasNeue.variable} ${shareTechMono.variable}`}>
+    <html lang="en" className={`${eurostile.variable} ${bankGothic.variable}`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -66,7 +66,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={shareTechMono.className}>
+      <body className={bankGothic.className}>
         {children}
         <SiteAnalytics />
       </body>

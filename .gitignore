@@ -47,3 +47,4 @@ ios/DerivedData/
 ios/build/
 *.xcuserstate
 xcuserdata/
+.venv-fonts/
