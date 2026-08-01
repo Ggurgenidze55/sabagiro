@@ -24,10 +24,12 @@ export async function POST(request: Request) {
       lastName: body.lastName,
     });
 
+    // Only ADMIN invites for this email+event drive Guest numbering (not FREE/personal).
     const existing = await prisma.ticket.findMany({
       where: {
         productSlug: body.productSlug,
         status: { not: 'CANCELLED' },
+        source: 'ADMIN',
         holderEmail: { equals: body.email.trim(), mode: 'insensitive' },
       },
       select: { holderLastName: true },

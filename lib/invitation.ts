@@ -34,7 +34,11 @@ export function invitationAccountDefaults(guest: InvitationGuest) {
 
 const GUEST_SUFFIX_RE = /\bGuest\s+(\d+)\s*$/i;
 
-/** Highest Guest N in last names, or ticket count if unnumbered tickets exist. */
+export function stripAdminGuestSuffix(lastName: string): string {
+  return lastName.replace(GUEST_SUFFIX_RE, '').trim();
+}
+
+/** Next Guest N from existing admin invite last names (max N + 1). */
 export function nextAdminGuestNumberFromLastNames(
   holderLastNames: string[],
 ): number {
@@ -43,17 +47,13 @@ export function nextAdminGuestNumberFromLastNames(
     const match = lastName.match(GUEST_SUFFIX_RE);
     if (match) maxGuest = Math.max(maxGuest, Number(match[1]));
   }
-  // Unnumbered tickets still consume a slot (e.g. first single invite).
-  if (holderLastNames.length > maxGuest) {
-    maxGuest = holderLastNames.length;
-  }
   return maxGuest + 1;
 }
 
 /**
  * Admin invite holder naming.
  * - First ever single invite: plain last name
- * - Otherwise: "Lastname Guest N" continuing across batches for that email+event
+ * - Otherwise: "Lastname Guest N", continuing from the highest existing Guest N
  */
 export function adminInvitationHolder(
   guest: InvitationGuest,
@@ -63,8 +63,9 @@ export function adminInvitationHolder(
   if (!opts.useGuestSuffix) {
     return invitationGuestToHolder(guest);
   }
+  const baseLastName = stripAdminGuestSuffix(guest.lastName) || guest.lastName;
   return invitationGuestToHolder({
     ...guest,
-    lastName: `${guest.lastName} Guest ${guestNumber}`,
+    lastName: `${baseLastName} Guest ${guestNumber}`,
   });
 }
