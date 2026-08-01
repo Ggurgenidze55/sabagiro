@@ -6,7 +6,7 @@ import { INSTAGRAM_URL } from '@/lib/social';
 
 export const metadata = {
   title: 'Contact — Sabagiro',
-  description: 'Contact Sabagiro — tickets, events, press. Tbilisi underground club.',
+  description: 'Contact Sabagiro — tickets, events, press. Music · Art · Community. Tbilisi, Georgia.',
 };
 
 export default function ContactPage() {

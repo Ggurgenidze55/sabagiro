@@ -6,7 +6,7 @@ import { siteUrl } from '@/lib/site-url';
 
 const aboutTitle = 'About — Sabagiro';
 const aboutDescription =
-  'Sabagiro — brutalist underground club in Tbilisi. Night · Concrete · Sound. Events, tickets, warehouse nights.';
+  'Sabagiro — a former cable car station in Tbilisi, reimagined. Music · Art · Community. Events and tickets.';
 
 export const metadata: Metadata = {
   title: aboutTitle,

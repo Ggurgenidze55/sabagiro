@@ -1,5 +1,6 @@
 import { isSabagiroAppUserAgent } from '@/lib/app-shell';
 import { SABAGIRO_SHARE_IMAGE } from '@/lib/share-image';
+import { SITE_SEO_DESCRIPTION, SITE_SEO_TITLE } from '@/lib/site-brand';
 import { getSiteBaseUrl } from '@/lib/site-url';
 
 export type AnalyticsHeadOptions = {
@@ -14,9 +15,8 @@ function escapeScriptValue(value: string): string {
 /** HTML snippets for static homepage + server-rendered injection. */
 export function buildHomepageSeoHeadHtml(): string {
   const base = getSiteBaseUrl();
-  const title = 'Sabagiro — Underground · Tbilisi';
-  const description =
-    'Sabagiro — underground club in Tbilisi. Events, tickets, techno nights. Night · Concrete · Sound.';
+  const title = SITE_SEO_TITLE;
+  const description = SITE_SEO_DESCRIPTION;
   const image = `${base}${SABAGIRO_SHARE_IMAGE.path}`;
 
   return [

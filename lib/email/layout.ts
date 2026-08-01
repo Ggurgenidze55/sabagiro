@@ -65,7 +65,7 @@ export function renderEmailLayout(opts: LayoutOpts): string {
               ${cta}
               <hr style="border:none;border-top:1px solid ${EMAIL_BORDER};margin:28px 0 20px" />
               <p style="margin:0;font-size:14px;color:${EMAIL_MUTED};line-height:1.5">
-                Underground · Tbilisi<br />
+                Music · Art · Community · Tbilisi<br />
                 <a href="${escapeHtml(accountUrl)}" style="color:${EMAIL_ACID}">Your account</a>
                 ·
                 <a href="${escapeHtml(eventsUrl)}" style="color:${EMAIL_ACID}">Events</a>

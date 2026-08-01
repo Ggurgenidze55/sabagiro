@@ -39,7 +39,7 @@ export default async function LocationPage() {
         <div className="location-info">
           <h2 className="section-title">Find us</h2>
           <p className="page-lead" style={{ lineHeight: 1.8 }}>
-            Sabagiro — brutalist underground venue. Open air &amp; warehouse nights.
+            Sabagiro — a former cable car station reimagined. Music · Art · Community.
           </p>
           <ul className="location-list">
             <li>

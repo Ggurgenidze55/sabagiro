@@ -8,7 +8,7 @@ import { serializeJsonForHtmlScript } from '@/lib/html-json';
 const INLINE_EVENTS_PATTERN =
   /(<script type="application\/json" id="homepage-events-data">)[\s\S]*?(<\/script>)/;
 
-/** Serves the brutalist fullscreen homepage from public/index.html */
+/** Serves the fullscreen homepage from public/index.html */
 export async function GET(request: Request) {
   const filePath = path.join(process.cwd(), 'public', 'index.html');
   let html = await readFile(filePath, 'utf-8');

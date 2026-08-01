@@ -2,34 +2,41 @@ import type { Metadata } from 'next';
 import { SiteAnalytics } from '@/components/SiteAnalytics';
 import { bankGothic, eurostile } from '@/lib/site-fonts';
 import { shareImageOpenGraph, shareImageTwitter } from '@/lib/share-image';
+import { SITE_SEO_DESCRIPTION, SITE_SEO_TITLE } from '@/lib/site-brand';
 import { getSiteBaseUrl } from '@/lib/site-url';
 import './globals.css';
 
 const siteUrl = getSiteBaseUrl();
-const siteDescription =
-  'Sabagiro — underground club in Tbilisi. Events, tickets, techno nights. Night · Concrete · Sound.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Sabagiro — Underground · Tbilisi',
+    default: SITE_SEO_TITLE,
     template: '%s · Sabagiro',
   },
-  description: siteDescription,
-  keywords: ['Sabagiro', 'Tbilisi club', 'Georgia nightlife', 'techno', 'tickets', 'underground'],
+  description: SITE_SEO_DESCRIPTION,
+  keywords: [
+    'Sabagiro',
+    'Tbilisi',
+    'cable car station',
+    'Music Art Community',
+    'events',
+    'tickets',
+    'Georgia',
+  ],
   openGraph: {
     type: 'website',
     locale: 'en_GE',
     url: siteUrl,
     siteName: 'Sabagiro',
-    title: 'Sabagiro — Underground · Tbilisi',
-    description: siteDescription,
+    title: SITE_SEO_TITLE,
+    description: SITE_SEO_DESCRIPTION,
     images: shareImageOpenGraph(),
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sabagiro — Underground · Tbilisi',
-    description: siteDescription,
+    title: SITE_SEO_TITLE,
+    description: SITE_SEO_DESCRIPTION,
     images: shareImageTwitter(),
   },
   verification: process.env.GOOGLE_SITE_VERIFICATION

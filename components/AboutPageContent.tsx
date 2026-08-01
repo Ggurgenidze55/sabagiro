@@ -83,9 +83,8 @@ export function AboutPageContent() {
           The room
         </h2>
         <p className="about-copy">
-          Sabagiro is an underground club in Tbilisi — a brutalist venue for warehouse nights and open-air
-          seasons. We keep the program tight, the door clear, and the system honest: buy a ticket, get a QR,
-          walk in.
+          Sabagiro is a former cable car station in Tbilisi, reimagined for music, art, and community. We
+          keep the program tight, the door clear, and the system honest: buy a ticket, get a QR, walk in.
         </p>
         <p className="about-copy about-copy--muted">
           Doors 23:00. Pin on{' '}
