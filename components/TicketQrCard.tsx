@@ -229,6 +229,9 @@ export function TicketQrCard({
   }, [appleWalletHref, inNativeApp]);
 
   const downloadQr = useCallback(async () => {
+    // App shell: save/download disabled — use Share ticket link only.
+    if (inNativeApp) return;
+
     const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
     setDownloadBusy(true);
     setError('');
@@ -378,7 +381,8 @@ export function TicketQrCard({
               ) : (
                 <p className="form-error ticket-card__loading">{error || 'QR unavailable'}</p>
               )}
-              {dataUrl || qrToken ? (
+              {/* In-app WebView: no save/download — share link only. Web browsers keep download. */}
+              {!inNativeApp && (dataUrl || qrToken) ? (
                 <button
                   type="button"
                   className="wallet-badge"
