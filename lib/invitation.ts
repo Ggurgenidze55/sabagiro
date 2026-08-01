@@ -38,6 +38,20 @@ export function stripAdminGuestSuffix(lastName: string): string {
   return lastName.replace(GUEST_SUFFIX_RE, '').trim();
 }
 
+export function adminGuestNumberFromLastName(lastName: string): number | null {
+  const match = lastName.match(GUEST_SUFFIX_RE);
+  if (!match) return null;
+  const n = Number(match[1]);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Account ticket list title — append invite index when present. */
+export function ticketCardTitle(productName: string, holderLastName: string): string {
+  const n = adminGuestNumberFromLastName(holderLastName);
+  if (n == null) return productName;
+  return `${productName} · #${n}`;
+}
+
 /** Next Guest N from existing admin invite last names (max N + 1). */
 export function nextAdminGuestNumberFromLastNames(
   holderLastNames: string[],

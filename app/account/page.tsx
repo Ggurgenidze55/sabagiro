@@ -8,6 +8,7 @@ import { TicketQrCard } from '@/components/TicketQrCard';
 import { getArtistForAccountUser } from '@/lib/artist-tickets';
 import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { ticketCardTitle } from '@/lib/invitation';
 import { describeTicketIssuance } from '@/lib/ticket-issuance';
 import { getTicketLimitPerEvent } from '@/lib/ticket-purchase-limit';
 import {
@@ -150,7 +151,7 @@ export default async function AccountPage() {
               <TicketQrCard
                 key={t.id}
                 ticketId={t.id}
-                productName={t.productName}
+                productName={ticketCardTitle(t.productName, t.holderLastName)}
                 status={t.status}
                 holderName={`${t.holderFirstName} ${t.holderLastName}`}
                 personalId={t.holderPersonalId}
