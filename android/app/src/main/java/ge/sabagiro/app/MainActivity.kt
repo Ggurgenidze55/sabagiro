@@ -1,16 +1,19 @@
 package ge.sabagiro.app
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.URLUtil
 import android.webkit.WebChromeClient
-import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -69,7 +72,45 @@ class MainActivity : AppCompatActivity() {
         webView.setBackgroundColor(getColor(R.color.sabagiro_background))
         webView.addJavascriptInterface(TicketImageBridge(this), "SabagiroApp")
 
-        webView.setDownloadListener { url, _, _, mimeType, _ ->
+        webView.setDownloadListener { url, userAgent, contentDisposition, mimeType, _ ->
+            // Ticket PNGs / APKs: save with DownloadManager (opens in Downloads / Photos).
+            if (mimeType?.startsWith("image/") == true ||
+                url.contains("/qr") ||
+                url.endsWith(".png", ignoreCase = true) ||
+                url.endsWith(".apk", ignoreCase = true)
+            ) {
+                try {
+                    val filename = URLUtil.guessFileName(
+                        url,
+                        contentDisposition,
+                        mimeType ?: "image/png",
+                    )
+                    val request = DownloadManager.Request(Uri.parse(url)).apply {
+                        setMimeType(mimeType ?: "image/png")
+                        addRequestHeader("User-Agent", userAgent)
+                        val cookies = CookieManager.getInstance().getCookie(url)
+                        if (!cookies.isNullOrBlank()) {
+                            addRequestHeader("Cookie", cookies)
+                        }
+                        setDescription("Sabagiro ticket")
+                        setTitle(filename)
+                        setNotificationVisibility(
+                            DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
+                        )
+                        setDestinationInExternalPublicDir(
+                            Environment.DIRECTORY_DOWNLOADS,
+                            filename,
+                        )
+                    }
+                    val dm = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+                    dm.enqueue(request)
+                    Toast.makeText(this, "Saving ticket…", Toast.LENGTH_SHORT).show()
+                    return@setDownloadListener
+                } catch (_: Exception) {
+                    // fall through to ACTION_VIEW
+                }
+            }
+
             val uri = Uri.parse(url)
             val intent = Intent(Intent.ACTION_VIEW, uri).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

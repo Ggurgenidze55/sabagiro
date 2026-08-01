@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { isSabagiroAppShell } from '@/lib/app-shell';
 import { canUseAppleWalletClient } from '@/lib/apple-wallet-device';
 import { canUseGoogleWalletClient } from '@/lib/google-wallet-device';
+import { canNativeSaveImageToPhotos, nativeSaveImageToPhotos } from '@/lib/native-bridge';
 
 type TicketQrCardProps = {
   ticketId: string;
@@ -16,10 +17,30 @@ type TicketQrCardProps = {
   expiredMessage?: string;
 };
 
-function prefersLongPressSave() {
+function isAndroidDevice() {
+  if (typeof navigator === 'undefined') return false;
+  return /Android/i.test(navigator.userAgent);
+}
+
+function prefersMobileSaveUi() {
   if (typeof window === 'undefined') return false;
   if (isSabagiroAppShell()) return true;
   return 'ontouchstart' in window || (navigator.maxTouchPoints ?? 0) > 0;
+}
+
+async function sharePngFile(blob: Blob, filename: string): Promise<boolean> {
+  const nav = typeof navigator !== 'undefined' ? navigator : null;
+  if (!nav || typeof nav.share !== 'function') return false;
+  try {
+    const file = new File([blob], filename, { type: 'image/png' });
+    const payload: ShareData = { files: [file], title: 'Sabagiro ticket' };
+    if (nav.canShare && !nav.canShare(payload)) return false;
+    await nav.share(payload);
+    return true;
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') return true;
+    return false;
+  }
 }
 
 export function TicketQrCard({
@@ -46,9 +67,11 @@ export function TicketQrCard({
   const [appleWalletError, setAppleWalletError] = useState('');
   const [downloadBusy, setDownloadBusy] = useState(false);
   const [passPreviewUrl, setPassPreviewUrl] = useState<string | null>(null);
+  const [passPreviewBlob, setPassPreviewBlob] = useState<Blob | null>(null);
   const [error, setError] = useState('');
   const inNativeApp = isSabagiroAppShell();
-  const longPressSave = prefersLongPressSave();
+  const android = isAndroidDevice();
+  const mobileSaveUi = prefersMobileSaveUi();
 
   useEffect(() => {
     if (!open || !qrAvailable) {
@@ -109,6 +132,7 @@ export function TicketQrCard({
       if (prev) URL.revokeObjectURL(prev);
       return null;
     });
+    setPassPreviewBlob(null);
   }, []);
 
   const addToGoogleWallet = useCallback(async () => {
@@ -173,7 +197,7 @@ export function TicketQrCard({
     try {
       let blob: Blob | null = null;
       const passUrl = qrToken
-        ? `/api/scan/${qrToken}/qr?download=1&v=6&t=${Date.now()}`
+        ? `/api/scan/${qrToken}/qr?download=1&v=7&t=${Date.now()}`
         : null;
 
       if (passUrl) {
@@ -186,8 +210,31 @@ export function TicketQrCard({
       }
       if (!blob) return;
 
-      // Phone / in-app WebView: show image so long-press → Save to Photos (no app update).
-      if (longPressSave) {
+      // Optional native bridge (only if already in a build that has it).
+      if (inNativeApp && canNativeSaveImageToPhotos()) {
+        const saved = await nativeSaveImageToPhotos(blob, filename);
+        if (saved) return;
+      }
+
+      // Android WebView: no long-press save menu — share, else download, else sheet button.
+      if (android) {
+        if (await sharePngFile(blob, filename)) return;
+        if (passUrl) {
+          // Attachment → WebView DownloadListener → Downloads / gallery.
+          window.location.assign(passUrl);
+          return;
+        }
+        setPassPreviewBlob(blob);
+        setPassPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(blob!);
+        });
+        return;
+      }
+
+      // iPhone: long-press image → Add to Photos.
+      if (mobileSaveUi) {
+        setPassPreviewBlob(blob);
         setPassPreviewUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
           return URL.createObjectURL(blob!);
@@ -209,7 +256,25 @@ export function TicketQrCard({
     } finally {
       setDownloadBusy(false);
     }
-  }, [qrToken, dataUrl, ticketId, longPressSave]);
+  }, [qrToken, dataUrl, ticketId, inNativeApp, android, mobileSaveUi]);
+
+  const saveAndroidFromSheet = useCallback(async () => {
+    if (!passPreviewBlob) return;
+    const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
+    setDownloadBusy(true);
+    try {
+      if (await sharePngFile(passPreviewBlob, filename)) {
+        closePassPreview();
+        return;
+      }
+      if (qrToken) {
+        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=7&t=${Date.now()}`);
+        closePassPreview();
+      }
+    } finally {
+      setDownloadBusy(false);
+    }
+  }, [passPreviewBlob, ticketId, qrToken, closePassPreview]);
 
   return (
     <article
@@ -262,7 +327,7 @@ export function TicketQrCard({
                 >
                   {downloadBusy
                     ? 'Preparing…'
-                    : longPressSave
+                    : mobileSaveUi
                       ? 'Save to Photos'
                       : 'Download ticket'}
                 </button>
@@ -312,13 +377,31 @@ export function TicketQrCard({
         >
           <div className="ticket-save-sheet__panel">
             <p className="ticket-save-sheet__hint">
-              Long-press the image → <strong>Add to Photos</strong> / <strong>Save image</strong>
+              {android ? (
+                <>
+                  Tap <strong>Save to gallery</strong> below
+                </>
+              ) : (
+                <>
+                  Long-press the image → <strong>Add to Photos</strong>
+                </>
+              )}
             </p>
             <img
               src={passPreviewUrl}
               alt="Sabagiro ticket"
               className="ticket-save-sheet__img"
             />
+            {android ? (
+              <button
+                type="button"
+                className="btn"
+                onClick={saveAndroidFromSheet}
+                disabled={downloadBusy}
+              >
+                {downloadBusy ? 'Saving…' : 'Save to gallery'}
+              </button>
+            ) : null}
             <button type="button" className="btn btn--ghost" onClick={closePassPreview}>
               Close
             </button>

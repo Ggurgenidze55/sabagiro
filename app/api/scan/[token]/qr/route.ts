@@ -45,8 +45,12 @@ export async function GET(request: Request, { params }: Params) {
   const download = url.searchParams.get('download') === '1';
   const ua = request.headers.get('user-agent') || '';
   const inNativeApp = isSabagiroAppUserAgent(ua);
-  // WKWebView ignores attachment downloads; show inline so Save/Share works.
-  const asAttachment = download && !inNativeApp && url.searchParams.get('inline') !== '1';
+  const isAndroid = /Android/i.test(ua);
+  // iOS WKWebView: inline (long-press save). Android WebView: attachment (DownloadListener).
+  const asAttachment =
+    download &&
+    url.searchParams.get('inline') !== '1' &&
+    (!inNativeApp || isAndroid);
   const filename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
 
   let png: Buffer;
