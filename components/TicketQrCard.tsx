@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { isSabagiroAppShell } from '@/lib/app-shell';
 import { canUseAppleWalletClient } from '@/lib/apple-wallet-device';
 import { canUseGoogleWalletClient } from '@/lib/google-wallet-device';
-import { canNativeSaveImageToPhotos, nativeSaveImageToPhotos } from '@/lib/native-bridge';
 
 type TicketQrCardProps = {
   ticketId: string;
@@ -16,6 +15,12 @@ type TicketQrCardProps = {
   qrAvailable?: boolean;
   expiredMessage?: string;
 };
+
+function prefersLongPressSave() {
+  if (typeof window === 'undefined') return false;
+  if (isSabagiroAppShell()) return true;
+  return 'ontouchstart' in window || (navigator.maxTouchPoints ?? 0) > 0;
+}
 
 export function TicketQrCard({
   ticketId,
@@ -40,8 +45,10 @@ export function TicketQrCard({
   const [appleWalletBusy, setAppleWalletBusy] = useState(false);
   const [appleWalletError, setAppleWalletError] = useState('');
   const [downloadBusy, setDownloadBusy] = useState(false);
+  const [passPreviewUrl, setPassPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState('');
   const inNativeApp = isSabagiroAppShell();
+  const longPressSave = prefersLongPressSave();
 
   useEffect(() => {
     if (!open || !qrAvailable) {
@@ -90,6 +97,19 @@ export function TicketQrCard({
       cancelled = true;
     };
   }, [ticketId, qrAvailable, open, deviceSupportsAppleWallet, deviceSupportsGoogleWallet]);
+
+  useEffect(() => {
+    return () => {
+      if (passPreviewUrl) URL.revokeObjectURL(passPreviewUrl);
+    };
+  }, [passPreviewUrl]);
+
+  const closePassPreview = useCallback(() => {
+    setPassPreviewUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+  }, []);
 
   const addToGoogleWallet = useCallback(async () => {
     setGoogleWalletBusy(true);
@@ -153,7 +173,7 @@ export function TicketQrCard({
     try {
       let blob: Blob | null = null;
       const passUrl = qrToken
-        ? `/api/scan/${qrToken}/qr?download=1&v=5&t=${Date.now()}`
+        ? `/api/scan/${qrToken}/qr?download=1&v=6&t=${Date.now()}`
         : null;
 
       if (passUrl) {
@@ -166,35 +186,30 @@ export function TicketQrCard({
       }
       if (!blob) return;
 
-      // Native apps: write straight into Photos / Gallery (no Files share sheet).
-      if (inNativeApp && canNativeSaveImageToPhotos()) {
-        const saved = await nativeSaveImageToPhotos(blob, filename);
-        if (saved) return;
-      }
-
-      if (!inNativeApp) {
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = filename;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+      // Phone / in-app WebView: show image so long-press → Save to Photos (no app update).
+      if (longPressSave) {
+        setPassPreviewUrl((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return URL.createObjectURL(blob!);
+        });
         return;
       }
 
-      // Older app builds without the Photos bridge — open image for long-press save.
-      if (passUrl) {
-        window.location.assign(`${passUrl}&inline=1`);
-      }
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save ticket');
     } finally {
       setDownloadBusy(false);
     }
-  }, [qrToken, dataUrl, ticketId, inNativeApp]);
+  }, [qrToken, dataUrl, ticketId, longPressSave]);
 
   return (
     <article
@@ -246,8 +261,8 @@ export function TicketQrCard({
                   disabled={downloadBusy || (!dataUrl && !qrToken)}
                 >
                   {downloadBusy
-                    ? 'Saving…'
-                    : inNativeApp
+                    ? 'Preparing…'
+                    : longPressSave
                       ? 'Save to Photos'
                       : 'Download ticket'}
                 </button>
@@ -285,6 +300,29 @@ export function TicketQrCard({
               ) : null}
             </div>
           )}
+        </div>
+      ) : null}
+
+      {passPreviewUrl ? (
+        <div
+          className="ticket-save-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Save ticket to Photos"
+        >
+          <div className="ticket-save-sheet__panel">
+            <p className="ticket-save-sheet__hint">
+              Long-press the image → <strong>Add to Photos</strong> / <strong>Save image</strong>
+            </p>
+            <img
+              src={passPreviewUrl}
+              alt="Sabagiro ticket"
+              className="ticket-save-sheet__img"
+            />
+            <button type="button" className="btn btn--ghost" onClick={closePassPreview}>
+              Close
+            </button>
+          </div>
         </div>
       ) : null}
     </article>
