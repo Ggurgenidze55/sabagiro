@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 
         webView.setBackgroundColor(getColor(R.color.sabagiro_background))
+        webView.addJavascriptInterface(TicketImageBridge(this), "SabagiroApp")
 
         webView.setDownloadListener { url, _, _, mimeType, _ ->
             val uri = Uri.parse(url)

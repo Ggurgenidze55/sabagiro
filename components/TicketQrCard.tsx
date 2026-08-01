@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { isSabagiroAppShell } from '@/lib/app-shell';
 import { canUseAppleWalletClient } from '@/lib/apple-wallet-device';
 import { canUseGoogleWalletClient } from '@/lib/google-wallet-device';
+import { canNativeSaveImageToPhotos, nativeSaveImageToPhotos } from '@/lib/native-bridge';
 
 type TicketQrCardProps = {
   ticketId: string;
@@ -152,7 +153,7 @@ export function TicketQrCard({
     try {
       let blob: Blob | null = null;
       const passUrl = qrToken
-        ? `/api/scan/${qrToken}/qr?download=1&v=4&t=${Date.now()}`
+        ? `/api/scan/${qrToken}/qr?download=1&v=5&t=${Date.now()}`
         : null;
 
       if (passUrl) {
@@ -165,42 +166,31 @@ export function TicketQrCard({
       }
       if (!blob) return;
 
-      const file = new File([blob], filename, { type: 'image/png' });
-      const nav = typeof navigator !== 'undefined' ? navigator : null;
-
-      // iOS/Android WebViews ignore <a download> — Share sheet is the reliable path.
-      if (nav && typeof nav.share === 'function') {
-        try {
-          const payload: ShareData = { files: [file], title: 'Sabagiro ticket' };
-          if (!nav.canShare || nav.canShare(payload)) {
-            await nav.share(payload);
-            return;
-          }
-        } catch (e) {
-          if (e instanceof Error && e.name === 'AbortError') return;
-        }
+      // Native apps: write straight into Photos / Gallery (no Files share sheet).
+      if (inNativeApp && canNativeSaveImageToPhotos()) {
+        const saved = await nativeSaveImageToPhotos(blob, filename);
+        if (saved) return;
       }
 
-      if (inNativeApp && passUrl) {
-        // Show PNG in WebView (inline for SabagiroApp UA) — long-press to save.
-        window.location.assign(`${passUrl}&inline=1`);
+      if (!inNativeApp) {
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
         return;
       }
 
-      const objectUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = objectUrl;
-      link.download = filename;
-      link.rel = 'noopener';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not download ticket');
-      if (qrToken) {
-        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=4&inline=1&t=${Date.now()}`);
+      // Older app builds without the Photos bridge — open image for long-press save.
+      if (passUrl) {
+        window.location.assign(`${passUrl}&inline=1`);
       }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not save ticket');
     } finally {
       setDownloadBusy(false);
     }
@@ -256,9 +246,9 @@ export function TicketQrCard({
                   disabled={downloadBusy || (!dataUrl && !qrToken)}
                 >
                   {downloadBusy
-                    ? 'Preparing…'
+                    ? 'Saving…'
                     : inNativeApp
-                      ? 'Share / save ticket'
+                      ? 'Save to Photos'
                       : 'Download ticket'}
                 </button>
               ) : null}

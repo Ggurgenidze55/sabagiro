@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import UIKit
 import WebKit
 
 @MainActor
@@ -12,12 +13,15 @@ final class WebViewModel: ObservableObject {
   @Published var paymentCheckoutActive = false
 
   let webView: WKWebView
+  /// Retained — WKUserContentController keeps only a weak reference to script handlers.
+  private let ticketImageSaver = TicketImageSaver()
 
   init() {
     let config = WKWebViewConfiguration()
     config.defaultWebpagePreferences.allowsContentJavaScript = true
     config.applicationNameForUserAgent = AppConfig.appUserAgentToken
     config.websiteDataStore = .default()
+    config.userContentController.add(ticketImageSaver, name: TicketImageSaver.handlerName)
     webView = WKWebView(frame: .zero, configuration: config)
     webView.isOpaque = false
     webView.backgroundColor = UIColor(red: 0.04, green: 0.04, blue: 0.04, alpha: 1)
