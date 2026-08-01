@@ -38,7 +38,9 @@ export function TicketQrCard({
   const [googleWalletError, setGoogleWalletError] = useState('');
   const [appleWalletBusy, setAppleWalletBusy] = useState(false);
   const [appleWalletError, setAppleWalletError] = useState('');
+  const [downloadBusy, setDownloadBusy] = useState(false);
   const [error, setError] = useState('');
+  const inNativeApp = isSabagiroAppShell();
 
   useEffect(() => {
     if (!open || !qrAvailable) {
@@ -111,7 +113,6 @@ export function TicketQrCard({
   const appleWalletHref = `/api/tickets/${ticketId}/wallet`;
   const showAppleWallet = open && qrAvailable && appleWalletEnabled && status !== 'CANCELLED';
   const showGoogleWallet = open && qrAvailable && googleWalletEnabled && status !== 'CANCELLED';
-  const inNativeApp = isSabagiroAppShell();
 
   const addToAppleWallet = useCallback(async () => {
     setAppleWalletBusy(true);
@@ -145,36 +146,65 @@ export function TicketQrCard({
 
   const downloadQr = useCallback(async () => {
     const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
+    setDownloadBusy(true);
+    setError('');
 
-    if (qrToken) {
-      // Bust iOS/WebView caches that still held the old tofu-font PNGs.
-      const url = `/api/scan/${qrToken}/qr?download=1&v=3&t=${Date.now()}`;
-      try {
-        const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-        if (!res.ok) throw new Error('download failed');
-        const blob = await res.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = objectUrl;
-        link.download = filename;
-        link.rel = 'noopener';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
-        return;
-      } catch {
-        window.location.href = url;
+    try {
+      let blob: Blob | null = null;
+      const passUrl = qrToken
+        ? `/api/scan/${qrToken}/qr?download=1&v=4&t=${Date.now()}`
+        : null;
+
+      if (passUrl) {
+        const res = await fetch(passUrl, { cache: 'no-store', credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Could not prepare ticket image');
+        blob = await res.blob();
+      } else if (dataUrl) {
+        const res = await fetch(dataUrl);
+        blob = await res.blob();
+      }
+      if (!blob) return;
+
+      const file = new File([blob], filename, { type: 'image/png' });
+      const nav = typeof navigator !== 'undefined' ? navigator : null;
+
+      // iOS/Android WebViews ignore <a download> — Share sheet is the reliable path.
+      if (nav && typeof nav.share === 'function') {
+        try {
+          const payload: ShareData = { files: [file], title: 'Sabagiro ticket' };
+          if (!nav.canShare || nav.canShare(payload)) {
+            await nav.share(payload);
+            return;
+          }
+        } catch (e) {
+          if (e instanceof Error && e.name === 'AbortError') return;
+        }
+      }
+
+      if (inNativeApp && passUrl) {
+        // Show PNG in WebView (inline for SabagiroApp UA) — long-press to save.
+        window.location.assign(`${passUrl}&inline=1`);
         return;
       }
-    }
 
-    if (!dataUrl) return;
-    const link = document.createElement('a');
-    link.href = dataUrl;
-    link.download = filename;
-    link.click();
-  }, [qrToken, dataUrl, ticketId]);
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = filename;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not download ticket');
+      if (qrToken) {
+        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=4&inline=1&t=${Date.now()}`);
+      }
+    } finally {
+      setDownloadBusy(false);
+    }
+  }, [qrToken, dataUrl, ticketId, inNativeApp]);
 
   return (
     <article
@@ -223,9 +253,13 @@ export function TicketQrCard({
                   type="button"
                   className="wallet-badge"
                   onClick={downloadQr}
-                  disabled={!dataUrl && !qrToken}
+                  disabled={downloadBusy || (!dataUrl && !qrToken)}
                 >
-                  Download ticket
+                  {downloadBusy
+                    ? 'Preparing…'
+                    : inNativeApp
+                      ? 'Share / save ticket'
+                      : 'Download ticket'}
                 </button>
               ) : null}
               {showAppleWallet ? (
