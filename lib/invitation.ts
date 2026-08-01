@@ -32,17 +32,39 @@ export function invitationAccountDefaults(guest: InvitationGuest) {
   };
 }
 
-/** Admin bulk send — appends "Guest N" to last name when quantity > 1. */
+const GUEST_SUFFIX_RE = /\bGuest\s+(\d+)\s*$/i;
+
+/** Highest Guest N in last names, or ticket count if unnumbered tickets exist. */
+export function nextAdminGuestNumberFromLastNames(
+  holderLastNames: string[],
+): number {
+  let maxGuest = 0;
+  for (const lastName of holderLastNames) {
+    const match = lastName.match(GUEST_SUFFIX_RE);
+    if (match) maxGuest = Math.max(maxGuest, Number(match[1]));
+  }
+  // Unnumbered tickets still consume a slot (e.g. first single invite).
+  if (holderLastNames.length > maxGuest) {
+    maxGuest = holderLastNames.length;
+  }
+  return maxGuest + 1;
+}
+
+/**
+ * Admin invite holder naming.
+ * - First ever single invite: plain last name
+ * - Otherwise: "Lastname Guest N" continuing across batches for that email+event
+ */
 export function adminInvitationHolder(
   guest: InvitationGuest,
-  index: number,
-  quantity: number,
+  guestNumber: number,
+  opts: { useGuestSuffix: boolean },
 ) {
-  if (quantity === 1) {
+  if (!opts.useGuestSuffix) {
     return invitationGuestToHolder(guest);
   }
   return invitationGuestToHolder({
     ...guest,
-    lastName: `${guest.lastName} Guest ${index}`,
+    lastName: `${guest.lastName} Guest ${guestNumber}`,
   });
 }

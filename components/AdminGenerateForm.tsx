@@ -91,7 +91,8 @@ export function AdminGenerateForm() {
     <div>
       <h2 className="section-title">Individual guest</h2>
       <p className="page-lead" style={{ marginBottom: '1rem' }}>
-        Guest name + email. Multiple invitations append Guest 1, Guest 2, … to the last name.
+        Guest name + email. Extra invitations for the same email keep numbering (Guest 21 after
+        Guest 20) — each email gets its own number.
       </p>
       <form className="form-stack" onSubmit={onSubmit}>
         <label className="form-field">
@@ -140,7 +141,8 @@ export function AdminGenerateForm() {
         </label>
         {!singleTicket ? (
           <p className="form-foot form-foot--note">
-            {quantity} emails — each ticket named Last name Guest 1, Guest 2, … Guest {quantity}.
+            {quantity} emails — Guest numbers continue from any invites already sent to this email
+            for the selected event.
           </p>
         ) : null}
         <label className="form-field">

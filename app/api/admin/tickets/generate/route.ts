@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import {
+  adminInvitationHolder,
+  nextAdminGuestNumberFromLastNames,
+} from '@/lib/invitation';
 import { createTicketForUser, findOrCreateUserForAdmin } from '@/lib/tickets';
-import { adminInvitationHolder } from '@/lib/invitation';
 import { adminGenerateSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
@@ -20,11 +24,28 @@ export async function POST(request: Request) {
       lastName: body.lastName,
     });
 
+    const existing = await prisma.ticket.findMany({
+      where: {
+        productSlug: body.productSlug,
+        status: { not: 'CANCELLED' },
+        holderEmail: { equals: body.email.trim(), mode: 'insensitive' },
+      },
+      select: { holderLastName: true },
+    });
+
+    const startNumber = nextAdminGuestNumberFromLastNames(
+      existing.map((t) => t.holderLastName),
+    );
+    const useGuestSuffix = existing.length > 0 || body.quantity > 1;
+
     const tickets = [];
     const emails = [];
+    const guestNumbers: number[] = [];
 
-    for (let i = 1; i <= body.quantity; i++) {
-      const holder = adminInvitationHolder(guest, i, body.quantity);
+    for (let i = 0; i < body.quantity; i++) {
+      const guestNumber = startNumber + i;
+      guestNumbers.push(guestNumber);
+      const holder = adminInvitationHolder(guest, guestNumber, { useGuestSuffix });
 
       const result = await createTicketForUser({
         user,
@@ -45,6 +66,7 @@ export async function POST(request: Request) {
       ok: true,
       quantity: body.quantity,
       emailsSent,
+      guestNumbers: useGuestSuffix ? guestNumbers : [],
       ticket: tickets[0],
       email: emails[0],
     });
