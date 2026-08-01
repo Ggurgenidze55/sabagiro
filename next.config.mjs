@@ -3,7 +3,11 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   experimental: {
-    serverComponentsExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client'],
+    serverComponentsExternalPackages: ['pg', '@prisma/adapter-pg', '@prisma/client', 'opentype.js'],
+    outputFileTracingIncludes: {
+      '/api/**/*': ['./public/fonts/BebasNeue-Regular.ttf'],
+      '/account': ['./public/fonts/BebasNeue-Regular.ttf'],
+    },
   },
 async headers() {
     return [
