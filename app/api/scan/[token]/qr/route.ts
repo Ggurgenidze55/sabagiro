@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { CLUB_COORDS_LABEL } from '@/lib/club-location';
 import { qrPngBuffer } from '@/lib/qr';
 import { qrExpiredMessage, loadTicketQrContext } from '@/lib/ticket-qr-access';
 import { assertTicketQrAccess } from '@/lib/ticket-qr-guard';
+import { ticketPassPngBuffer } from '@/lib/ticket-pass';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,9 +40,38 @@ export async function GET(request: Request, { params }: Params) {
     return new NextResponse('Unavailable', { status: 410 });
   }
 
-  const png = await qrPngBuffer(params.token);
   const download = new URL(request.url).searchParams.get('download') === '1';
   const filename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
+
+  let png: Buffer;
+  if (download) {
+    const event = await prisma.clubEvent.findFirst({
+      where: { slug: ticket.productSlug },
+      select: {
+        title: true,
+        dayLabel: true,
+        dateLabel: true,
+        doorsOpen: true,
+        lineup: true,
+        tag: true,
+        about: true,
+      },
+    });
+    png = await ticketPassPngBuffer({
+      qrToken: params.token,
+      productName: ticket.productName,
+      holderFirstName: ticket.holderFirstName,
+      holderLastName: ticket.holderLastName,
+      holderPersonalId: ticket.holderPersonalId,
+      priceGel: ticket.priceGel,
+      tierLabel: ticket.tierLabel,
+      event: event
+        ? { ...event, coordsLabel: CLUB_COORDS_LABEL }
+        : { title: ticket.productName, coordsLabel: CLUB_COORDS_LABEL },
+    });
+  } else {
+    png = await qrPngBuffer(params.token);
+  }
 
   return new NextResponse(new Uint8Array(png), {
     headers: {

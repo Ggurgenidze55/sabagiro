@@ -418,9 +418,9 @@ export function ticketPurchaseEmail(opts: {
     <p style="margin:0 0 4px;font-weight:700;color:${EMAIL_ACID};letter-spacing:0.04em">${holder}</p>
     <p style="margin:0 0 16px">ID ${escapeHtml(opts.holderPersonalId)}<br />${opts.priceGel} GEL${tier}</p>
     <p style="margin:0 0 16px">
-      <a href="${qrDownloadUrl}" style="display:inline-block;background:${EMAIL_ACID};color:#0a0a0a;text-decoration:none;font-weight:700;letter-spacing:0.12em;padding:12px 18px;font-size:13px">DOWNLOAD QR</a>
+      <a href="${qrDownloadUrl}" style="display:inline-block;background:${EMAIL_ACID};color:#0a0a0a;text-decoration:none;font-weight:700;letter-spacing:0.12em;padding:12px 18px;font-size:13px">DOWNLOAD TICKET</a>
     </p>
-    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>. PNG also attached to this email.</p>
+    <p style="font-size:14px;color:${EMAIL_MUTED};margin:0">Show this QR at the door. A copy is always in <a href="${escapeHtml(siteUrl('/account'))}" style="color:${EMAIL_ACID}">your account</a>. Full ticket PNG also attached to this email.</p>
   `;
 
   const textEvent = [

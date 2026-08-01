@@ -26,6 +26,7 @@ import {
 import { TICKET_QR_CID } from '@/lib/email/theme';
 import { qrPngBase64 } from '@/lib/qr';
 import { siteUrl } from '@/lib/site-url';
+import { ticketPassPngBase64 } from '@/lib/ticket-pass';
 
 async function loadTicketEmailEvent(productSlug: string): Promise<TicketEmailEventInfo | null> {
   const event = await prisma.clubEvent.findUnique({
@@ -152,9 +153,20 @@ export async function sendTicketEmail(payload: {
   scanLink: string;
 }): Promise<SendEmailResult> {
   const { ticket, scanLink, to } = payload;
-  const [qrContent, event] = await Promise.all([
+  const event = await loadTicketEmailEvent(ticket.productSlug);
+  const passInput = {
+    qrToken: ticket.qrToken,
+    productName: ticket.productName,
+    holderFirstName: ticket.holderFirstName,
+    holderLastName: ticket.holderLastName,
+    holderPersonalId: ticket.holderPersonalId,
+    priceGel: ticket.priceGel,
+    tierLabel: ticket.tierLabel,
+    event,
+  };
+  const [qrContent, passContent] = await Promise.all([
     qrPngBase64(ticket.qrToken),
-    loadTicketEmailEvent(ticket.productSlug),
+    ticketPassPngBase64(passInput),
   ]);
   const qrFilename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
   const qrDownloadUrl = siteUrl(`/api/scan/${ticket.qrToken}/qr?download=1`);
@@ -183,7 +195,7 @@ export async function sendTicketEmail(payload: {
       },
       {
         filename: qrFilename,
-        content: qrContent,
+        content: passContent,
         contentType: 'image/png',
       },
     ],

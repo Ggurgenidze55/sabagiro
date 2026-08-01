@@ -204,7 +204,7 @@ export function TicketQrCard({
                   onClick={downloadQr}
                   disabled={!dataUrl && !qrToken}
                 >
-                  Download QR
+                  Download ticket
                 </button>
               ) : null}
               {showAppleWallet ? (
