@@ -55,11 +55,15 @@ export const registerSchema = z
     personalId: personalIdSchema,
     facebookUrl: optionalSocialUrlSchema,
     instagramUrl: optionalSocialUrlSchema,
+    linkedinUrl: optionalSocialUrlSchema,
   })
-  .refine((data) => Boolean(data.facebookUrl) || Boolean(data.instagramUrl), {
-    message: 'Enter at least one profile link — Facebook or Instagram.',
-    path: ['facebookUrl'],
-  });
+  .refine(
+    (data) => Boolean(data.facebookUrl) || Boolean(data.instagramUrl) || Boolean(data.linkedinUrl),
+    {
+      message: 'Enter at least one profile link — Facebook, Instagram, or LinkedIn.',
+      path: ['facebookUrl'],
+    },
+  );
 
 export const ticketTierSchema = z.object({
   label: z.string().trim().max(80).optional(),

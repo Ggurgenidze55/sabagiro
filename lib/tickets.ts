@@ -197,6 +197,7 @@ export async function findOrCreateUserForAdmin(input: {
       verifiedAt: new Date(),
       facebookUrl: '',
       instagramUrl: '',
+      linkedinUrl: '',
     },
   });
 }

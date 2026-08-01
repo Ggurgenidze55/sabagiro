@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { canAccessAdminPanel, staffAdminLandingPath } from '@/lib/staff-roles';
 
 type Mode = 'login' | 'register';
-type SocialPlatform = 'facebook' | 'instagram' | '';
+type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | '';
 
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
@@ -31,11 +31,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
       const socialUrl = String(payload.socialUrl ?? '').trim();
       if (!platform || !socialUrl) {
         setLoading(false);
-        setError('Choose Facebook or Instagram and enter your profile link.');
+        setError('Choose Facebook, Instagram, or LinkedIn and enter your profile link.');
         return;
       }
       payload.facebookUrl = platform === 'facebook' ? socialUrl : '';
       payload.instagramUrl = platform === 'instagram' ? socialUrl : '';
+      payload.linkedinUrl = platform === 'linkedin' ? socialUrl : '';
       delete payload.socialPlatform;
       delete payload.socialUrl;
     }
@@ -94,8 +95,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <fieldset className="form-fieldset">
             <legend className="form-fieldset__legend">Social verification</legend>
             <p className="form-foot" style={{ marginBottom: '0.85rem', opacity: 0.75 }}>
-              Choose <strong>Facebook</strong> or <strong>Instagram</strong> and add your profile
-              link for admin verification.
+              Choose <strong>Facebook</strong>, <strong>Instagram</strong>, or{' '}
+              <strong>LinkedIn</strong> and add your profile link for admin verification.
             </p>
             <label className="form-field">
               <span>Platform</span>
@@ -110,11 +111,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 </option>
                 <option value="facebook">Facebook</option>
                 <option value="instagram">Instagram</option>
+                <option value="linkedin">LinkedIn</option>
               </select>
             </label>
             {socialPlatform === 'facebook' || socialPlatform === 'instagram' ? (
               <p className="form-error" style={{ margin: '0 0 0.65rem' }}>
                 Your Instagram/Facebook profile must be public for verification
+              </p>
+            ) : null}
+            {socialPlatform === 'linkedin' ? (
+              <p className="form-error" style={{ margin: '0 0 0.65rem' }}>
+                Your LinkedIn profile must be viewable for verification
               </p>
             ) : null}
             {socialPlatform === 'facebook' ? (
@@ -136,6 +143,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   type="url"
                   required
                   placeholder="https://instagram.com/..."
+                />
+              </label>
+            ) : null}
+            {socialPlatform === 'linkedin' ? (
+              <label className="form-field">
+                <span>LinkedIn profile link</span>
+                <input
+                  name="socialUrl"
+                  type="url"
+                  required
+                  placeholder="https://linkedin.com/in/..."
                 />
               </label>
             ) : null}

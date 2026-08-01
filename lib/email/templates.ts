@@ -41,7 +41,7 @@ export function welcomeRegistrationEmail(opts: {
   const name = escapeHtml(opts.firstName);
   const bodyHtml = `
     <p>Hi ${name}, your Sabagiro account is created.</p>
-    <p>We review Facebook and Instagram links before ticket purchases are enabled. You will get another email when your account is <strong>verified</strong>.</p>
+    <p>We review Facebook, Instagram, or LinkedIn links before ticket purchases are enabled. You will get another email when your account is <strong>verified</strong>.</p>
     <p>Until then you can log in and update your profile, but checkout stays locked.</p>
   `;
   return {
@@ -53,7 +53,7 @@ export function welcomeRegistrationEmail(opts: {
       ctaLabel: 'VIEW ACCOUNT',
       ctaHref: siteUrl('/account'),
     }),
-    text: `Hi ${opts.firstName}, your Sabagiro account is created. Admin will verify your social links before you can buy tickets. Account: ${siteUrl('/account')}`,
+    text: `Hi ${opts.firstName}, your Sabagiro account is created. Admin will verify your Facebook, Instagram, or LinkedIn link before you can buy tickets. Account: ${siteUrl('/account')}`,
   };
 }
 
@@ -297,7 +297,7 @@ export function accountRejectedEmail(opts: {
   const name = escapeHtml(opts.firstName);
   const bodyHtml = `
     <p>Hi ${name}, we could not verify your account at this time.</p>
-    <p>Please check that your Facebook and Instagram links are correct and belong to you, then contact Sabagiro support if you believe this is a mistake.</p>
+    <p>Please check that your Facebook, Instagram, or LinkedIn link is correct and belongs to you, then contact Sabagiro support if you believe this is a mistake.</p>
   `;
   return {
     subject: 'Sabagiro — account verification update',

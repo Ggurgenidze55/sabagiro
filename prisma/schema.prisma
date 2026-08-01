@@ -69,6 +69,7 @@ model User {
   personalId         String
   facebookUrl        String             @default("")
   instagramUrl       String             @default("")
+  linkedinUrl        String             @default("")
   verificationStatus VerificationStatus @default(PENDING)
   verifiedAt         DateTime?
   role                 Role               @default(USER)

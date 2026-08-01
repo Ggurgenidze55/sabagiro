@@ -25,6 +25,7 @@ export type SessionUser = {
   personalId: string;
   facebookUrl: string;
   instagramUrl: string;
+  linkedinUrl: string;
   verificationStatus: VerificationStatus;
   role: Role;
   ticketLimitPerEvent: number;
@@ -126,6 +127,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
         personalId: true,
         facebookUrl: true,
         instagramUrl: true,
+        linkedinUrl: true,
         verificationStatus: true,
         role: true,
         ticketLimitPerEvent: true,
@@ -205,6 +207,7 @@ export function toSessionUser(user: {
   personalId: string;
   facebookUrl: string;
   instagramUrl: string;
+  linkedinUrl: string;
   verificationStatus: VerificationStatus;
   role: Role;
   ticketLimitPerEvent: number;

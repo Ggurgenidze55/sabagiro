@@ -24,6 +24,7 @@ export type AdminUserRow = {
   personalId: string;
   facebookUrl: string;
   instagramUrl: string;
+  linkedinUrl: string;
   verificationStatus: 'PENDING' | 'VERIFIED' | 'REJECTED';
   role: string;
   isArtist: boolean;
@@ -414,6 +415,14 @@ export function AdminUsersPanel({
                         ) : (
                           <span className="table-sub">—</span>
                         )}
+                        <br />
+                        {u.linkedinUrl ? (
+                          <a href={u.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                            LinkedIn
+                          </a>
+                        ) : (
+                          <span className="table-sub">—</span>
+                        )}
                       </td>
                       <td>
                         <span
@@ -581,6 +590,14 @@ export function AdminUsersPanel({
                           {u.instagramUrl ? (
                             <a href={u.instagramUrl} target="_blank" rel="noopener noreferrer">
                               Instagram
+                            </a>
+                          ) : (
+                            <span className="table-sub">—</span>
+                          )}
+                          <br />
+                          {u.linkedinUrl ? (
+                            <a href={u.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                              LinkedIn
                             </a>
                           ) : (
                             <span className="table-sub">—</span>

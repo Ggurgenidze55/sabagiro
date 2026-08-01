@@ -22,6 +22,7 @@ export async function POST(request: Request) {
         personalId: body.personalId,
         facebookUrl: body.facebookUrl ?? '',
         instagramUrl: body.instagramUrl ?? '',
+        linkedinUrl: body.linkedinUrl ?? '',
         passwordHash: await hashPassword(body.password),
         role: 'USER',
         verificationStatus: 'PENDING',

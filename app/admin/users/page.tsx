@@ -84,6 +84,7 @@ export default async function AdminUsersPage() {
           personalId: u.personalId,
           facebookUrl: u.facebookUrl,
           instagramUrl: u.instagramUrl,
+          linkedinUrl: u.linkedinUrl,
           verificationStatus: u.verificationStatus,
           role: u.role,
           isArtist: Boolean(artist),
