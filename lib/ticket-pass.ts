@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 import { qrPngBuffer } from '@/lib/qr';
@@ -9,6 +10,25 @@ const ACID = '#f9c108';
 const BG = '#0a0a0a';
 const MUTED = '#8a827a';
 const TEXT = '#e8e0d8';
+
+/** Standard TTF bundled in repo — embedded as base64 so every device gets a rasterized ticket. */
+const PASS_FONT_FILE = 'BebasNeue-Regular.ttf';
+const PASS_FONT_FAMILY = 'SabagiroTicket';
+
+let cachedFontCss: string | null = null;
+
+function passFontCss(): string {
+  if (cachedFontCss) return cachedFontCss;
+  const fontPath = path.join(process.cwd(), 'public/fonts', PASS_FONT_FILE);
+  const b64 = readFileSync(fontPath).toString('base64');
+  cachedFontCss = `@font-face {
+        font-family: '${PASS_FONT_FAMILY}';
+        src: url('data:font/ttf;charset=utf-8;base64,${b64}') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }`;
+  return cachedFontCss;
+}
 
 export type TicketPassEventInfo = {
   title?: string | null;
@@ -40,6 +60,17 @@ function esc(value: string) {
     .replace(/"/g, '&quot;');
 }
 
+/** Keep glyphs that render reliably in the pass font on every platform. */
+function passText(value: string) {
+  return value
+    .replace(/°/g, '')
+    .replace(/[·•]/g, ' | ')
+    .replace(/[—–]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function wrapWords(text: string, maxChars: number): string[] {
   const words = text.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return [];
@@ -61,77 +92,77 @@ function wrapWords(text: string, maxChars: number): string[] {
 function truncate(text: string, max: number) {
   const t = text.trim();
   if (t.length <= max) return t;
-  return `${t.slice(0, max - 1).trimEnd()}…`;
+  return `${t.slice(0, max - 1).trimEnd()}...`;
 }
 
-type TextLine = { text: string; size: number; color: string; weight?: number; tracking?: number };
+type TextLine = { text: string; size: number; color: string; tracking?: number };
 
 function buildLines(input: TicketPassInput): TextLine[] {
   const event = input.event;
-  const title = (event?.title || input.productName).trim() || 'Sabagiro';
-  const when = [event?.dayLabel, event?.dateLabel].filter(Boolean).join(' · ');
-  const doors = event?.doorsOpen?.trim() || '';
-  const lineup = event?.lineup?.trim() || '';
-  const tag = event?.tag?.trim() || '';
-  const about = event?.about?.trim() ? truncate(event.about.trim(), 220) : '';
-  const coords = event?.coordsLabel?.trim() || '';
-  const holder = `${input.holderFirstName} ${input.holderLastName}`.trim();
-  const tier = input.tierLabel?.trim() ? ` · ${input.tierLabel.trim()}` : '';
+  const title = passText(event?.title || input.productName || 'Sabagiro');
+  const when = passText([event?.dayLabel, event?.dateLabel].filter(Boolean).join(' · '));
+  const doors = passText(event?.doorsOpen || '');
+  const lineup = passText(event?.lineup || '');
+  const tag = passText(event?.tag || '');
+  const about = event?.about?.trim() ? passText(truncate(event.about.trim(), 220)) : '';
+  const coords = passText(event?.coordsLabel || '');
+  const holder = passText(`${input.holderFirstName} ${input.holderLastName}`);
+  const tier = input.tierLabel?.trim() ? ` | ${passText(input.tierLabel)}` : '';
   const priceLine = `${input.priceGel} GEL${tier}`;
 
   const lines: TextLine[] = [
-    { text: 'SABAGIRO', size: 22, color: ACID, weight: 700, tracking: 8 },
-    { text: 'TICKET', size: 13, color: MUTED, tracking: 6 },
+    { text: 'SABAGIRO', size: 28, color: ACID, tracking: 6 },
+    { text: 'TICKET', size: 16, color: MUTED, tracking: 5 },
     { text: '', size: 16, color: TEXT },
   ];
 
-  for (const part of wrapWords(title.toUpperCase(), 28)) {
-    lines.push({ text: part, size: 28, color: ACID, weight: 700, tracking: 2 });
+  for (const part of wrapWords(title.toUpperCase(), 26)) {
+    lines.push({ text: part, size: 34, color: ACID, tracking: 2 });
   }
   lines.push({ text: '', size: 14, color: TEXT });
 
   if (when) {
-    lines.push({ text: 'WHEN', size: 11, color: ACID, tracking: 4 });
-    lines.push({ text: when.toUpperCase(), size: 16, color: TEXT });
+    lines.push({ text: 'WHEN', size: 13, color: ACID, tracking: 4 });
+    lines.push({ text: when.toUpperCase(), size: 20, color: TEXT });
   }
   if (doors) {
-    lines.push({ text: 'DOORS', size: 11, color: ACID, tracking: 4 });
-    lines.push({ text: doors, size: 16, color: TEXT });
+    lines.push({ text: 'DOORS', size: 13, color: ACID, tracking: 4 });
+    lines.push({ text: doors, size: 20, color: TEXT });
   }
   if (lineup) {
-    lines.push({ text: 'LINEUP', size: 11, color: ACID, tracking: 4 });
-    for (const part of wrapWords(lineup.toUpperCase(), 34)) {
-      lines.push({ text: part, size: 15, color: TEXT });
+    lines.push({ text: 'LINEUP', size: 13, color: ACID, tracking: 4 });
+    for (const part of wrapWords(lineup.toUpperCase(), 32)) {
+      lines.push({ text: part, size: 18, color: TEXT });
     }
   }
   if (tag) {
-    lines.push({ text: 'NOTE', size: 11, color: ACID, tracking: 4 });
-    for (const part of wrapWords(tag.toUpperCase(), 34)) {
-      lines.push({ text: part, size: 15, color: TEXT });
+    lines.push({ text: 'NOTE', size: 13, color: ACID, tracking: 4 });
+    for (const part of wrapWords(tag.toUpperCase(), 32)) {
+      lines.push({ text: part, size: 18, color: TEXT });
     }
   }
   if (about) {
-    lines.push({ text: 'ABOUT', size: 11, color: ACID, tracking: 4 });
-    for (const part of wrapWords(about, 36)) {
-      lines.push({ text: part, size: 14, color: MUTED });
+    lines.push({ text: 'ABOUT', size: 13, color: ACID, tracking: 4 });
+    for (const part of wrapWords(about.toUpperCase(), 34)) {
+      lines.push({ text: part, size: 16, color: MUTED });
     }
   }
 
-  lines.push({ text: 'LOCATION', size: 11, color: ACID, tracking: 4 });
-  lines.push({ text: 'SABAGIRO · TBILISI', size: 15, color: TEXT });
+  lines.push({ text: 'LOCATION', size: 13, color: ACID, tracking: 4 });
+  lines.push({ text: 'SABAGIRO | TBILISI', size: 18, color: TEXT });
   if (coords) {
-    lines.push({ text: coords.toUpperCase(), size: 13, color: MUTED });
+    lines.push({ text: coords.toUpperCase(), size: 16, color: MUTED });
   }
 
   lines.push({ text: '', size: 20, color: TEXT });
   lines.push({ text: '__QR__', size: QR_SIZE + 24, color: TEXT });
   lines.push({ text: '', size: 18, color: TEXT });
 
-  lines.push({ text: holder.toUpperCase(), size: 18, color: ACID, weight: 700 });
-  lines.push({ text: `ID ${input.holderPersonalId}`, size: 15, color: TEXT });
-  lines.push({ text: priceLine.toUpperCase(), size: 15, color: TEXT });
+  lines.push({ text: holder.toUpperCase(), size: 22, color: ACID });
+  lines.push({ text: `ID ${input.holderPersonalId}`, size: 18, color: TEXT });
+  lines.push({ text: priceLine.toUpperCase(), size: 18, color: TEXT });
   lines.push({ text: '', size: 12, color: TEXT });
-  lines.push({ text: 'SHOW THIS QR AT THE DOOR', size: 12, color: MUTED, tracking: 3 });
+  lines.push({ text: 'SHOW THIS QR AT THE DOOR', size: 14, color: MUTED, tracking: 3 });
 
   return lines;
 }
@@ -153,27 +184,21 @@ export async function ticketPassPngBuffer(input: TicketPassInput): Promise<Buffe
       y += line.size;
       continue;
     }
-    const tracking = line.tracking != null ? ` letter-spacing="${line.tracking * 0.05}em"` : '';
-    const weight = line.weight ? ` font-weight="${line.weight}"` : '';
+    const tracking = line.tracking != null ? ` letter-spacing="${line.tracking * 0.04}em"` : '';
     textSpans.push(
-      `<text x="${PAD}" y="${y + line.size}" fill="${line.color}" font-size="${line.size}"${weight}${tracking} font-family="SabagiroPass, Arial, Helvetica, sans-serif">${esc(line.text)}</text>`,
+      `<text x="${PAD}" y="${y + line.size}" fill="${line.color}" font-size="${line.size}"${tracking} font-family="${PASS_FONT_FAMILY}, Arial, Helvetica, sans-serif">${esc(line.text)}</text>`,
     );
-    y += line.size + (line.size > 20 ? 10 : 8);
+    y += line.size + (line.size > 24 ? 10 : 8);
   }
 
   const height = Math.max(y + PAD, qrTop + QR_SIZE + 200);
-  const fontPath = path.join(process.cwd(), 'public/fonts/BankGothic-Md.ttf');
-  const fontUrl = `file://${fontPath.split(path.sep).join('/')}`;
   const qrLeft = Math.round((W - QR_SIZE) / 2);
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${W}" height="${height}" viewBox="0 0 ${W} ${height}" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <style>
-      @font-face {
-        font-family: 'SabagiroPass';
-        src: url('${esc(fontUrl)}');
-      }
+    <style type="text/css">
+      ${passFontCss()}
     </style>
   </defs>
   <rect width="100%" height="100%" fill="${BG}"/>
