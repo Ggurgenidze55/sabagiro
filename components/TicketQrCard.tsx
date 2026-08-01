@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { isSabagiroAppShell } from '@/lib/app-shell';
 import { canUseAppleWalletClient } from '@/lib/apple-wallet-device';
 import { canUseGoogleWalletClient } from '@/lib/google-wallet-device';
-import { canNativeSaveImageToPhotos, nativeSaveImageToPhotos } from '@/lib/native-bridge';
 
 type TicketQrCardProps = {
   ticketId: string;
@@ -251,11 +250,6 @@ export function TicketQrCard({
         blob = await (await fetch(dataUrl)).blob();
       }
       if (!blob) return;
-
-      if (inNativeApp && canNativeSaveImageToPhotos()) {
-        const saved = await nativeSaveImageToPhotos(blob, filename);
-        if (saved) return;
-      }
 
       // Best web path for Photos: share the PNG file (iOS sheet → Save Image).
       if (mobileSaveUi && (await shareImageFileForPhotos(blob, filename))) {
