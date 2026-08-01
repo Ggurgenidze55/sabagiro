@@ -72,21 +72,31 @@ async function loadPayload() {
   };
 }
 
+function serializeJsonForHtmlScript(value) {
+  return JSON.stringify(value)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 async function main() {
   const payload = await loadPayload();
   const json = JSON.stringify(payload);
+  const safeEmbed = serializeJsonForHtmlScript(payload);
 
   writeFileSync(snapshotPath, `${json}\n`, 'utf8');
   console.log(`[homepage-events] wrote ${snapshotPath} (${payload.events.length} events)`);
 
   const embedJson = (html) => {
     if (html.includes(marker)) {
-      return html.replace(marker, json);
+      return html.replace(marker, safeEmbed);
     }
     const inlinePattern =
       /(<script type="application\/json" id="homepage-events-data">)[\s\S]*?(<\/script>)/;
     if (inlinePattern.test(html)) {
-      return html.replace(inlinePattern, `$1${json}$2`);
+      return html.replace(inlinePattern, `$1${safeEmbed}$2`);
     }
     return null;
   };

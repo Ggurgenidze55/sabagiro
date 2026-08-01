@@ -141,7 +141,12 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
 
     const jwtRole = typeof payload.role === 'string' ? payload.role : null;
     if (jwtRole !== user.role) {
-      await setSessionCookie(toSessionUser(user));
+      try {
+        // Allowed in Route Handlers / Server Actions; RSC render may reject cookie writes.
+        await setSessionCookie(toSessionUser(user));
+      } catch {
+        // Keep the DB-backed session so a role change does not log the user out.
+      }
     }
 
     return user;

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { NextResponse } from 'next/server';
 import { buildAnalyticsHeadHtml, buildHomepageSeoHeadHtml, isNativeAppRequest } from '@/lib/analytics';
 import { getHomepageEventsPayload } from '@/lib/homepage-events';
+import { serializeJsonForHtmlScript } from '@/lib/html-json';
 
 const INLINE_EVENTS_PATTERN =
   /(<script type="application\/json" id="homepage-events-data">)[\s\S]*?(<\/script>)/;
@@ -14,7 +15,10 @@ export async function GET(request: Request) {
 
   try {
     const payload = await getHomepageEventsPayload();
-    html = html.replace(INLINE_EVENTS_PATTERN, `$1${JSON.stringify(payload)}$2`);
+    html = html.replace(
+      INLINE_EVENTS_PATTERN,
+      `$1${serializeJsonForHtmlScript(payload)}$2`,
+    );
   } catch (e) {
     console.error('[homepage] live events inject failed', e);
   }
