@@ -169,7 +169,7 @@ export async function sendTicketEmail(payload: {
     ticketPassPngBase64(passInput),
   ]);
   const qrFilename = `sabagiro-ticket-${ticket.id.slice(-8)}.png`;
-  const qrDownloadUrl = siteUrl(`/api/scan/${ticket.qrToken}/qr?download=1`);
+  const qrDownloadUrl = siteUrl(`/api/scan/${ticket.qrToken}/qr?download=1&v=3`);
   const msg = ticketPurchaseEmail({
     ticketId: ticket.id,
     productName: ticket.productName,

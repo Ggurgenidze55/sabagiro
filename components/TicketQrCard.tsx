@@ -143,15 +143,36 @@ export function TicketQrCard({
     }
   }, [appleWalletHref, inNativeApp]);
 
-  const downloadQr = useCallback(() => {
+  const downloadQr = useCallback(async () => {
+    const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
+
     if (qrToken) {
-      window.location.href = `/api/scan/${qrToken}/qr?download=1`;
-      return;
+      // Bust iOS/WebView caches that still held the old tofu-font PNGs.
+      const url = `/api/scan/${qrToken}/qr?download=1&v=3&t=${Date.now()}`;
+      try {
+        const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
+        if (!res.ok) throw new Error('download failed');
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        link.rel = 'noopener';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+        return;
+      } catch {
+        window.location.href = url;
+        return;
+      }
     }
+
     if (!dataUrl) return;
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
+    link.download = filename;
     link.click();
   }, [qrToken, dataUrl, ticketId]);
 

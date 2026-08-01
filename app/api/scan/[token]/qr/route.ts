@@ -76,7 +76,10 @@ export async function GET(request: Request, { params }: Params) {
   return new NextResponse(new Uint8Array(png), {
     headers: {
       'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=3600',
+      // Ticket pass used to cache broken font renders in iOS WebView — never cache.
+      'Cache-Control': 'private, no-cache, no-store, must-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
       'Content-Disposition': download
         ? `attachment; filename="${filename}"`
         : `inline; filename="${filename}"`,
