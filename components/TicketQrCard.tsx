@@ -210,7 +210,7 @@ export function TicketQrCard({
       }
       if (!blob) return;
 
-      // Optional native bridge (only if already in a build that has it).
+      // Optional native Photos bridge (only in newer app builds).
       if (inNativeApp && canNativeSaveImageToPhotos()) {
         const saved = await nativeSaveImageToPhotos(blob, filename);
         if (saved) return;
@@ -220,23 +220,23 @@ export function TicketQrCard({
       if (android) {
         if (await sharePngFile(blob, filename)) return;
         if (passUrl) {
-          // Attachment → WebView DownloadListener → Downloads / gallery.
           window.location.assign(passUrl);
           return;
         }
         setPassPreviewBlob(blob);
         setPassPreviewUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
+          if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
           return URL.createObjectURL(blob!);
         });
         return;
       }
 
-      // iPhone: long-press image → Add to Photos.
+      // iPhone WKWebView: blob: images only offer Share. Use https URL so "Add to Photos" appears.
       if (mobileSaveUi) {
-        setPassPreviewBlob(blob);
+        setPassPreviewBlob(null);
         setPassPreviewUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
+          if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+          if (passUrl) return `${passUrl}&inline=1`;
           return URL.createObjectURL(blob!);
         });
         return;
@@ -383,7 +383,9 @@ export function TicketQrCard({
                 </>
               ) : (
                 <>
-                  Long-press the image → <strong>Add to Photos</strong>
+                  Press and hold the image → choose <strong>Add to Photos</strong>
+                  <br />
+                  (not Share)
                 </>
               )}
             </p>
