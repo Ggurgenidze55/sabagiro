@@ -51,7 +51,7 @@ const defaultFormBase = {
   dateLabel: '',
   eventDate: '',
   doorsOpen: '',
-  accent: '#f9c108',
+  accent: '#f7e892',
   priceGel: 45,
   isFreeEntry: false,
   isFeatured: false,

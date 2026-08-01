@@ -33,7 +33,7 @@ const merchProducts: Product[] = [
     description: 'Heavy cotton · Screen print logo · Unisex',
     priceGel: 65,
     type: 'merch',
-    accent: '#f9c108',
+    accent: '#f7e892',
     tag: 'MERCH',
   },
   {

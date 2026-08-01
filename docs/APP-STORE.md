@@ -87,23 +87,21 @@ npm run seed:appstore-review
 
 Re-run seed if the review account was deleted during testing.
 
-## iOS Build 8 — Wallet fix (version 1.0.2)
+## iOS Build 9 — Branding (version 1.0.3)
 
-Version **1.0.1** did not open Apple Wallet from the app — WKWebView does not present `.pkpass` like Safari. **Build 8** fetches the pass with session cookies and opens **PassKit** (`PKAddPassesViewController`).
+New brand color `#f7e892` and updated App Icon (black + mark).
 
 ```bash
 cd ios && xcodegen generate && ./archive.sh
 ```
 
-Xcode → **Organizer** → **Distribute App** → App Store Connect.
-
-App Store Connect → **+ Version** → **1.0.2** → select **Build 8** → **Submit for Review**.
+Xcode → **Organizer** → **Distribute App** → App Store Connect → **1.0.3** → Build **9** → **Submit for Review**.
 
 Review notes:
 
 ```
-Wallet: Add to Apple Wallet in the native app uses PassKit (PKAddPassesViewController) with the same /api/tickets/{id}/wallet endpoint and login cookies as Safari.
-Website updates load from sabagiro.ge — no extra native changes required.
+Branding update: new app icon and accent color.
+Wallet: native PassKit add-to-wallet (Build 8+).
 Demo: appstore.review@sabagiro.ge / SabagiroReview2026!
 Account deletion: Account → Settings → Delete account.
 ```

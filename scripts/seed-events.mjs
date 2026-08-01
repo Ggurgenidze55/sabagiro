@@ -11,7 +11,7 @@ const events = [
     dayLabel: 'SAT',
     dateLabel: '31 MAY',
     eventDate: '2025-05-31',
-    accent: '#f9c108',
+    accent: '#f7e892',
     priceGel: 45,
     isFeatured: true,
     sortOrder: 0,

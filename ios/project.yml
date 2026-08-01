@@ -7,8 +7,8 @@ options:
   groupSortPosition: top
 settings:
   base:
-    MARKETING_VERSION: "1.0.2"
-    CURRENT_PROJECT_VERSION: "8"
+    MARKETING_VERSION: "1.0.3"
+    CURRENT_PROJECT_VERSION: "9"
     SWIFT_VERSION: "5.0"
     # Set your Apple ID team in Xcode → Signing (do not commit personal team id)
     DEVELOPMENT_TEAM: "R85UAY2KY6"

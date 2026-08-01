@@ -126,7 +126,7 @@ export function FreeTicketGenerator({
           </Link>
         </p>
       ) : null}
-      <p className="page-lead" style={{ marginBottom: '1rem', color: 'var(--acid, #f9c108)' }}>
+      <p className="page-lead" style={{ marginBottom: '1rem', color: 'var(--acid, #f7e892)' }}>
         {selectedSlug
           ? `Remaining for selected event: ${remainingForSelected} / ${quota}`
           : `Remaining: ${quota} / ${quota}`}
