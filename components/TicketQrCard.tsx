@@ -28,19 +28,32 @@ function prefersMobileSaveUi() {
   return 'ontouchstart' in window || (navigator.maxTouchPoints ?? 0) > 0;
 }
 
-async function sharePngFile(blob: Blob, filename: string): Promise<boolean> {
+function publicTicketUrl(qrToken: string) {
+  if (typeof window === 'undefined') return `/t/${encodeURIComponent(qrToken)}`;
+  return `${window.location.origin}/t/${encodeURIComponent(qrToken)}`;
+}
+
+/** Share a clean https ticket link (never blob:) — opens for guests without login. */
+async function shareTicketLink(qrToken: string, title: string): Promise<'shared' | 'copied' | 'failed'> {
+  const url = publicTicketUrl(qrToken);
   const nav = typeof navigator !== 'undefined' ? navigator : null;
-  if (!nav || typeof nav.share !== 'function') return false;
-  try {
-    const file = new File([blob], filename, { type: 'image/png' });
-    const payload: ShareData = { files: [file], title: 'Sabagiro ticket' };
-    if (nav.canShare && !nav.canShare(payload)) return false;
-    await nav.share(payload);
-    return true;
-  } catch (e) {
-    if (e instanceof Error && e.name === 'AbortError') return true;
-    return false;
+  if (nav && typeof nav.share === 'function') {
+    try {
+      await nav.share({ title, text: title, url });
+      return 'shared';
+    } catch (e) {
+      if (e instanceof Error && e.name === 'AbortError') return 'shared';
+    }
   }
+  try {
+    if (nav?.clipboard?.writeText) {
+      await nav.clipboard.writeText(url);
+      return 'copied';
+    }
+  } catch {
+    /* ignore */
+  }
+  return 'failed';
 }
 
 export function TicketQrCard({
@@ -66,6 +79,8 @@ export function TicketQrCard({
   const [appleWalletBusy, setAppleWalletBusy] = useState(false);
   const [appleWalletError, setAppleWalletError] = useState('');
   const [downloadBusy, setDownloadBusy] = useState(false);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareNote, setShareNote] = useState('');
   const [passPreviewUrl, setPassPreviewUrl] = useState<string | null>(null);
   const [passPreviewBlob, setPassPreviewBlob] = useState<Blob | null>(null);
   const [error, setError] = useState('');
@@ -216,9 +231,8 @@ export function TicketQrCard({
         if (saved) return;
       }
 
-      // Android WebView: no long-press save menu — share, else download, else sheet button.
+      // Android WebView: no long-press save — HTTP download (or sheet with Save).
       if (android) {
-        if (await sharePngFile(blob, filename)) return;
         if (passUrl) {
           window.location.assign(passUrl);
           return;
@@ -259,22 +273,29 @@ export function TicketQrCard({
   }, [qrToken, dataUrl, ticketId, inNativeApp, android, mobileSaveUi]);
 
   const saveAndroidFromSheet = useCallback(async () => {
-    if (!passPreviewBlob) return;
-    const filename = `sabagiro-ticket-${ticketId.slice(-8)}.png`;
     setDownloadBusy(true);
     try {
-      if (await sharePngFile(passPreviewBlob, filename)) {
-        closePassPreview();
-        return;
-      }
       if (qrToken) {
-        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=7&t=${Date.now()}`);
+        window.location.assign(`/api/scan/${qrToken}/qr?download=1&v=8&t=${Date.now()}`);
         closePassPreview();
       }
     } finally {
       setDownloadBusy(false);
     }
-  }, [passPreviewBlob, ticketId, qrToken, closePassPreview]);
+  }, [qrToken, closePassPreview]);
+
+  const shareTicket = useCallback(async () => {
+    if (!qrToken) return;
+    setShareBusy(true);
+    setShareNote('');
+    try {
+      const result = await shareTicketLink(qrToken, `${productName} — Sabagiro ticket`);
+      if (result === 'copied') setShareNote('Link copied');
+      if (result === 'failed') setShareNote('Could not share link');
+    } finally {
+      setShareBusy(false);
+    }
+  }, [qrToken, productName]);
 
   return (
     <article
@@ -332,6 +353,17 @@ export function TicketQrCard({
                       : 'Download ticket'}
                 </button>
               ) : null}
+              {qrToken ? (
+                <button
+                  type="button"
+                  className="wallet-badge"
+                  onClick={shareTicket}
+                  disabled={shareBusy}
+                >
+                  {shareBusy ? 'Sharing…' : 'Share ticket link'}
+                </button>
+              ) : null}
+              {shareNote ? <p className="ticket-card__meta">{shareNote}</p> : null}
               {showAppleWallet ? (
                 <button
                   type="button"

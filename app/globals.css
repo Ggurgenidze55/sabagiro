@@ -1422,6 +1422,28 @@ html.sabagiro-in-app .payment-page {
   word-break: break-all;
 }
 
+.public-ticket {
+  margin: 1.25rem 0 0;
+  max-width: 26rem;
+}
+
+.public-ticket__img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid rgba(249, 193, 8, 0.35);
+  background: #000;
+}
+
+.public-ticket__caption {
+  margin: 0.75rem 0 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(232, 224, 216, 0.45);
+  line-height: 1.5;
+}
+
 /* Phone / in-app: long-press image → Save to Photos (no native update). */
 .ticket-save-sheet {
   position: fixed;
