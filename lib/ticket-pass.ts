@@ -1,8 +1,7 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import opentype from 'opentype.js';
 import sharp from 'sharp';
 import { qrPngBuffer } from '@/lib/qr';
+import { BEBAS_NEUE_REGULAR_TTF_BASE64 } from '@/lib/ticket-pass-font-data';
 
 const W = 720;
 const PAD = 40;
@@ -12,15 +11,12 @@ const BG = '#0a0a0a';
 const MUTED = '#8a827a';
 const TEXT = '#e8e0d8';
 
-/** Bebas Neue — glyphs converted to SVG paths so PNG needs no runtime font. */
-const PASS_FONT_FILE = 'BebasNeue-Regular.ttf';
-
 let cachedFont: opentype.Font | null = null;
 
 function getPassFont(): opentype.Font {
   if (cachedFont) return cachedFont;
-  const fontPath = path.join(process.cwd(), 'public/fonts', PASS_FONT_FILE);
-  const raw = readFileSync(fontPath);
+  // Embedded TTF → SVG paths. No filesystem / @font-face (breaks on Vercel + phones).
+  const raw = Buffer.from(BEBAS_NEUE_REGULAR_TTF_BASE64, 'base64');
   cachedFont = opentype.parse(
     raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.byteLength),
   );
