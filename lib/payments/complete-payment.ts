@@ -2,7 +2,7 @@ import { prisma } from '@/lib/db';
 import { fulfillPaidOrder, markOrderFailed } from '@/lib/payments/fulfill-order';
 import { isPaymentsTestMode } from '@/lib/payments/config';
 import { FlittClient } from '@/lib/payments/flitt/client';
-import { flittStatusToOutcome } from '@/lib/payments/flitt/callback';
+import { flittStatusToOutcome, isFlittTestApproval } from '@/lib/payments/flitt/callback';
 
 export async function completePaymentSuccess(paymentId: string, rawCallback?: unknown) {
   const payment = await prisma.payment.findUnique({
@@ -39,6 +39,18 @@ export async function completePaymentFailed(paymentId: string, rawCallback?: unk
   await markOrderFailed(payment.orderId);
 }
 
+/**
+ * Live Flitt must not fulfill onboarding/test approvals (is_test: true) —
+ * those show as Approved in portal but do not charge the card.
+ */
+function assertLiveCharge(raw: unknown) {
+  if (isPaymentsTestMode()) return;
+  if (!raw || typeof raw !== 'object') return;
+  if (isFlittTestApproval(raw as Record<string, unknown>)) {
+    throw new Error('FLITT_TEST_PAYMENT');
+  }
+}
+
 export async function syncFlittPaymentForOrder(orderId: string) {
   if (isPaymentsTestMode()) return null;
 
@@ -52,8 +64,17 @@ export async function syncFlittPaymentForOrder(orderId: string) {
   const { status, raw } = await client.getOrderStatus(orderId);
 
   if (status === 'succeeded') {
-    await completePaymentSuccess(payment.id, raw);
-    return 'succeeded';
+    try {
+      assertLiveCharge(raw);
+      await completePaymentSuccess(payment.id, raw);
+      return 'succeeded';
+    } catch (e) {
+      if (e instanceof Error && e.message === 'FLITT_TEST_PAYMENT') {
+        await completePaymentFailed(payment.id, raw);
+        return 'failed';
+      }
+      throw e;
+    }
   }
   if (status === 'failed') {
     await completePaymentFailed(payment.id, raw);
@@ -82,7 +103,16 @@ export async function handleFlittCallback(payload: Record<string, unknown>) {
   if (!payment) return null;
 
   if (outcome === 'succeeded') {
-    await completePaymentSuccess(payment.id, payload);
+    try {
+      assertLiveCharge(payload);
+      await completePaymentSuccess(payment.id, payload);
+    } catch (e) {
+      if (e instanceof Error && e.message === 'FLITT_TEST_PAYMENT') {
+        await completePaymentFailed(payment.id, payload);
+        return payment.orderId;
+      }
+      throw e;
+    }
     return payment.orderId;
   }
   if (outcome === 'failed') {

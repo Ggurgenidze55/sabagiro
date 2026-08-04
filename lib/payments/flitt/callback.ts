@@ -47,3 +47,21 @@ export function flittStatusToOutcome(orderStatus: string): 'succeeded' | 'failed
   if (FLITT_FAILED_STATUSES.has(s)) return 'failed';
   return 'pending';
 }
+
+/** Flitt Pending Onboarding marks approvals with additional_info.is_test — no real charge. */
+export function isFlittTestApproval(payload: Record<string, unknown>): boolean {
+  const raw = payload.additional_info;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const info = JSON.parse(raw) as { is_test?: boolean | string | number };
+      return info.is_test === true || info.is_test === 'true' || info.is_test === 1;
+    } catch {
+      return false;
+    }
+  }
+  if (raw && typeof raw === 'object') {
+    const info = raw as { is_test?: boolean | string | number };
+    return info.is_test === true || info.is_test === 'true' || info.is_test === 1;
+  }
+  return false;
+}

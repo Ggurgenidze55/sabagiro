@@ -29,6 +29,9 @@ Optional override:
 
 **Without `FLITT_MERCHANT_ID` + `FLITT_SECRET_KEY`** → test simulator (no real charge).
 
+While Flitt merchant status is **Pending Onboarding**, approvals come back with `additional_info.is_test: true`
+(“Test Approved” in the portal). Sabagiro **does not issue tickets** for those — wait until Flitt activates live charging.
+
 ## Test mode (Flitt docs)
 
 Use test merchant `1549901` and secret `test` on `https://pay.flitt.com`.

@@ -95,7 +95,10 @@ function ReturnInner() {
       <main className="payment-page">
         <div className="payment-card payment-card--error">
           <h1>Payment not completed</h1>
-          <p>No tickets were issued. You can try again from the event page.</p>
+          <p>
+            No tickets were issued. If Flitt is still in test / onboarding mode, the card is not charged
+            and checkout cannot finish. Complete merchant activation in Flitt, then try again.
+          </p>
           <Link href="/events" className="btn btn--ghost">
             Browse events
           </Link>
