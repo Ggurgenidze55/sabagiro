@@ -14,10 +14,11 @@ Sabagiro uses [Flitt](https://docs.flitt.com/) hosted checkout (`POST /api/check
 
 | Variable | Example | Notes |
 |----------|---------|--------|
-| `FLITT_MERCHANT_ID` | `1549901` | Merchant portal → Technical settings |
-| `FLITT_SECRET_KEY` | `test` or live secret | Payment secret key |
+| `FLITT_MERCHANT_ID` | from Flitt portal | Merchant ID (Basic profile) |
+| `FLITT_SECRET_KEY` | from Flitt portal | **Payment key** — not the credit private key |
 | `FLITT_API_ORIGIN` | `https://pay.flitt.com` | Optional, default shown |
 | `SABAGIRO_PUBLIC_URL` | `https://www.sabagiro.ge` | Return + callback URLs |
+| `SABAGIRO_PAYMENTS_TEST_MODE` | `false` | Set `true` only for local simulator |
 
 Optional override:
 
