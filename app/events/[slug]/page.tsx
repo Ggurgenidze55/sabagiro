@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { EventTicketButton } from '@/components/EventTicketButton';
+import { PaymentBrandLogos } from '@/components/PaymentBrandLogos';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import {
@@ -25,6 +26,7 @@ import {
 import { canPurchaseTickets } from '@/lib/verification';
 import { isProfileCompleteForTicket } from '@/lib/user-ticket-holder';
 import {
+  getEventPublicDescription,
   getPublicEventPriceDisplay,
   getPublicEventPriceLabel,
   ONLINE_INVITATION_LABEL,
@@ -117,7 +119,12 @@ export default async function EventPage({ params }: PageProps) {
     existingPurchased > 0;
   const freeEventNotice = isFreeEntry ? getFreeTicketEventNotice(user, eventMeta) : null;
   const quotaNotice = getFreeTicketQuotaNotice(user, eventMeta, freeTicketsRemaining);
-  const aboutText = product.about?.trim() || product.description;
+  const aboutText = getEventPublicDescription({
+    name: product.name,
+    about: product.about,
+    description: product.description,
+    lineup: product.lineup,
+  });
   const priceDisplay = getPublicEventPriceDisplay({
     isLoggedIn: Boolean(user),
     isFreeEntry,
@@ -147,15 +154,13 @@ export default async function EventPage({ params }: PageProps) {
           </div>
         ) : null}
 
-        {aboutText || product.lineup ? (
-          <section className="event-page__about" aria-label="About this event">
-            <h2 className="event-page__section-label">About</h2>
-            {product.lineup ? (
-              <p className="event-page__about-lineup">{product.lineup}</p>
-            ) : null}
-            {aboutText ? <p className="event-about">{aboutText}</p> : null}
-          </section>
-        ) : null}
+        <section className="event-page__about" aria-label="About this event">
+          <h2 className="event-page__section-label">About</h2>
+          {product.lineup ? (
+            <p className="event-page__about-lineup">{product.lineup}</p>
+          ) : null}
+          <p className="event-about">{aboutText}</p>
+        </section>
 
         {priceDisplay ? (
           <div className="event-page__price-card">
@@ -163,6 +168,9 @@ export default async function EventPage({ params }: PageProps) {
               {getPublicEventPriceLabel(isFreeEntry, showInvitationPrice)}
             </span>
             <p className="event-page__price">{priceDisplay}</p>
+            {!isFreeEntry && !showInvitationPrice ? (
+              <PaymentBrandLogos className="payment-brands--event" />
+            ) : null}
           </div>
         ) : null}
 

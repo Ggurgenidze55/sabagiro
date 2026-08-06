@@ -3,6 +3,7 @@ import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
 import {
+  getEventPublicDescription,
   getPublicEventCtaLabel,
   getPublicEventPriceDisplay,
 } from '@/lib/event-price-display';
@@ -60,9 +61,14 @@ export default async function EventsPage() {
               {product.lineup ? <p className="product-card__lineup">{product.lineup}</p> : null}
               {doorsOpenLabel ? <p className="product-card__doors-open">{doorsOpenLabel}</p> : null}
               {product.venueTag ? <p className="product-card__venue-tag">{product.venueTag}</p> : null}
-              {!product.lineup && !product.venueTag ? (
-                <p className="product-card__meta">{product.description}</p>
-              ) : null}
+              <p className="product-card__meta">
+                {getEventPublicDescription({
+                  name: product.name,
+                  about: product.about,
+                  description: product.description,
+                  lineup: product.lineup,
+                })}
+              </p>
               {priceLabel ? <p className="product-card__price">{priceLabel}</p> : null}
               <Link href={`/events/${product.slug}`} className="btn btn--ghost">
                 {getPublicEventCtaLabel({

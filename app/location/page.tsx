@@ -43,6 +43,14 @@ export default async function LocationPage() {
           </p>
           <ul className="location-list">
             <li>
+              <span className="location-list__label">Address</span>
+              <span>
+                Leo Kvachadze St, Lisi
+                <br />
+                Saburtalo, Tbilisi 0176
+              </span>
+            </li>
+            <li>
               <span className="location-list__label">City</span>
               <span>Tbilisi</span>
             </li>

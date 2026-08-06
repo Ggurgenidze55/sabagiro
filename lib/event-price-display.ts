@@ -1,4 +1,4 @@
-import { formatGel } from '@/lib/format-gel';
+import { formatGelWithCode } from '@/lib/format-gel';
 
 export const ONLINE_INVITATION_LABEL = 'Online invitation';
 
@@ -10,7 +10,10 @@ type PublicEventPriceOptions = {
   ticketsRemaining?: number;
 };
 
-/** Public event cards: hide price when logged out; invitation users / free-entry → invitation label. */
+/**
+ * Public event cards must show GEL prices (Flitt / card-scheme).
+ * Invitation label only when the viewer actually has complimentary access.
+ */
 export function getPublicEventPriceDisplay({
   isLoggedIn,
   isFreeEntry,
@@ -18,10 +21,13 @@ export function getPublicEventPriceDisplay({
   priceGel,
   ticketsRemaining,
 }: PublicEventPriceOptions): string | null {
-  if (!isLoggedIn) return null;
-  if (isFreeEntry || hasFreeTicketAccess) return ONLINE_INVITATION_LABEL;
   if (ticketsRemaining === 0) return 'Sold out';
-  return formatGel(priceGel);
+  if (hasFreeTicketAccess) return ONLINE_INVITATION_LABEL;
+  if (isFreeEntry) {
+    if (isLoggedIn) return ONLINE_INVITATION_LABEL;
+    return '0 ₾ (GEL)';
+  }
+  return formatGelWithCode(priceGel);
 }
 
 export function getPublicEventCtaLabel(options: {
@@ -36,4 +42,20 @@ export function getPublicEventCtaLabel(options: {
 
 export function getPublicEventPriceLabel(isFreeEntry: boolean, hasFreeTicketAccess = false): string {
   return isFreeEntry || hasFreeTicketAccess ? 'Invitation' : 'Ticket';
+}
+
+/** Always-visible product blurb for listings and Flitt product description checks. */
+export function getEventPublicDescription(opts: {
+  name: string;
+  about?: string | null;
+  description?: string | null;
+  lineup?: string | null;
+}): string {
+  const about = opts.about?.trim();
+  if (about) return about;
+  const lineup = opts.lineup?.trim();
+  if (lineup) return lineup;
+  const description = opts.description?.trim();
+  if (description) return description;
+  return `${opts.name} — Sabagiro event ticket. Entry in Tbilisi. Price in GEL (₾).`;
 }

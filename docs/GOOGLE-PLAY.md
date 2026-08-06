@@ -5,7 +5,7 @@ WebView shell for **https://www.sabagiro.ge** — tickets, login, cart, Flitt pa
 | | |
 |--|--|
 | **Package** | `ge.sabagiro.app` |
-| **Privacy** | https://www.sabagiro.ge/rules |
+| **Privacy** | https://www.sabagiro.ge/privacy |
 | **Demo login** | `appstore.review@sabagiro.ge` / `SabagiroReview2026!` |
 
 ---
@@ -65,7 +65,7 @@ File: `android/app/build/outputs/bundle/release/app-release.aab`
 | **Feature graphic** | 1024×500 (club branding) |
 | **Category** | Events or Entertainment |
 | **Contact email** | info@sabagiro.ge |
-| **Privacy policy URL** | https://www.sabagiro.ge/rules |
+| **Privacy policy URL** | https://www.sabagiro.ge/privacy |
 
 ---
 

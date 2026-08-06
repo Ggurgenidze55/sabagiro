@@ -457,6 +457,55 @@ html.sabagiro-in-app .payment-page {
   opacity: 0.65;
 }
 
+.footer__legal {
+  margin: 0;
+  max-width: 36rem;
+  justify-self: center;
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  color: rgba(232, 224, 216, 0.55);
+}
+
+.footer__legal a {
+  color: rgba(232, 224, 216, 0.75);
+  text-decoration: none;
+}
+
+.footer__legal a:hover {
+  color: var(--acid);
+}
+
+.payment-brands {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.payment-brands--footer,
+.payment-brands--page,
+.payment-brands--contact,
+.payment-brands--event {
+  margin-top: 0.75rem;
+}
+
+.payment-brands--footer {
+  justify-self: center;
+  justify-content: center;
+}
+
+.payment-brands__item {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.payment-brands__item svg {
+  display: block;
+  border: 1px solid rgba(249, 193, 8, 0.25);
+}
+
 .footer__nav {
   justify-self: center;
   display: flex;
