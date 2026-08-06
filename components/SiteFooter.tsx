@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { PaymentBrandLogos } from '@/components/PaymentBrandLogos';
-import { SiteFooterBrand } from '@/components/SiteFooterBrand';
 import {
   COMPANY_EMAIL,
   COMPANY_LEGAL_NAME_KA,
@@ -10,13 +9,6 @@ import {
   getCompanyPhoneHref,
 } from '@/lib/company';
 import { FOOTER_PAGE_LINKS } from '@/lib/footer-links';
-import { INSTAGRAM_URL } from '@/lib/social';
-
-const SOCIAL_LINKS = [
-  { href: INSTAGRAM_URL, label: 'Instagram' },
-  { href: 'https://ra.co', label: 'RA' },
-  { href: 'https://soundcloud.com', label: 'SoundCloud' },
-] as const;
 
 export function SiteFooter() {
   const phone = getCompanyPhone();
@@ -26,7 +18,6 @@ export function SiteFooter() {
 
   return (
     <footer className="footer" id="contact">
-      <SiteFooterBrand />
       <p className="footer__legal">
         {COMPANY_LEGAL_NAME_KA}
         {idCode ? ` · ID ${idCode}` : ''}
@@ -49,15 +40,6 @@ export function SiteFooter() {
         ))}
       </nav>
       <PaymentBrandLogos className="payment-brands--footer" />
-      <ul className="social">
-        {SOCIAL_LINKS.map((item) => (
-          <li key={item.label}>
-            <a href={item.href} target="_blank" rel="noopener noreferrer">
-              {item.label}
-            </a>
-          </li>
-        ))}
-      </ul>
     </footer>
   );
 }
