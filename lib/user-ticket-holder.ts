@@ -1,3 +1,5 @@
+import { isValidPersonalId } from '@/lib/personal-id';
+
 export type TicketHolderFields = {
   firstName: string;
   lastName: string;
@@ -29,11 +31,11 @@ export function isProfileCompleteForTicket(user: UserWithHolderFields): boolean 
   return (
     holder.firstName.length >= 2 &&
     holder.lastName.length >= 2 &&
-    /^\d{11}$/.test(holder.personalId) &&
+    isValidPersonalId(holder.personalId) &&
     holder.email.includes('@') &&
     holder.phone.length >= 9
   );
 }
 
 export const PROFILE_INCOMPLETE_MESSAGE =
-  'Complete your profile (name, personal ID, email, phone) in Settings before getting a ticket.';
+  'Complete your profile (name, ID/passport number, email, phone) in Settings before getting a ticket.';

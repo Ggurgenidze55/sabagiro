@@ -1,5 +1,10 @@
 import { z, type ZodError } from 'zod';
 import { CONTACT_TOPICS, normalizeContactTopic } from '@/lib/contact-topic';
+import {
+  isValidPersonalId,
+  normalizePersonalId,
+  PERSONAL_ID_INVALID_MESSAGE,
+} from '@/lib/personal-id';
 
 /** Zod `.optional()` still validates `""` — treat blank as missing. */
 function emptyToUndefined(val: unknown) {
@@ -22,6 +27,9 @@ export function formatValidationError(e: unknown): string {
         if (field === 'slug') {
           return 'Leave slug empty to auto-generate from title, or enter at least 2 latin characters.';
         }
+        if (field === 'personalId') {
+          return issue.message;
+        }
         return `${field}: ${issue.message}`;
       })
       .join(' · ');
@@ -32,7 +40,8 @@ export function formatValidationError(e: unknown): string {
 export const personalIdSchema = z
   .string()
   .trim()
-  .regex(/^\d{11}$/, 'Personal ID must be 11 digits');
+  .transform(normalizePersonalId)
+  .refine(isValidPersonalId, { message: PERSONAL_ID_INVALID_MESSAGE });
 
 const socialUrlValueSchema = z
   .string()

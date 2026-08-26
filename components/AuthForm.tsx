@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { canAccessAdminPanel, staffAdminLandingPath } from '@/lib/staff-roles';
+import { PERSONAL_ID_HTML_PATTERN, PERSONAL_ID_LABEL, PERSONAL_ID_MAX, PERSONAL_ID_MIN } from '@/lib/personal-id';
 
 type Mode = 'login' | 'register';
 type SocialPlatform = 'facebook' | 'instagram' | 'linkedin' | '';
@@ -89,8 +90,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <input name="lastName" required minLength={2} />
           </label>
           <label className="form-field">
-            <span>Personal ID (11 digits)</span>
-            <input name="personalId" required pattern="\d{11}" inputMode="numeric" />
+            <span>{PERSONAL_ID_LABEL}</span>
+            <input
+              name="personalId"
+              required
+              minLength={PERSONAL_ID_MIN}
+              maxLength={PERSONAL_ID_MAX}
+              pattern={PERSONAL_ID_HTML_PATTERN}
+              autoCapitalize="characters"
+              autoComplete="off"
+              placeholder="Passport or national ID"
+            />
           </label>
           <fieldset className="form-fieldset">
             <legend className="form-fieldset__legend">Social verification</legend>

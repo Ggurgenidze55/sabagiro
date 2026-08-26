@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ticketSuccessUrl } from '@/lib/ticket-success-url';
+import { PERSONAL_ID_HTML_PATTERN, PERSONAL_ID_LABEL, PERSONAL_ID_MAX, PERSONAL_ID_MIN } from '@/lib/personal-id';
 
 type HolderDraft = {
   firstName: string;
@@ -217,12 +218,15 @@ export function EventTicketButton({
             </label>
             {!isFreeEntry ? (
               <label className="form-field">
-                <span>Personal ID</span>
+                <span>{PERSONAL_ID_LABEL}</span>
                 <input
                   value={holder.personalId}
                   onChange={(e) => updateHolderField('personalId', e.target.value)}
-                  pattern="\d{11}"
-                  inputMode="numeric"
+                  minLength={PERSONAL_ID_MIN}
+                  maxLength={PERSONAL_ID_MAX}
+                  pattern={PERSONAL_ID_HTML_PATTERN}
+                  autoCapitalize="characters"
+                  autoComplete="off"
                   required
                 />
               </label>
