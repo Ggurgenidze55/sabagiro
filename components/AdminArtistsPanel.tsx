@@ -2,6 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import { ResponsiveTable } from '@/components/ResponsiveTable';
+import {
+  PERSONAL_ID_HTML_PATTERN,
+  PERSONAL_ID_LABEL,
+  PERSONAL_ID_MAX,
+  PERSONAL_ID_MIN,
+} from '@/lib/personal-id';
 
 export type AdminArtistRow = {
   id: string;
@@ -195,12 +201,15 @@ export function AdminArtistsPanel({ artists: initial }: { artists: AdminArtistRo
             />
           </label>
           <label className="form-field">
-            <span>Personal ID</span>
+            <span>{PERSONAL_ID_LABEL}</span>
             <input
               value={form.personalId}
               onChange={(e) => setForm({ ...form, personalId: e.target.value })}
               required
-              pattern="\d{11}"
+              minLength={PERSONAL_ID_MIN}
+              maxLength={PERSONAL_ID_MAX}
+              pattern={PERSONAL_ID_HTML_PATTERN}
+              autoCapitalize="characters"
             />
           </label>
           <label className="form-field">

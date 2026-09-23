@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { AdminTicketStatsPanel } from '@/components/AdminTicketStatsPanel';
 import { getSessionUser } from '@/lib/auth';
+import { getAdminTicketStats } from '@/lib/admin-ticket-stats';
 import { prisma } from '@/lib/db';
 import { canUseFullAdminTools, staffAdminLandingPath } from '@/lib/staff-roles';
 
@@ -15,10 +17,11 @@ export default async function AdminOverviewPage() {
     redirect(staffAdminLandingPath(user.role));
   }
 
-  const [users, tickets, sold] = await Promise.all([
+  const [users, tickets, sold, ticketStats] = await Promise.all([
     prisma.user.count(),
     prisma.ticket.count(),
     prisma.ticket.aggregate({ _sum: { priceGel: true } }),
+    getAdminTicketStats(),
   ]);
 
   return (
@@ -31,7 +34,7 @@ export default async function AdminOverviewPage() {
           <span className="stat-card__value">{users}</span>
         </div>
         <div className="stat-card">
-          <span className="stat-card__label">Tickets sold</span>
+          <span className="stat-card__label">Tickets in DB</span>
           <span className="stat-card__value">{tickets}</span>
         </div>
         <div className="stat-card">
@@ -39,6 +42,9 @@ export default async function AdminOverviewPage() {
           <span className="stat-card__value">{sold._sum.priceGel ?? 0}</span>
         </div>
       </div>
+
+      <AdminTicketStatsPanel stats={ticketStats} />
+
       <div className="cart-actions" style={{ marginTop: '2rem' }}>
         <Link href="/admin/events" className="btn">
           MANAGE EVENTS

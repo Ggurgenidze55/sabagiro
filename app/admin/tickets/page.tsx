@@ -1,5 +1,7 @@
+import { AdminTicketStatsPanel } from '@/components/AdminTicketStatsPanel';
 import { SoldTicketsTable } from '@/components/SoldTicketsTable';
 import { getSessionUser } from '@/lib/auth';
+import { getAdminTicketStats } from '@/lib/admin-ticket-stats';
 import { prisma } from '@/lib/db';
 import { canUseFullAdminTools, staffDeniedRedirectPath } from '@/lib/staff-roles';
 import { redirect } from 'next/navigation';
@@ -15,8 +17,9 @@ export default async function AdminTicketsPage() {
   const user = await getSessionUser();
   if (!user || !canUseFullAdminTools(user.role)) redirect(staffDeniedRedirectPath(user?.role));
 
-  const [totalCount, tickets] = await Promise.all([
+  const [totalCount, ticketStats, tickets] = await Promise.all([
     prisma.ticket.count(),
+    getAdminTicketStats(),
     prisma.ticket.findMany({
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { email: true } } },
@@ -34,6 +37,7 @@ export default async function AdminTicketsPage() {
           : ''}
         . Tickets 4+ days after event are auto-deleted.
       </p>
+      <AdminTicketStatsPanel stats={ticketStats} />
       <SoldTicketsTable
         totalCount={totalCount}
         tickets={tickets.map((t) => ({
