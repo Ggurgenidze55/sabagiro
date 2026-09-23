@@ -30,12 +30,13 @@ function applyCount(stats: TicketKindStats, status: TicketStatus, count: number)
   else if (status === 'CANCELLED') stats.cancelled += count;
 }
 
-export async function getAdminTicketStats(): Promise<AdminTicketStats> {
-  const rows = await prisma.ticket.groupBy({
-    by: ['source', 'status'],
-    _count: { _all: true },
-  });
+type GroupedTicketRow = {
+  source: TicketSource;
+  status: TicketStatus;
+  _count: { _all: number };
+};
 
+function statsFromGroupedRows(rows: GroupedTicketRow[]): AdminTicketStats {
   const paid = emptyKindStats();
   const invite = emptyKindStats();
   const combined = emptyKindStats();
@@ -48,4 +49,14 @@ export async function getAdminTicketStats(): Promise<AdminTicketStats> {
   }
 
   return { paid, invite, combined };
+}
+
+/** Per-event tickets (matched by product slug / event slug). */
+export async function getAdminTicketStatsForEvent(productSlug: string): Promise<AdminTicketStats> {
+  const rows = await prisma.ticket.groupBy({
+    by: ['source', 'status'],
+    where: { productSlug },
+    _count: { _all: true },
+  });
+  return statsFromGroupedRows(rows);
 }

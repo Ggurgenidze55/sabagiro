@@ -1,8 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { AdminTicketStatsPanel } from '@/components/AdminTicketStatsPanel';
 import { getSessionUser } from '@/lib/auth';
-import { getAdminTicketStats } from '@/lib/admin-ticket-stats';
 import { prisma } from '@/lib/db';
 import { canUseFullAdminTools, staffAdminLandingPath } from '@/lib/staff-roles';
 
@@ -17,11 +15,10 @@ export default async function AdminOverviewPage() {
     redirect(staffAdminLandingPath(user.role));
   }
 
-  const [users, tickets, sold, ticketStats] = await Promise.all([
+  const [users, tickets, sold] = await Promise.all([
     prisma.user.count(),
     prisma.ticket.count(),
     prisma.ticket.aggregate({ _sum: { priceGel: true } }),
-    getAdminTicketStats(),
   ]);
 
   return (
@@ -43,7 +40,10 @@ export default async function AdminOverviewPage() {
         </div>
       </div>
 
-      <AdminTicketStatsPanel stats={ticketStats} />
+      <p className="page-lead" style={{ marginTop: '1.5rem' }}>
+        Per-event scans and paid vs invites: open <Link href="/admin/events">Events</Link> → Stats on
+        each night.
+      </p>
 
       <div className="cart-actions" style={{ marginTop: '2rem' }}>
         <Link href="/admin/events" className="btn">

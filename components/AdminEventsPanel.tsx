@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { ResponsiveTable } from '@/components/ResponsiveTable';
 import { IntInput } from '@/components/IntInput';
 import { SectionDivider } from '@/components/SectionDivider';
@@ -655,8 +656,16 @@ export function AdminEventsPanel({
                   {ev.artistTicketsEnabled ? ' · DJ' : ''}
                 </>
               ),
-              actions: canEdit ? (
+              actions: (
                 <div className="table-actions">
+                  <Link
+                    href={`/admin/events/${encodeURIComponent(ev.slug)}/stats`}
+                    className="btn btn--ghost"
+                  >
+                    Stats
+                  </Link>
+                  {canEdit ? (
+                  <>
                   <button type="button" className="btn btn--ghost" onClick={() => startEdit(ev)}>
                     Edit
                   </button>
@@ -669,9 +678,9 @@ export function AdminEventsPanel({
                   <button type="button" className="btn btn--ghost" onClick={() => removeEvent(ev.id)}>
                     Delete
                   </button>
+                  </>
+                  ) : null}
                 </div>
-              ) : (
-                <span className="table-sub">View only</span>
               ),
             },
           }))}

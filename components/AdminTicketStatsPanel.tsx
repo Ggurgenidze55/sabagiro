@@ -43,33 +43,20 @@ function KindBlock({
   );
 }
 
-export function AdminTicketStatsPanel({ stats }: { stats: AdminTicketStats }) {
+export function AdminTicketStatsPanel({
+  stats,
+  title = 'Ticket statistics',
+}: {
+  stats: AdminTicketStats;
+  title?: string;
+}) {
   return (
     <section className="admin-ticket-stats" aria-label="Ticket statistics">
-      <h2 className="admin-section-title">Ticket statistics</h2>
+      <h2 className="admin-section-title">{title}</h2>
       <p className="admin-ticket-stats__lead">
         Scanned = marked USED at the door · Not scanned = still VALID · Invitations = free
         (admin invites, account invitations, artist comps) · Paid = checkout purchases
       </p>
-
-      <div className="stat-grid admin-ticket-stats__summary">
-        <div className="stat-card">
-          <span className="stat-card__label">Scanned (all)</span>
-          <span className="stat-card__value">{stats.combined.used}</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-card__label">Not scanned</span>
-          <span className="stat-card__value">{stats.combined.unused}</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-card__label">Paid · scanned</span>
-          <span className="stat-card__value">{stats.paid.used}</span>
-        </div>
-        <div className="stat-card">
-          <span className="stat-card__label">Invites · scanned</span>
-          <span className="stat-card__value">{stats.invite.used}</span>
-        </div>
-      </div>
 
       <div className="admin-ticket-stats__split">
         <KindBlock
