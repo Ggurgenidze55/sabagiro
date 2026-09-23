@@ -1,7 +1,9 @@
 import type { ClubEvent } from '@/generated/prisma/client';
 import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
-import { sortPublishedEvents } from '@/lib/sort-published-events';
+import { sortEventsArchive, sortPublishedEvents } from '@/lib/sort-published-events';
+
+export const EVENTS_LIST_PAGE_SIZE = 10;
 
 /** URL-safe slug: lowercase, hyphens, no spaces (fixes /shop/foo bar → 404). */
 export function slugifyTitle(title: string) {
@@ -64,6 +66,29 @@ export async function listPublishedEvents() {
     where: { published: true },
   });
   return sortPublishedEvents(events);
+}
+
+export async function listPublishedEventsPaginated(page: number, pageSize = EVENTS_LIST_PAGE_SIZE) {
+  if (!hasDatabase()) {
+    return { events: [], total: 0, totalPages: 1, page: 1, pageSize };
+  }
+
+  const events = await prisma.clubEvent.findMany({
+    where: { published: true },
+  });
+  const sorted = sortEventsArchive(events);
+  const total = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const safePage = Math.min(Math.max(1, page), totalPages);
+  const start = (safePage - 1) * pageSize;
+
+  return {
+    events: sorted.slice(start, start + pageSize),
+    total,
+    totalPages,
+    page: safePage,
+    pageSize,
+  };
 }
 
 export async function getPublishedEventBySlug(slug: string) {

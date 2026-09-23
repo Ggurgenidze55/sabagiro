@@ -29,3 +29,19 @@ export function sortPublishedEvents<T extends SortablePublishedEvent>(events: T[
     return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
   });
 }
+
+/** All events list — latest event nights first (upcoming + past archive). */
+export function sortEventsArchive<T extends SortablePublishedEvent>(events: T[]): T[] {
+  return [...events].sort((a, b) => {
+    const dateA = eventDateMs(a.eventDate);
+    const dateB = eventDateMs(b.eventDate);
+    if (dateA != null && dateB != null && dateA !== dateB) return dateB - dateA;
+    if (dateA != null && dateB == null) return -1;
+    if (dateA == null && dateB != null) return 1;
+
+    const byCreated = createdAtMs(b.createdAt) - createdAtMs(a.createdAt);
+    if (byCreated !== 0) return byCreated;
+
+    return (a.sortOrder ?? 0) - (b.sortOrder ?? 0);
+  });
+}

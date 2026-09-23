@@ -1,6 +1,11 @@
 import type { FreeEntryAccessMode } from '@/lib/free-entry-access';
 import { eventToProduct } from '@/lib/events';
-import { getPublishedEventBySlug, listPublishedEvents } from '@/lib/events';
+import {
+  EVENTS_LIST_PAGE_SIZE,
+  getPublishedEventBySlug,
+  listPublishedEvents,
+  listPublishedEventsPaginated,
+} from '@/lib/events';
 import { getEventTierAvailability, type TierAvailability } from '@/lib/ticket-tiers';
 
 export type ProductType = 'ticket' | 'merch';
@@ -81,6 +86,21 @@ export async function listTicketProducts(): Promise<Product[]> {
   const events = await listPublishedEvents();
   const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiers(e.slug)));
   return ticketProducts.filter(Boolean) as Product[];
+}
+
+export async function listTicketProductsPaginated(page: number) {
+  const { events, total, totalPages, page: safePage } = await listPublishedEventsPaginated(
+    page,
+    EVENTS_LIST_PAGE_SIZE,
+  );
+  const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiers(e.slug)));
+  return {
+    products: ticketProducts.filter(Boolean) as Product[],
+    total,
+    totalPages,
+    page: safePage,
+    pageSize: EVENTS_LIST_PAGE_SIZE,
+  };
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {

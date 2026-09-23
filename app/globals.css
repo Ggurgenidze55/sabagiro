@@ -666,6 +666,46 @@ html.sabagiro-in-app .payment-page {
   margin-top: auto;
 }
 
+.product-card--past {
+  opacity: 0.72;
+}
+
+.product-card--past:hover {
+  transform: none;
+  border-color: var(--border);
+}
+
+.product-card__tag--past {
+  color: var(--concrete);
+  opacity: 0.85;
+}
+
+.product-card__meta--date {
+  color: var(--card-accent, var(--acid));
+  opacity: 0.75;
+}
+
+.events-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.events-pagination__info {
+  font-size: var(--text-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.events-pagination__disabled {
+  pointer-events: none;
+  opacity: 0.35;
+}
+
 /* —— Event / shop product page —— */
 .event-page {
   --event-accent: var(--acid);
