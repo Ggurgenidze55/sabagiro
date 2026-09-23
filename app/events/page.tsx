@@ -39,7 +39,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
     <SiteChrome current="events">
       <h1 className="page-title">EVENTS</h1>
       <p className="page-lead">
-        All nights · Upcoming &amp; past · {total} published
+        All nights · Upcoming &amp; past · {total} in archive
         {totalPages > 1 ? ` · page ${page}/${totalPages}` : ''}
       </p>
       <TicketAccessNotice user={user} className="events-page__access" />

@@ -1,4 +1,6 @@
 import type { ClubEvent } from '@/generated/prisma/client';
+import { clubEventPublicArchiveWhere } from '@/lib/event-archive';
+import { isPastEventDate } from '@/lib/event-past';
 import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
 import { sortEventsArchive, sortPublishedEvents } from '@/lib/sort-published-events';
@@ -69,12 +71,17 @@ export async function listPublishedEvents() {
 }
 
 export async function listPublishedEventsPaginated(page: number, pageSize = EVENTS_LIST_PAGE_SIZE) {
+  return listPublicArchiveEventsPaginated(page, pageSize);
+}
+
+/** /events list — published + hidden past nights (archive). */
+export async function listPublicArchiveEventsPaginated(page: number, pageSize = EVENTS_LIST_PAGE_SIZE) {
   if (!hasDatabase()) {
     return { events: [], total: 0, totalPages: 1, page: 1, pageSize };
   }
 
   const events = await prisma.clubEvent.findMany({
-    where: { published: true },
+    where: clubEventPublicArchiveWhere(),
   });
   const sorted = sortEventsArchive(events);
   const total = sorted.length;
@@ -105,6 +112,28 @@ export async function getPublishedEventBySlug(slug: string) {
   const published = await prisma.clubEvent.findMany({ where: { published: true } });
   return (
     published.find((e) => normalizeEventSlug(e.slug, e.title) === normalized) ?? null
+  );
+}
+
+/** Event page from /events archive — includes hidden past nights. */
+export async function getPublicArchiveEventBySlug(slug: string) {
+  const live = await getPublishedEventBySlug(slug);
+  if (live) return live;
+  if (!hasDatabase()) return null;
+
+  const decoded = decodeURIComponent(slug).trim();
+  const normalized = normalizeEventSlug(decoded);
+
+  const direct = await prisma.clubEvent.findFirst({
+    where: { OR: [{ slug: decoded }, { slug: normalized }] },
+  });
+  if (direct && !direct.published && isPastEventDate(direct.eventDate)) return direct;
+
+  const archived = await prisma.clubEvent.findMany({
+    where: clubEventPublicArchiveWhere(),
+  });
+  return (
+    archived.find((e) => normalizeEventSlug(e.slug, e.title) === normalized) ?? null
   );
 }
 

@@ -32,14 +32,15 @@ import {
   ONLINE_INVITATION_LABEL,
 } from '@/lib/event-price-display';
 import { formatDoorsOpenLabel } from '@/lib/format-doors-open';
-import { getProduct } from '@/lib/products';
+import { getEventArchiveProduct, getProduct } from '@/lib/products';
+import { isPastEventDate } from '@/lib/event-past';
 
 export const dynamic = 'force-dynamic';
 
 type PageProps = { params: { slug: string } };
 
 export async function generateMetadata({ params }: PageProps) {
-  const product = await getProduct(params.slug);
+  const product = (await getEventArchiveProduct(params.slug)) ?? (await getProduct(params.slug));
   if (!product) return { title: 'Not found — Sabagiro' };
   return { title: `${product.name} — Sabagiro Events` };
 }
@@ -53,12 +54,14 @@ export default async function EventPage({ params }: PageProps) {
     if (legacy) redirect(`/events/${canonical}`);
   }
 
-  const product = await getProduct(params.slug);
+  const product = (await getEventArchiveProduct(params.slug)) ?? (await getProduct(params.slug));
   if (!product) notFound();
 
   if (product.type === 'merch') {
     redirect('/events');
   }
+
+  const pastEvent = isPastEventDate(product.eventDate);
 
   const isFreeEntry = Boolean(product.isFreeEntry);
   const eventMeta = {
@@ -125,13 +128,15 @@ export default async function EventPage({ params }: PageProps) {
     description: product.description,
     lineup: product.lineup,
   });
-  const priceDisplay = getPublicEventPriceDisplay({
-    isLoggedIn: Boolean(user),
-    isFreeEntry,
-    hasFreeTicketAccess: showInvitationPrice,
-    priceGel: product.priceGel,
-    ticketsRemaining: product.ticketsRemaining,
-  });
+  const priceDisplay = pastEvent
+    ? null
+    : getPublicEventPriceDisplay({
+        isLoggedIn: Boolean(user),
+        isFreeEntry,
+        hasFreeTicketAccess: showInvitationPrice,
+        priceGel: product.priceGel,
+        ticketsRemaining: product.ticketsRemaining,
+      });
   const doorsOpenLabel = formatDoorsOpenLabel(product.doorsOpen);
 
   return (
@@ -175,7 +180,10 @@ export default async function EventPage({ params }: PageProps) {
         ) : null}
 
         <div className="event-page__notices">
-          {isFreeEntry ? (
+          {pastEvent ? (
+            <p className="notice-banner notice-banner--inline">This night is in the archive.</p>
+          ) : null}
+          {!pastEvent && isFreeEntry ? (
             <>
               <p className="notice-banner notice-banner--inline">
                 {ONLINE_INVITATION_LABEL} —{' '}
@@ -189,17 +197,21 @@ export default async function EventPage({ params }: PageProps) {
                 <TicketAccessNotice user={user} getNotice={() => freeEventNotice} />
               ) : null}
             </>
-          ) : canAccessFree ? (
+          ) : !pastEvent && canAccessFree ? (
             <p className="notice-banner notice-banner--inline">
               {ONLINE_INVITATION_LABEL} — your account includes invitations for this event.
             </p>
-          ) : (
+          ) : !pastEvent ? (
             <TicketAccessNotice user={user} />
-          )}
+          ) : null}
 
-          {quotaNotice ? <p className="event-page__hint">{quotaNotice}</p> : null}
+          {!pastEvent && quotaNotice ? <p className="event-page__hint">{quotaNotice}</p> : null}
 
-          {user && canPurchaseTickets(user) && !profileComplete && (canAccessFree || !isFreeEntry) ? (
+          {!pastEvent &&
+          user &&
+          canPurchaseTickets(user) &&
+          !profileComplete &&
+          (canAccessFree || !isFreeEntry) ? (
             <p className="notice-banner notice-banner--inline">
               Complete your profile in Settings before getting a ticket.{' '}
               <Link href="/account/settings" className="btn btn--ghost event-page__notice-btn">
@@ -208,7 +220,7 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {canAccessFree && freeTicketsRemaining <= 0 ? (
+          {!pastEvent && canAccessFree && freeTicketsRemaining <= 0 ? (
             <p className="notice-banner notice-banner--inline">
               {freeTicketLimitMessage(user!, eventMeta)}
               <Link href="/account" className="btn btn--ghost event-page__notice-btn">
@@ -217,7 +229,8 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {!canAccessFree &&
+          {!pastEvent &&
+          !canAccessFree &&
           user &&
           canPurchaseTickets(user) &&
           cannotBuyMore &&
@@ -230,13 +243,14 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {canGuestFreeTicket ? (
+          {!pastEvent && canGuestFreeTicket ? (
             <p className="event-page__hint">
               Additional invitations require guest name and email.
             </p>
           ) : null}
 
-          {!canAccessFree &&
+          {!pastEvent &&
+          !canAccessFree &&
           user &&
           canPurchaseTickets(user) &&
           !cannotBuyMore &&
@@ -246,7 +260,8 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {!canAccessFree &&
+          {!pastEvent &&
+          !canAccessFree &&
           user &&
           canPurchaseTickets(user) &&
           !cannotBuyMore &&
@@ -260,20 +275,20 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="event-page__actions">
-          {canInstantFreeTicket ? (
+          {!pastEvent && canInstantFreeTicket ? (
             <EventTicketButton slug={product.slug} isFreeEntry />
-          ) : canGuestFreeTicket ? (
+          ) : !pastEvent && canGuestFreeTicket ? (
             <EventTicketButton
               slug={product.slug}
               isFreeEntry
               needsHolderForm
               ticketNumber={existingFree + 1}
             />
-          ) : !canAccessFree && product.ticketsRemaining === 0 ? (
+          ) : !pastEvent && !canAccessFree && product.ticketsRemaining === 0 ? (
             <p className="form-error event-page__sold-out">Sold out</p>
-          ) : useInstantPaidCheckout ? (
+          ) : !pastEvent && useInstantPaidCheckout ? (
             <EventTicketButton slug={product.slug} isFreeEntry={false} label="Buy ticket" />
-          ) : canGuestPaidTicket ? (
+          ) : !pastEvent && canGuestPaidTicket ? (
             <EventTicketButton
               slug={product.slug}
               isFreeEntry={false}

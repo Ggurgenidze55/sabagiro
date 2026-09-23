@@ -1,10 +1,10 @@
+import type { ClubEvent } from '@/generated/prisma/client';
 import type { FreeEntryAccessMode } from '@/lib/free-entry-access';
-import { eventToProduct } from '@/lib/events';
+import { eventToProduct, getPublicArchiveEventBySlug, getPublishedEventBySlug } from '@/lib/events';
 import {
   EVENTS_LIST_PAGE_SIZE,
-  getPublishedEventBySlug,
   listPublishedEvents,
-  listPublishedEventsPaginated,
+  listPublicArchiveEventsPaginated,
 } from '@/lib/events';
 import { getEventTierAvailability, type TierAvailability } from '@/lib/ticket-tiers';
 
@@ -52,10 +52,7 @@ const merchProducts: Product[] = [
   },
 ];
 
-async function eventToProductWithTiers(slug: string) {
-  const event = await getPublishedEventBySlug(slug);
-  if (!event) return undefined;
-
+async function eventToProductWithTiersFromRow(event: ClubEvent) {
   const base = eventToProduct(event);
   if (event.isFreeEntry) {
     return {
@@ -66,7 +63,7 @@ async function eventToProductWithTiers(slug: string) {
     };
   }
 
-  const avail = await getEventTierAvailability(slug);
+  const avail = await getEventTierAvailability(event.slug);
   return {
     ...base,
     priceGel: avail?.currentTierPrice ?? base.priceGel,
@@ -74,6 +71,18 @@ async function eventToProductWithTiers(slug: string) {
     tiers: avail?.tiers,
     ticketsRemaining: avail?.totalRemaining ?? 0,
   };
+}
+
+async function eventToProductWithTiers(slug: string) {
+  const event = await getPublishedEventBySlug(slug);
+  if (!event) return undefined;
+  return eventToProductWithTiersFromRow(event);
+}
+
+async function eventToProductWithTiersArchive(slug: string) {
+  const event = await getPublicArchiveEventBySlug(slug);
+  if (!event) return undefined;
+  return eventToProductWithTiersFromRow(event);
 }
 
 export async function listProducts(): Promise<Product[]> {
@@ -89,11 +98,11 @@ export async function listTicketProducts(): Promise<Product[]> {
 }
 
 export async function listTicketProductsPaginated(page: number) {
-  const { events, total, totalPages, page: safePage } = await listPublishedEventsPaginated(
+  const { events, total, totalPages, page: safePage } = await listPublicArchiveEventsPaginated(
     page,
     EVENTS_LIST_PAGE_SIZE,
   );
-  const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiers(e.slug)));
+  const ticketProducts = await Promise.all(events.map((e) => eventToProductWithTiersFromRow(e)));
   return {
     products: ticketProducts.filter(Boolean) as Product[],
     total,
@@ -101,6 +110,11 @@ export async function listTicketProductsPaginated(page: number) {
     page: safePage,
     pageSize: EVENTS_LIST_PAGE_SIZE,
   };
+}
+
+/** Single event for /events/[slug] — includes archived past nights. */
+export async function getEventArchiveProduct(slug: string): Promise<Product | undefined> {
+  return eventToProductWithTiersArchive(slug);
 }
 
 export async function getProduct(slug: string): Promise<Product | undefined> {
