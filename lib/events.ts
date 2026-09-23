@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db';
 import type { Product } from '@/lib/products';
 import { sortEventsArchive, sortPublishedEvents } from '@/lib/sort-published-events';
 
-export const EVENTS_LIST_PAGE_SIZE = 10;
+export const EVENTS_LIST_PAGE_SIZE = 12;
 
 /** URL-safe slug: lowercase, hyphens, no spaces (fixes /shop/foo bar → 404). */
 export function slugifyTitle(title: string) {
