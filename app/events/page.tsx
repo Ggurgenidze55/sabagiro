@@ -4,11 +4,7 @@ import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
 import { getSessionUser } from '@/lib/auth';
 import { isPastEventDate } from '@/lib/event-past';
-import {
-  getEventPublicDescription,
-  getPublicEventCtaLabel,
-  getPublicEventPriceDisplay,
-} from '@/lib/event-price-display';
+import { getPublicEventCtaLabel, getPublicEventPriceDisplay } from '@/lib/event-price-display';
 import { showsOnlineInvitationForUser } from '@/lib/free-entry-access';
 import { formatDoorsOpenLabel } from '@/lib/format-doors-open';
 import { listTicketProductsPaginated } from '@/lib/products';
@@ -50,7 +46,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
         </p>
       ) : (
         <>
-          <div className="product-grid">
+          <div className="product-grid events-archive-grid">
             {products.map((product) => {
               const eventMeta = {
                 isFreeEntry: Boolean(product.isFreeEntry),
@@ -84,14 +80,6 @@ export default async function EventsPage({ searchParams }: PageProps) {
                   {product.lineup ? <p className="product-card__lineup">{product.lineup}</p> : null}
                   {doorsOpenLabel ? <p className="product-card__doors-open">{doorsOpenLabel}</p> : null}
                   {product.venueTag ? <p className="product-card__venue-tag">{product.venueTag}</p> : null}
-                  <p className="product-card__meta">
-                    {getEventPublicDescription({
-                      name: product.name,
-                      about: product.about,
-                      description: product.description,
-                      lineup: product.lineup,
-                    })}
-                  </p>
                   {priceLabel ? <p className="product-card__price">{priceLabel}</p> : null}
                   <Link href={`/events/${product.slug}`} className="btn btn--ghost">
                     {past
