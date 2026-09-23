@@ -2,5 +2,5 @@
 export function formatDoorsOpenLabel(time: string | null | undefined): string | null {
   const trimmed = time?.trim();
   if (!trimmed) return null;
-  return `Doors open ${trimmed}`;
+  return `DOORS OPEN ${trimmed}`;
 }

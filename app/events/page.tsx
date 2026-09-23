@@ -33,6 +33,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
 
   return (
     <SiteChrome current="events">
+      <div className="events-page">
       <h1 className="page-title">EVENTS</h1>
       <p className="page-lead">
         All nights · Upcoming &amp; past · {total} in archive
@@ -69,7 +70,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
                   className={`product-card${past ? ' product-card--past' : ''}`}
                   style={{ ['--card-accent' as string]: product.accent }}
                 >
-                  {past ? <span className="product-card__tag product-card__tag--past">Past</span> : null}
+                  {past ? <span className="product-card__tag product-card__tag--past">PAST</span> : null}
                   {!past && product.tag ? (
                     <span className="product-card__tag">{product.tag}</span>
                   ) : null}
@@ -97,6 +98,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
           <EventsPagination page={page} totalPages={totalPages} total={total} />
         </>
       )}
+      </div>
     </SiteChrome>
   );
 }
