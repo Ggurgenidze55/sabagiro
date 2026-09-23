@@ -612,7 +612,6 @@ html.sabagiro-in-app .payment-page {
   -webkit-line-clamp: 2;
   overflow: hidden;
   line-height: 1.25;
-  text-transform: uppercase;
 }
 
 .events-archive-grid .product-card__lineup {
@@ -653,7 +652,7 @@ html.sabagiro-in-app .payment-page {
 .product-card__tag {
   font-size: var(--text-2xs);
   letter-spacing: 0.28em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--card-accent, var(--acid));
 }
 
@@ -662,6 +661,7 @@ html.sabagiro-in-app .payment-page {
   font-size: 1.5rem;
   letter-spacing: 0.08em;
   color: var(--concrete-light);
+  text-transform: uppercase;
 }
 
 .product-card__meta {
@@ -683,7 +683,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0.35rem 0 0;
   font-size: var(--text-2xs);
   letter-spacing: 0.16em;
-  text-transform: uppercase;
+  text-transform: none;
   color: color-mix(in srgb, var(--card-accent, var(--acid)) 65%, var(--concrete));
 }
 
@@ -691,7 +691,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0.35rem 0 0;
   font-size: var(--text-2xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
+  text-transform: none;
   opacity: 0.5;
   line-height: 1.7;
 }
@@ -765,7 +765,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0;
   font-size: var(--text-sm);
   letter-spacing: 0.38em;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--event-accent);
   opacity: 0.92;
 }
@@ -785,7 +785,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0.65rem 0 0;
   font-size: var(--text-xs);
   letter-spacing: 0.18em;
-  text-transform: uppercase;
+  text-transform: none;
   color: color-mix(in srgb, var(--event-accent) 75%, var(--concrete));
 }
 
@@ -793,7 +793,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0.15rem 0 0;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
+  text-transform: none;
   color: color-mix(in srgb, var(--event-accent) 70%, var(--concrete));
   line-height: 1.7;
 }
@@ -802,7 +802,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0.35rem 0 0;
   font-size: var(--text-xs);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
+  text-transform: none;
   color: rgba(212, 204, 196, 0.55);
   line-height: 1.7;
 }
@@ -874,7 +874,7 @@ html.sabagiro-in-app .payment-page {
   margin: 0 0 0.85rem;
   font-size: var(--text-sm);
   letter-spacing: 0.2em;
-  text-transform: uppercase;
+  text-transform: none;
   color: color-mix(in srgb, var(--event-accent) 70%, var(--concrete));
   line-height: 1.7;
 }
@@ -1145,6 +1145,8 @@ html.sabagiro-in-app .payment-page {
   font-family: var(--font-mono, var(--font-mono-fallback));
   font-size: var(--text-md);
   color-scheme: dark;
+  /* Labels stay uppercase; typed copy keeps exact casing */
+  text-transform: none;
 }
 
 .form-field textarea {

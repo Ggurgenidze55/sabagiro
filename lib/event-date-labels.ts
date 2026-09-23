@@ -14,16 +14,13 @@ export function labelsFromEventDate(isoDate: string): { dayLabel: string; dateLa
     timeZone: TBILISI,
   })
     .format(date)
-    .replace(/\./g, '')
-    .toUpperCase();
+    .replace(/\./g, '');
 
   const dateLabel = new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
     timeZone: TBILISI,
-  })
-    .format(date)
-    .toUpperCase();
+  }).format(date);
 
   return { dayLabel, dateLabel };
 }
