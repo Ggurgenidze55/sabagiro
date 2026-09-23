@@ -70,7 +70,7 @@ export default async function EventsPage({ searchParams }: PageProps) {
                   className={`product-card${past ? ' product-card--past' : ''}`}
                   style={{ ['--card-accent' as string]: product.accent }}
                 >
-                  {past ? <span className="product-card__tag product-card__tag--past">PAST</span> : null}
+                  {past ? <span className="product-card__tag product-card__tag--past">Past</span> : null}
                   {!past && product.tag ? (
                     <span className="product-card__tag">{product.tag}</span>
                   ) : null}
