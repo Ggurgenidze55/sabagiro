@@ -23,6 +23,7 @@ export const ADMIN_MENU_ITEMS: NavDropdownItem[] = [
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/generate', label: 'Send invitations' },
   { href: '/admin/tickets', label: 'All tickets' },
+  { href: '/admin/promo-codes', label: 'Promo codes' },
 ];
 
 /** Staff-only admin links (no Account duplicates — those live under Account menu). */
@@ -42,6 +43,7 @@ export function getStaffMenuItems(role: Role): NavDropdownItem[] {
     items.push(
       { href: '/admin/generate', label: 'Send invitations' },
       { href: '/admin/tickets', label: 'All tickets' },
+      { href: '/admin/promo-codes', label: 'Promo codes' },
     );
   }
 
