@@ -3240,6 +3240,45 @@ body.nav-lock {
   max-width: 40rem;
 }
 
+.event-promo-field {
+  max-width: 22rem;
+  margin-bottom: 0.75rem;
+}
+
+.event-promo-field__row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.event-promo-field__row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-promo-field__hint {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  color: var(--acid);
+}
+
+.event-promo-field__hint--err {
+  color: #ff6688;
+}
+
+.event-ticket-checkout {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.admin-promo__section + .admin-promo__section {
+  margin-top: 2.5rem;
+}
+
 @media (max-width: 768px) {
   .site-header {
     display: grid;

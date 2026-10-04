@@ -8,6 +8,7 @@ import {
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
 import type { StoredOrderHolder } from '@/lib/payments/types';
+import { consumePromoCodeUse } from '@/lib/promo-codes';
 
 function parsePrices(item: OrderItem): number[] {
   const raw = item.unitPrices;
@@ -84,6 +85,11 @@ export async function fulfillPaidOrder(orderId: string): Promise<string[]> {
         });
         ticketIds.push(ticket.id);
       }
+    }
+
+    if (current.promoCodeId) {
+      const ok = await consumePromoCodeUse(current.promoCodeId);
+      if (!ok) throw new Error('PROMO_EXHAUSTED');
     }
 
     await prisma.order.update({

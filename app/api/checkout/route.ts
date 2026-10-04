@@ -33,8 +33,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { items } = checkoutSchema.parse(await request.json());
-    const order = await createPendingOrder(user, items);
+    const { items, promoCode } = checkoutSchema.parse(await request.json());
+    const order = await createPendingOrder(user, items, promoCode);
     const payment = await startPaymentForOrder(order);
 
     return NextResponse.json({
@@ -77,6 +77,18 @@ export async function POST(request: Request) {
     }
     if (message === 'NO_ITEMS') {
       return NextResponse.json({ error: 'No valid tickets in order' }, { status: 400 });
+    }
+    if (message === 'INVALID_PROMO') {
+      return NextResponse.json(
+        { error: 'Promo code is invalid or does not apply to this event.', code: 'INVALID_PROMO' },
+        { status: 400 },
+      );
+    }
+    if (message === 'PROMO_ZERO_TOTAL') {
+      return NextResponse.json(
+        { error: 'Discount would make the total zero — use a lower percentage.', code: 'PROMO_ZERO_TOTAL' },
+        { status: 400 },
+      );
     }
     if (message === 'FLITT_NO_REDIRECT') {
       return NextResponse.json(

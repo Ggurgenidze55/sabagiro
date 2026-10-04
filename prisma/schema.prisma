@@ -104,21 +104,42 @@ model PasswordResetToken {
 }
 
 model Order {
-  id        String      @id @default(cuid())
-  userId    String
-  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status    OrderStatus @default(PENDING)
-  totalGel  Int
-  currency  String      @default("GEL")
-  expiresAt DateTime?
-  paidAt    DateTime?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  items     OrderItem[]
-  payments  Payment[]
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      OrderStatus @default(PENDING)
+  totalGel    Int
+  discountGel Int         @default(0)
+  promoCodeId String?
+  promoCode   PromoCode?  @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  currency    String      @default("GEL")
+  expiresAt   DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  items       OrderItem[]
+  payments    Payment[]
 
   @@index([userId, status])
   @@index([status, createdAt])
+  @@index([promoCodeId])
+}
+
+model PromoCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  percentOff  Int
+  eventSlug   String
+  active      Boolean   @default(true)
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orders      Order[]
+
+  @@index([eventSlug])
+  @@index([active])
 }
 
 model OrderItem {

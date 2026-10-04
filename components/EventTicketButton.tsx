@@ -26,6 +26,7 @@ type EventTicketButtonProps = {
   label?: string;
   needsHolderForm?: boolean;
   ticketNumber?: number;
+  promoCode?: string | null;
 };
 
 function mapApiError(data: { error?: string; code?: string }): string {
@@ -44,6 +45,9 @@ function mapApiError(data: { error?: string; code?: string }): string {
   if (data.code === 'ALREADY_OWNED' || data.code === 'TICKET_LIMIT') {
     return data.error || 'Ticket limit reached for this event.';
   }
+  if (data.code === 'INVALID_PROMO') {
+    return data.error || 'Promo code is not valid for this event.';
+  }
   return data.error || 'Could not complete request';
 }
 
@@ -54,6 +58,7 @@ export function EventTicketButton({
   label,
   needsHolderForm = false,
   ticketNumber = 2,
+  promoCode = null,
 }: EventTicketButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -142,7 +147,10 @@ export function EventTicketButton({
       await submit(
         isFreeEntry
           ? { productSlug: slug }
-          : { items: [{ slug, qty: 1, holders: [] }] },
+          : {
+              items: [{ slug, qty: 1, holders: [] }],
+              ...(promoCode ? { promoCode } : {}),
+            },
       );
     } catch {
       setError('Network error — try again');
@@ -175,6 +183,7 @@ export function EventTicketButton({
       } else {
         await submit({
           items: [{ slug, qty: 1, holders: [holderPayload] }],
+          ...(promoCode ? { promoCode } : {}),
         });
       }
     } catch {

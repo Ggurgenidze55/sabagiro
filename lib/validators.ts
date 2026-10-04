@@ -183,6 +183,21 @@ export const checkoutSchema = z.object({
       }),
     )
     .min(1),
+  promoCode: z.string().trim().min(2).max(40).optional(),
+});
+
+export const promoCodeAdminSchema = z.object({
+  code: z.string().trim().min(2).max(40),
+  percentOff: z.coerce.number().int().min(1).max(99),
+  eventSlug: z.string().trim().min(1).max(120),
+  active: z.boolean().optional(),
+  maxUses: z.coerce.number().int().min(1).max(1_000_000).nullable().optional(),
+  expiresAt: z.string().trim().min(1).optional().nullable(),
+});
+
+export const promoValidateSchema = z.object({
+  code: z.string().trim().min(2).max(40),
+  slug: z.string().trim().min(1),
 });
 
 export const ticketPolicySchema = z.object({

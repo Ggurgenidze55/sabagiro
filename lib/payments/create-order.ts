@@ -13,8 +13,16 @@ import {
 } from '@/lib/user-ticket-holder';
 import { ORDER_TTL_MINUTES } from '@/lib/payments/config';
 import type { CheckoutLineItem } from '@/lib/payments/types';
+import {
+  assertPromoCodeForCheckout,
+  discountedUnitPriceGel,
+} from '@/lib/promo-codes';
 
-export async function createPendingOrder(user: User, items: CheckoutLineItem[]) {
+export async function createPendingOrder(
+  user: User,
+  items: CheckoutLineItem[],
+  promoCodeRaw?: string,
+) {
   const lines: {
     productSlug: string;
     productName: string;
@@ -25,6 +33,17 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
   }[] = [];
 
   let totalGel = 0;
+  let discountGel = 0;
+  let promoCodeId: string | undefined;
+
+  const promoTrimmed = promoCodeRaw?.trim();
+  let resolvedPromo: Awaited<ReturnType<typeof assertPromoCodeForCheckout>> | null = null;
+  if (promoTrimmed) {
+    const slugs = [...new Set(items.map((i) => i.slug))];
+    if (slugs.length !== 1) throw new Error('INVALID_PROMO');
+    resolvedPromo = await assertPromoCodeForCheckout(promoTrimmed, slugs[0]!);
+    promoCodeId = resolvedPromo.row.id;
+  }
 
   for (const item of items) {
     const product = await getProduct(item.slug);
@@ -54,12 +73,20 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
       throw new Error('HOLDER_REQUIRED');
     }
 
-    totalGel += prices.reduce((s, p) => s + p, 0);
+    let linePrices = prices;
+    if (resolvedPromo && item.slug === resolvedPromo.eventSlug) {
+      linePrices = prices.map((p) => discountedUnitPriceGel(p, resolvedPromo!.percentOff));
+      const lineBefore = prices.reduce((s, p) => s + p, 0);
+      const lineAfter = linePrices.reduce((s, p) => s + p, 0);
+      discountGel += lineBefore - lineAfter;
+    }
+
+    totalGel += linePrices.reduce((s, p) => s + p, 0);
     lines.push({
       productSlug: item.slug,
       productName: product.name,
       quantity: item.qty,
-      unitPrices: prices,
+      unitPrices: linePrices,
       tierLabels: labels,
       holders: extraHolders as Prisma.InputJsonValue,
     });
@@ -69,12 +96,18 @@ export async function createPendingOrder(user: User, items: CheckoutLineItem[]) 
     throw new Error('NO_ITEMS');
   }
 
+  if (totalGel < 1) {
+    throw new Error('PROMO_ZERO_TOTAL');
+  }
+
   const expiresAt = new Date(Date.now() + ORDER_TTL_MINUTES * 60_000);
 
   return prisma.order.create({
     data: {
       userId: user.id,
       totalGel,
+      discountGel,
+      promoCodeId: promoCodeId ?? null,
       expiresAt,
       items: {
         create: lines.map((line) => ({

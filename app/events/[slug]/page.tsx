@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
-import { EventTicketButton } from '@/components/EventTicketButton';
+import { EventTicketCheckout } from '@/components/EventTicketCheckout';
 import { PaymentBrandLogos } from '@/components/PaymentBrandLogos';
 import { TicketAccessNotice } from '@/components/TicketAccessNotice';
 import { SiteChrome } from '@/components/SiteChrome';
@@ -275,25 +275,22 @@ export default async function EventPage({ params }: PageProps) {
         </div>
 
         <div className="event-page__actions">
-          {!pastEvent && canInstantFreeTicket ? (
-            <EventTicketButton slug={product.slug} isFreeEntry />
-          ) : !pastEvent && canGuestFreeTicket ? (
-            <EventTicketButton
-              slug={product.slug}
-              isFreeEntry
-              needsHolderForm
-              ticketNumber={existingFree + 1}
-            />
-          ) : !pastEvent && !canAccessFree && product.ticketsRemaining === 0 ? (
+          {!pastEvent && !canAccessFree && product.ticketsRemaining === 0 ? (
             <p className="form-error event-page__sold-out">Sold out</p>
-          ) : !pastEvent && useInstantPaidCheckout ? (
-            <EventTicketButton slug={product.slug} isFreeEntry={false} label="Buy ticket" />
-          ) : !pastEvent && canGuestPaidTicket ? (
-            <EventTicketButton
+          ) : !pastEvent &&
+            (canInstantFreeTicket ||
+              canGuestFreeTicket ||
+              useInstantPaidCheckout ||
+              canGuestPaidTicket) ? (
+            <EventTicketCheckout
               slug={product.slug}
-              isFreeEntry={false}
-              needsHolderForm
-              ticketNumber={existingPurchased + 1}
+              isFreeEntry={isFreeEntry}
+              canInstantFreeTicket={canInstantFreeTicket}
+              canGuestFreeTicket={canGuestFreeTicket}
+              useInstantPaidCheckout={useInstantPaidCheckout}
+              canGuestPaidTicket={canGuestPaidTicket}
+              existingFree={existingFree}
+              existingPurchased={existingPurchased}
             />
           ) : null}
           <Link href="/events" className="btn btn--ghost">
