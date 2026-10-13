@@ -3300,6 +3300,43 @@ body.nav-lock {
   margin-top: 2.5rem;
 }
 
+.admin-promo-stats {
+  margin-top: 2.5rem;
+}
+
+.admin-promo-stats__table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(176, 168, 154, 0.2);
+  background: rgba(10, 10, 10, 0.65);
+}
+
+.admin-promo-stats__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+}
+
+.admin-promo-stats__table th,
+.admin-promo-stats__table td {
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(176, 168, 154, 0.12);
+}
+
+.admin-promo-stats__table th {
+  text-transform: uppercase;
+  font-size: var(--text-2xs);
+  letter-spacing: 0.14em;
+  color: rgba(232, 224, 216, 0.55);
+}
+
+.admin-promo-stats__table td.admin-ticket-stats__accent {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--acid);
+}
+
 @media (max-width: 768px) {
   .site-header {
     display: grid;

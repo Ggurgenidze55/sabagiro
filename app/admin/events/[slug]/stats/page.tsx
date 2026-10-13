@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
+import { AdminEventPromoStatsPanel } from '@/components/AdminEventPromoStatsPanel';
 import { AdminTicketStatsPanel } from '@/components/AdminTicketStatsPanel';
 import { getSessionUser } from '@/lib/auth';
+import { getEventPromoStats } from '@/lib/admin-promo-stats';
 import { getAdminTicketStatsForEvent } from '@/lib/admin-ticket-stats';
 import { prisma } from '@/lib/db';
 import { canViewEventsAdmin, staffDeniedRedirectPath } from '@/lib/staff-roles';
@@ -28,7 +30,7 @@ export default async function AdminEventStatsPage({ params }: PageProps) {
   const slug = decodeURIComponent(params.slug).trim();
   if (!slug) notFound();
 
-  const [event, stats] = await Promise.all([
+  const [event, stats, promoStats] = await Promise.all([
     prisma.clubEvent.findFirst({
       where: { slug },
       select: {
@@ -40,10 +42,12 @@ export default async function AdminEventStatsPage({ params }: PageProps) {
       },
     }),
     getAdminTicketStatsForEvent(slug),
+    getEventPromoStats(slug),
   ]);
 
   const dateLine = [event?.dayLabel, event?.dateLabel].filter(Boolean).join(' ');
   const hasTickets = stats.combined.total > 0;
+  const hasPromoSection = promoStats.length > 0;
 
   return (
     <div className="centered-page">
@@ -60,11 +64,11 @@ export default async function AdminEventStatsPage({ params }: PageProps) {
         <p className="table-sub">/events/{slug}</p>
       </header>
       <div className="centered-page__body">
-        {!hasTickets ? (
+        {!hasTickets && !hasPromoSection ? (
           <p className="cart-empty">No tickets issued for this event yet.</p>
-        ) : (
-          <AdminTicketStatsPanel stats={stats} title="This event only" />
-        )}
+        ) : null}
+        {hasTickets ? <AdminTicketStatsPanel stats={stats} title="This event only" /> : null}
+        {hasPromoSection ? <AdminEventPromoStatsPanel rows={promoStats} /> : null}
         <div className="cart-actions" style={{ marginTop: '1.5rem' }}>
           <Link href={`/events/${encodeURIComponent(slug)}`} className="btn btn--ghost">
             Public event page
