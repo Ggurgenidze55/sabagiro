@@ -29,12 +29,21 @@ function referenceMs(eventDateIso?: string | null): number {
   return Date.now();
 }
 
-export function isAtLeast18FromGeorgianId(personalId: string, eventDateIso?: string | null): boolean | null {
+export function ageYearsFromGeorgianPersonalId(
+  personalId: string,
+  eventDateIso?: string | null,
+): number | null {
   const birth = birthDateFromGeorgianPersonalId(personalId);
   if (!birth) return null;
   const ref = referenceMs(eventDateIso);
   const ageYears = (ref - birth.getTime()) / (365.2425 * 24 * 60 * 60 * 1000);
-  return ageYears >= 18;
+  return Math.floor(ageYears);
+}
+
+export function isAtLeast18FromGeorgianId(personalId: string, eventDateIso?: string | null): boolean | null {
+  const age = ageYearsFromGeorgianPersonalId(personalId, eventDateIso);
+  if (age === null) return null;
+  return age >= 18;
 }
 
 /** Georgian ID must parse as 18+; other IDs require explicit checkbox. */
@@ -46,5 +55,29 @@ export function validateAdultHolder(
   const fromId = isAtLeast18FromGeorgianId(personalId, eventDateIso);
   if (fromId === true) return;
   if (fromId === false) throw new Error('UNDERAGE');
+  if (!confirmAdult18) throw new Error('ADULT_CONFIRM_REQUIRED');
+}
+
+/** Declared age + ID rules — blocks checkout under 18. */
+export function validateAdultHolderWithDeclaredAge(
+  personalId: string,
+  declaredAge: number,
+  confirmAdult18: boolean,
+  eventDateIso?: string | null,
+): void {
+  if (!Number.isFinite(declaredAge) || declaredAge < 18) {
+    throw new Error('UNDERAGE');
+  }
+
+  const fromId = isAtLeast18FromGeorgianId(personalId, eventDateIso);
+  if (fromId === false) throw new Error('UNDERAGE');
+  if (fromId === true) {
+    const idAge = ageYearsFromGeorgianPersonalId(personalId, eventDateIso);
+    if (idAge !== null && Math.abs(idAge - declaredAge) > 1) {
+      throw new Error('AGE_MISMATCH');
+    }
+    return;
+  }
+
   if (!confirmAdult18) throw new Error('ADULT_CONFIRM_REQUIRED');
 }

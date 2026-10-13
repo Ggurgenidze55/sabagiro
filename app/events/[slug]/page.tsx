@@ -141,6 +141,12 @@ export default async function EventPage({ params }: PageProps) {
     !cannotBuyMore &&
     (product.ticketsRemaining ?? 0) > 0 &&
     existingPurchased > 0;
+  const guestIdOnlyCheckout =
+    !user &&
+    allowIdOnlyPurchase &&
+    !isFreeEntry &&
+    !pastEvent &&
+    (product.ticketsRemaining ?? 0) > 0;
   const freeEventNotice = isFreeEntry ? getFreeTicketEventNotice(user, eventMeta) : null;
   const quotaNotice = getFreeTicketQuotaNotice(user, eventMeta, freeTicketsRemaining);
   const aboutText = getEventPublicDescription({
@@ -222,10 +228,11 @@ export default async function EventPage({ params }: PageProps) {
             <p className="notice-banner notice-banner--inline">
               {ONLINE_INVITATION_LABEL} — your account includes invitations for this event.
             </p>
-          ) : !pastEvent && user && !verifiedPurchaser && allowIdOnlyPurchase ? (
+          ) : !pastEvent && allowIdOnlyPurchase && (!user || !verifiedPurchaser) ? (
             <p className="notice-banner notice-banner--inline">
-              This event allows checkout without account verification — enter ID/passport and confirm
-              18+ when buying.
+              {user
+                ? 'This event allows checkout without account verification — enter ID/passport, age, and confirm 18+ when buying.'
+                : 'This event allows buying a ticket without registration — enter your details below (18+ and valid ID at the door required).'}
             </p>
           ) : !pastEvent ? (
             <TicketAccessNotice user={user} />
@@ -309,7 +316,8 @@ export default async function EventPage({ params }: PageProps) {
               useInstantPaidCheckout ||
               useIdOnlyPaidCheckout ||
               canGuestPaidTicket ||
-              useIdOnlyGuestPaid) ? (
+              useIdOnlyGuestPaid ||
+              guestIdOnlyCheckout) ? (
             <EventTicketCheckout
               slug={product.slug}
               isFreeEntry={isFreeEntry}
@@ -319,6 +327,7 @@ export default async function EventPage({ params }: PageProps) {
               useIdOnlyPaidCheckout={useIdOnlyPaidCheckout}
               canGuestPaidTicket={canGuestPaidTicket}
               useIdOnlyGuestPaid={useIdOnlyGuestPaid}
+              guestIdOnlyCheckout={guestIdOnlyCheckout}
               existingFree={existingFree}
               existingPurchased={existingPurchased}
             />

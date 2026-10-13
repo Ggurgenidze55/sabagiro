@@ -4,6 +4,7 @@ export type CheckoutHolder = {
   personalId: string;
   email: string;
   phone: string;
+  age: number;
 };
 
 export type CheckoutLineItem = {

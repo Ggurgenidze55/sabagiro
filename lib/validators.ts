@@ -177,6 +177,7 @@ export const checkoutSchema = z.object({
               personalId: personalIdSchema,
               email: z.string().trim().email(),
               phone: z.string().trim().min(9).max(20),
+              age: z.coerce.number().int().min(18).max(120),
             }),
           )
           .max(19)
@@ -186,6 +187,7 @@ export const checkoutSchema = z.object({
     .min(1),
   promoCode: z.string().trim().min(2).max(40).optional(),
   confirmAdult18: z.boolean().optional(),
+  confirmIdAtDoor: z.boolean().optional(),
 });
 
 export const promoCodeAdminSchema = z.object({
@@ -218,6 +220,7 @@ export const ticketHolderSchema = z.object({
   personalId: personalIdSchema,
   email: z.string().trim().email(),
   phone: z.string().trim().min(9).max(20),
+  age: z.coerce.number().int().min(18).max(120),
 });
 
 export const freeTicketGenerateSchema = z.object({

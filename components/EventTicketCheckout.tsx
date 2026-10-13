@@ -13,6 +13,7 @@ type EventTicketCheckoutProps = {
   useIdOnlyPaidCheckout?: boolean;
   canGuestPaidTicket?: boolean;
   useIdOnlyGuestPaid?: boolean;
+  guestIdOnlyCheckout?: boolean;
   existingFree?: number;
   existingPurchased?: number;
 };
@@ -27,6 +28,7 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
     useIdOnlyPaidCheckout,
     canGuestPaidTicket,
     useIdOnlyGuestPaid,
+    guestIdOnlyCheckout,
     existingFree = 0,
     existingPurchased = 0,
   } = props;
@@ -34,7 +36,11 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
   const [promoCode, setPromoCode] = useState<string | null>(null);
   const showPromo =
     !isFreeEntry &&
-    (useInstantPaidCheckout || useIdOnlyPaidCheckout || canGuestPaidTicket || useIdOnlyGuestPaid);
+    (useInstantPaidCheckout ||
+      useIdOnlyPaidCheckout ||
+      canGuestPaidTicket ||
+      useIdOnlyGuestPaid ||
+      guestIdOnlyCheckout);
 
   return (
     <div className="event-ticket-checkout">
@@ -51,6 +57,20 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
         />
       ) : useInstantPaidCheckout ? (
         <EventTicketButton slug={slug} isFreeEntry={false} label="Buy ticket" promoCode={promoCode} />
+      ) : guestIdOnlyCheckout ? (
+        <EventTicketButton
+          slug={slug}
+          isFreeEntry={false}
+          needsHolderForm
+          ticketNumber={1}
+          label="Buy ticket"
+          promoCode={promoCode}
+          requireAdultConfirm
+          requireIdAtDoorConfirm
+          requireHolderAge
+          guestCheckout
+          holderFormLead="Buy without an account — enter your details (18+ and ID at the door required)"
+        />
       ) : useIdOnlyPaidCheckout ? (
         <EventTicketButton
           slug={slug}
@@ -60,6 +80,8 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           label="Buy ticket"
           promoCode={promoCode}
           requireAdultConfirm
+          requireIdAtDoorConfirm
+          requireHolderAge
           holderFormLead="Ticket holder — ID/passport and 18+ required (no account verification for this event)"
         />
       ) : canGuestPaidTicket ? (
@@ -69,6 +91,7 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           needsHolderForm
           ticketNumber={existingPurchased + 1}
           promoCode={promoCode}
+          requireHolderAge
         />
       ) : useIdOnlyGuestPaid ? (
         <EventTicketButton
@@ -78,6 +101,8 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           ticketNumber={existingPurchased + 1}
           promoCode={promoCode}
           requireAdultConfirm
+          requireIdAtDoorConfirm
+          requireHolderAge
           holderFormLead="Guest ticket — ID/passport and 18+ required"
         />
       ) : null}

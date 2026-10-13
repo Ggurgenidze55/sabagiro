@@ -12,7 +12,7 @@ import {
   isProfileCompleteForTicket,
 } from '@/lib/user-ticket-holder';
 import { eventAllowsUnverifiedIdPurchase } from '@/lib/event-purchase-eligibility';
-import { validateAdultHolder } from '@/lib/holder-age';
+import { validateAdultHolderWithDeclaredAge } from '@/lib/holder-age';
 import { isValidPersonalId } from '@/lib/personal-id';
 import { ORDER_TTL_MINUTES } from '@/lib/payments/config';
 import type { CheckoutLineItem } from '@/lib/payments/types';
@@ -27,7 +27,9 @@ export async function createPendingOrder(
   items: CheckoutLineItem[],
   promoCodeRaw?: string,
   confirmAdult18?: boolean,
+  opts?: { forceIdOnlyCheckout?: boolean },
 ) {
+  const forceIdOnlyCheckout = Boolean(opts?.forceIdOnlyCheckout);
   const lines: {
     productSlug: string;
     productName: string;
@@ -73,6 +75,7 @@ export async function createPendingOrder(
     });
     const idOnly = eventAllowsUnverifiedIdPurchase(eventRow);
     const verifiedBuyer = canPurchaseTickets(user);
+    const idOnlyCheckout = idOnly && (forceIdOnlyCheckout || !verifiedBuyer);
 
     if (!verifiedBuyer && !idOnly) {
       throw new Error('NOT_VERIFIED');
@@ -83,7 +86,7 @@ export async function createPendingOrder(
     const existingPurchased = await countPurchasedTicketsForEvent(user.id, item.slug);
     let requiredHolders = extraHolderCount(item.qty, existingPurchased);
 
-    if (!verifiedBuyer && idOnly) {
+    if (idOnlyCheckout) {
       requiredHolders = item.qty;
     } else if (requiredHolders === 0 && item.qty > 0 && !isProfileCompleteForTicket(user)) {
       throw new Error('PROFILE_INCOMPLETE');
@@ -93,11 +96,17 @@ export async function createPendingOrder(
       throw new Error('HOLDER_REQUIRED');
     }
 
-    if (!verifiedBuyer && idOnly) {
+    if (idOnlyCheckout) {
       for (let hi = 0; hi < requiredHolders; hi++) {
         const h = extraHolders[hi]!;
         if (!isValidPersonalId(h.personalId)) throw new Error('HOLDER_REQUIRED');
-        validateAdultHolder(h.personalId, Boolean(confirmAdult18), eventRow?.eventDate);
+        if (typeof h.age !== 'number') throw new Error('HOLDER_REQUIRED');
+        validateAdultHolderWithDeclaredAge(
+          h.personalId,
+          h.age,
+          Boolean(confirmAdult18),
+          eventRow?.eventDate,
+        );
       }
     }
 

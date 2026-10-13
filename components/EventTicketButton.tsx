@@ -11,6 +11,7 @@ type HolderDraft = {
   personalId: string;
   email: string;
   phone: string;
+  age: string;
 };
 
 type GuestDraft = {
@@ -28,6 +29,9 @@ type EventTicketButtonProps = {
   ticketNumber?: number;
   promoCode?: string | null;
   requireAdultConfirm?: boolean;
+  requireIdAtDoorConfirm?: boolean;
+  requireHolderAge?: boolean;
+  guestCheckout?: boolean;
   holderFormLead?: string;
 };
 
@@ -53,6 +57,15 @@ function mapApiError(data: { error?: string; code?: string }): string {
   if (data.code === 'UNDERAGE' || data.code === 'ADULT_CONFIRM_REQUIRED') {
     return data.error || 'You must be 18 or older.';
   }
+  if (data.code === 'AGE_MISMATCH') {
+    return data.error || 'Age does not match your ID number.';
+  }
+  if (data.code === 'ID_POLICY_REQUIRED') {
+    return data.error || 'Confirm ID at door and 18+ to continue.';
+  }
+  if (data.code === 'LOGIN_REQUIRED') {
+    return data.error || 'Log in to buy tickets for this event.';
+  }
   return data.error || 'Could not complete request';
 }
 
@@ -65,18 +78,23 @@ export function EventTicketButton({
   ticketNumber = 2,
   promoCode = null,
   requireAdultConfirm = false,
+  requireIdAtDoorConfirm = false,
+  requireHolderAge = false,
+  guestCheckout = false,
   holderFormLead,
 }: EventTicketButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmAdult18, setConfirmAdult18] = useState(false);
+  const [confirmIdAtDoor, setConfirmIdAtDoor] = useState(false);
   const [holder, setHolder] = useState<HolderDraft>({
     firstName: '',
     lastName: '',
     personalId: '',
     email: '',
     phone: '',
+    age: '',
   });
   const [guest, setGuest] = useState<GuestDraft>({
     firstName: '',
@@ -128,7 +146,7 @@ export function EventTicketButton({
       body: JSON.stringify(payload),
     });
     const data = await res.json().catch(() => ({}));
-    if (res.status === 401) {
+    if (res.status === 401 && !guestCheckout) {
       router.push(`/login?next=/events/${encodeURIComponent(slug)}`);
       return;
     }
@@ -185,6 +203,7 @@ export function EventTicketButton({
           personalId: holder.personalId.trim(),
           email: holder.email.trim(),
           phone: holder.phone.trim(),
+          ...(requireHolderAge ? { age: Number(holder.age.trim()) } : {}),
         };
     try {
       if (isFreeEntry) {
@@ -193,7 +212,8 @@ export function EventTicketButton({
         await submit({
           items: [{ slug, qty: 1, holders: [holderPayload] }],
           ...(promoCode ? { promoCode } : {}),
-          ...(requireAdultConfirm ? { confirmAdult18 } : {}),
+          ...(requireAdultConfirm || guestCheckout ? { confirmAdult18 } : {}),
+          ...(requireIdAtDoorConfirm || guestCheckout ? { confirmIdAtDoor } : {}),
         });
       }
     } catch {
@@ -276,6 +296,20 @@ export function EventTicketButton({
                 />
               </label>
             ) : null}
+            {!isFreeEntry && requireHolderAge ? (
+              <label className="form-field">
+                <span>Age</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={18}
+                  max={120}
+                  value={holder.age}
+                  onChange={(e) => updateHolderField('age', e.target.value)}
+                  required
+                />
+              </label>
+            ) : null}
           </div>
           {requireAdultConfirm && !isFreeEntry ? (
             <label className="form-check event-ticket-action__adult">
@@ -288,10 +322,29 @@ export function EventTicketButton({
               <span>I confirm I am 18 years or older (required for passport / non-Georgian ID)</span>
             </label>
           ) : null}
+          {(requireIdAtDoorConfirm || guestCheckout) && !isFreeEntry ? (
+            <label className="form-check event-ticket-action__adult">
+              <input
+                type="checkbox"
+                checked={confirmIdAtDoor}
+                onChange={(e) => setConfirmIdAtDoor(e.target.checked)}
+                required
+              />
+              <span>
+                I will bring the same ID or passport to the door. Entry is 18+ only — without valid
+                ID or if under 18, entry is refused and the ticket is not refunded.
+              </span>
+            </label>
+          ) : null}
           <button
             type="submit"
             className="btn"
-            disabled={disabled || loading || (requireAdultConfirm && !isFreeEntry && !confirmAdult18)}
+            disabled={
+              disabled ||
+              loading ||
+              (requireAdultConfirm && !isFreeEntry && !confirmAdult18) ||
+              ((requireIdAtDoorConfirm || guestCheckout) && !isFreeEntry && !confirmIdAtDoor)
+            }
           >
             {loading ? '…' : buttonLabel}
           </button>

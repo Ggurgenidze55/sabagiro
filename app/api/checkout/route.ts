@@ -1,14 +1,15 @@
 import { NextResponse } from 'next/server';
-import { requireUser } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { findOrCreateUserForGuestCheckout } from '@/lib/guest-checkout-user';
 import { createPendingOrder } from '@/lib/payments/create-order';
 import { startPaymentForOrder } from '@/lib/payments/start-payment';
+import { eventAllowsUnverifiedIdPurchase } from '@/lib/event-purchase-eligibility';
 import {
   getTicketLimitPerEvent,
   ticketAlreadyOwnedMessage,
   ticketLimitMessage,
 } from '@/lib/ticket-purchase-limit';
-import { eventAllowsUnverifiedIdPurchase } from '@/lib/event-purchase-eligibility';
 import { canPurchaseTickets } from '@/lib/verification';
 import { PROFILE_INCOMPLETE_MESSAGE } from '@/lib/user-ticket-holder';
 import { checkoutSchema } from '@/lib/validators';
@@ -18,34 +19,91 @@ export async function POST(request: Request) {
   let showLimitDetails = false;
 
   try {
-    const session = await requireUser();
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: session.id } });
-    purchaseLimit = getTicketLimitPerEvent(user);
-    showLimitDetails = user.freeTicketsEnabled;
+    const parsed = checkoutSchema.parse(await request.json());
+    const { items, promoCode, confirmAdult18, confirmIdAtDoor } = parsed;
 
-    const { items, promoCode, confirmAdult18 } = checkoutSchema.parse(await request.json());
+    const session = await getSessionUser();
+    let user;
+    let forceIdOnlyCheckout = false;
 
-    if (!canPurchaseTickets(user)) {
-      const slug = items[0]?.slug;
-      const eventRow = slug
-        ? await prisma.clubEvent.findFirst({
-            where: { slug },
-            select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
-          })
-        : null;
+    if (session) {
+      user = await prisma.user.findUniqueOrThrow({ where: { id: session.id } });
+      purchaseLimit = getTicketLimitPerEvent(user);
+      showLimitDetails = user.freeTicketsEnabled;
+
+      if (!canPurchaseTickets(user)) {
+        const slug = items[0]?.slug;
+        const eventRow = slug
+          ? await prisma.clubEvent.findFirst({
+              where: { slug },
+              select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
+            })
+          : null;
+        if (!eventAllowsUnverifiedIdPurchase(eventRow)) {
+          return NextResponse.json(
+            {
+              error:
+                'Ticket purchase requires verified account. Wait for admin approval after registration.',
+              code: 'NOT_VERIFIED',
+            },
+            { status: 403 },
+          );
+        }
+        const hasHolderDetails = items.some((i) => (i.holders?.length ?? 0) > 0);
+        if (hasHolderDetails && (!confirmAdult18 || !confirmIdAtDoor)) {
+          return NextResponse.json(
+            {
+              error: 'Confirm age 18+ and that you will bring ID to the door.',
+              code: 'ID_POLICY_REQUIRED',
+            },
+            { status: 400 },
+          );
+        }
+      }
+    } else {
+      if (items.length !== 1 || items[0]!.qty !== 1) {
+        return NextResponse.json(
+          { error: 'Guest checkout supports one ticket at a time.', code: 'GUEST_CHECKOUT_INVALID' },
+          { status: 400 },
+        );
+      }
+      const slug = items[0]!.slug;
+      const eventRow = await prisma.clubEvent.findFirst({
+        where: { slug },
+        select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
+      });
       if (!eventAllowsUnverifiedIdPurchase(eventRow)) {
         return NextResponse.json(
           {
-            error:
-              'Ticket purchase requires verified account. Wait for admin approval after registration.',
-            code: 'NOT_VERIFIED',
+            error: 'Log in or register to buy tickets for this event.',
+            code: 'LOGIN_REQUIRED',
           },
-          { status: 403 },
+          { status: 401 },
         );
       }
+      const holder = items[0]!.holders?.[0];
+      if (!holder) {
+        return NextResponse.json(
+          { error: 'Enter ticket holder details.', code: 'HOLDER_REQUIRED' },
+          { status: 400 },
+        );
+      }
+      if (!confirmAdult18 || !confirmIdAtDoor) {
+        return NextResponse.json(
+          {
+            error: 'Confirm age 18+ and that you will bring ID to the door.',
+            code: 'ID_POLICY_REQUIRED',
+          },
+          { status: 400 },
+        );
+      }
+      user = await findOrCreateUserForGuestCheckout(holder);
+      forceIdOnlyCheckout = true;
     }
 
-    const order = await createPendingOrder(user, items, promoCode, confirmAdult18);
+    const order = await createPendingOrder(user, items, promoCode, confirmAdult18, {
+      forceIdOnlyCheckout,
+    });
     const payment = await startPaymentForOrder(order);
 
     return NextResponse.json({
@@ -92,6 +150,15 @@ export async function POST(request: Request) {
     if (message === 'UNDERAGE') {
       return NextResponse.json(
         { error: 'Ticket holder must be 18 or older.', code: 'UNDERAGE' },
+        { status: 400 },
+      );
+    }
+    if (message === 'AGE_MISMATCH') {
+      return NextResponse.json(
+        {
+          error: 'Age does not match the personal ID number. Check your details.',
+          code: 'AGE_MISMATCH',
+        },
         { status: 400 },
       );
     }

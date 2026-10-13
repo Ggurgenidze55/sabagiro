@@ -476,7 +476,8 @@ export function AdminEventsPanel({
                 checked={form.allowUnverifiedIdPurchase}
                 onChange={(e) => setForm({ ...form, allowUnverifiedIdPurchase: e.target.checked })}
               />
-              Allow ticket purchase without account verification (ID/passport + 18+ at checkout)
+              Allow ticket purchase without registration on this event page (ID/passport, age, 18+ at
+              checkout)
             </label>
           ) : null}
           {form.isFreeEntry ? (
