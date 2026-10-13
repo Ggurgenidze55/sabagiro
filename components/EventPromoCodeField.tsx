@@ -68,14 +68,21 @@ export function EventPromoCodeField({ eventSlug, onApplied }: EventPromoCodeFiel
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Enter code"
             autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck={false}
             disabled={Boolean(appliedCode)}
           />
           {appliedCode ? (
-            <button type="button" className="btn btn--ghost" onClick={clear}>
+            <button type="button" className="btn btn--ghost event-promo-field__btn" onClick={clear}>
               Remove
             </button>
           ) : (
-            <button type="button" className="btn btn--ghost" onClick={apply} disabled={status === 'checking'}>
+            <button
+              type="button"
+              className="btn btn--ghost event-promo-field__btn"
+              onClick={apply}
+              disabled={status === 'checking'}
+            >
               {status === 'checking' ? '…' : 'Apply'}
             </button>
           )}
