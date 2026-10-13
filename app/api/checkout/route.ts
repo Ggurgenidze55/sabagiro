@@ -8,6 +8,7 @@ import {
   ticketAlreadyOwnedMessage,
   ticketLimitMessage,
 } from '@/lib/ticket-purchase-limit';
+import { eventAllowsUnverifiedIdPurchase } from '@/lib/event-purchase-eligibility';
 import { canPurchaseTickets } from '@/lib/verification';
 import { PROFILE_INCOMPLETE_MESSAGE } from '@/lib/user-ticket-holder';
 import { checkoutSchema } from '@/lib/validators';
@@ -22,19 +23,29 @@ export async function POST(request: Request) {
     purchaseLimit = getTicketLimitPerEvent(user);
     showLimitDetails = user.freeTicketsEnabled;
 
+    const { items, promoCode, confirmAdult18 } = checkoutSchema.parse(await request.json());
+
     if (!canPurchaseTickets(user)) {
-      return NextResponse.json(
-        {
-          error:
-            'Ticket purchase requires verified account. Wait for admin approval after registration.',
-          code: 'NOT_VERIFIED',
-        },
-        { status: 403 },
-      );
+      const slug = items[0]?.slug;
+      const eventRow = slug
+        ? await prisma.clubEvent.findFirst({
+            where: { slug },
+            select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
+          })
+        : null;
+      if (!eventAllowsUnverifiedIdPurchase(eventRow)) {
+        return NextResponse.json(
+          {
+            error:
+              'Ticket purchase requires verified account. Wait for admin approval after registration.',
+            code: 'NOT_VERIFIED',
+          },
+          { status: 403 },
+        );
+      }
     }
 
-    const { items, promoCode } = checkoutSchema.parse(await request.json());
-    const order = await createPendingOrder(user, items, promoCode);
+    const order = await createPendingOrder(user, items, promoCode, confirmAdult18);
     const payment = await startPaymentForOrder(order);
 
     return NextResponse.json({
@@ -77,6 +88,18 @@ export async function POST(request: Request) {
     }
     if (message === 'NO_ITEMS') {
       return NextResponse.json({ error: 'No valid tickets in order' }, { status: 400 });
+    }
+    if (message === 'UNDERAGE') {
+      return NextResponse.json(
+        { error: 'Ticket holder must be 18 or older.', code: 'UNDERAGE' },
+        { status: 400 },
+      );
+    }
+    if (message === 'ADULT_CONFIRM_REQUIRED') {
+      return NextResponse.json(
+        { error: 'Confirm that you are 18 or older.', code: 'ADULT_CONFIRM_REQUIRED' },
+        { status: 400 },
+      );
     }
     if (message === 'INVALID_PROMO') {
       return NextResponse.json(

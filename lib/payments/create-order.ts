@@ -11,17 +11,22 @@ import { extraHolderCount } from '@/lib/ticket-holders';
 import {
   isProfileCompleteForTicket,
 } from '@/lib/user-ticket-holder';
+import { eventAllowsUnverifiedIdPurchase } from '@/lib/event-purchase-eligibility';
+import { validateAdultHolder } from '@/lib/holder-age';
+import { isValidPersonalId } from '@/lib/personal-id';
 import { ORDER_TTL_MINUTES } from '@/lib/payments/config';
 import type { CheckoutLineItem } from '@/lib/payments/types';
 import {
   assertPromoCodeForCheckout,
   discountedUnitPriceGel,
 } from '@/lib/promo-codes';
+import { canPurchaseTickets } from '@/lib/verification';
 
 export async function createPendingOrder(
   user: User,
   items: CheckoutLineItem[],
   promoCodeRaw?: string,
+  confirmAdult18?: boolean,
 ) {
   const lines: {
     productSlug: string;
@@ -62,15 +67,38 @@ export async function createPendingOrder(
       throw new Error('SOLD_OUT');
     }
 
+    const eventRow = await prisma.clubEvent.findFirst({
+      where: { slug: item.slug },
+      select: { allowUnverifiedIdPurchase: true, isFreeEntry: true, eventDate: true },
+    });
+    const idOnly = eventAllowsUnverifiedIdPurchase(eventRow);
+    const verifiedBuyer = canPurchaseTickets(user);
+
+    if (!verifiedBuyer && !idOnly) {
+      throw new Error('NOT_VERIFIED');
+    }
+
     const { prices, labels } = allocateTierPrices(avail.tiers, item.qty);
     const extraHolders = item.holders ?? [];
     const existingPurchased = await countPurchasedTicketsForEvent(user.id, item.slug);
-    const requiredHolders = extraHolderCount(item.qty, existingPurchased);
-    if (requiredHolders === 0 && item.qty > 0 && !isProfileCompleteForTicket(user)) {
+    let requiredHolders = extraHolderCount(item.qty, existingPurchased);
+
+    if (!verifiedBuyer && idOnly) {
+      requiredHolders = item.qty;
+    } else if (requiredHolders === 0 && item.qty > 0 && !isProfileCompleteForTicket(user)) {
       throw new Error('PROFILE_INCOMPLETE');
     }
+
     if (extraHolders.length < requiredHolders) {
       throw new Error('HOLDER_REQUIRED');
+    }
+
+    if (!verifiedBuyer && idOnly) {
+      for (let hi = 0; hi < requiredHolders; hi++) {
+        const h = extraHolders[hi]!;
+        if (!isValidPersonalId(h.personalId)) throw new Error('HOLDER_REQUIRED');
+        validateAdultHolder(h.personalId, Boolean(confirmAdult18), eventRow?.eventDate);
+      }
     }
 
     let linePrices = prices;

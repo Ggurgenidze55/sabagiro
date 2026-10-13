@@ -26,6 +26,7 @@ export type Product = {
   doorsOpen?: string;
   isFreeEntry?: boolean;
   freeEntryAccess?: FreeEntryAccessMode;
+  allowUnverifiedIdPurchase?: boolean;
   tiers?: TierAvailability[];
   ticketsRemaining?: number;
   priceFromGel?: number;

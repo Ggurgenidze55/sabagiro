@@ -27,6 +27,8 @@ type EventTicketButtonProps = {
   needsHolderForm?: boolean;
   ticketNumber?: number;
   promoCode?: string | null;
+  requireAdultConfirm?: boolean;
+  holderFormLead?: string;
 };
 
 function mapApiError(data: { error?: string; code?: string }): string {
@@ -48,6 +50,9 @@ function mapApiError(data: { error?: string; code?: string }): string {
   if (data.code === 'INVALID_PROMO') {
     return data.error || 'Promo code is not valid for this event.';
   }
+  if (data.code === 'UNDERAGE' || data.code === 'ADULT_CONFIRM_REQUIRED') {
+    return data.error || 'You must be 18 or older.';
+  }
   return data.error || 'Could not complete request';
 }
 
@@ -59,10 +64,13 @@ export function EventTicketButton({
   needsHolderForm = false,
   ticketNumber = 2,
   promoCode = null,
+  requireAdultConfirm = false,
+  holderFormLead,
 }: EventTicketButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [confirmAdult18, setConfirmAdult18] = useState(false);
   const [holder, setHolder] = useState<HolderDraft>({
     firstName: '',
     lastName: '',
@@ -150,6 +158,7 @@ export function EventTicketButton({
           : {
               items: [{ slug, qty: 1, holders: [] }],
               ...(promoCode ? { promoCode } : {}),
+              ...(requireAdultConfirm ? { confirmAdult18: true } : {}),
             },
       );
     } catch {
@@ -184,6 +193,7 @@ export function EventTicketButton({
         await submit({
           items: [{ slug, qty: 1, holders: [holderPayload] }],
           ...(promoCode ? { promoCode } : {}),
+          ...(requireAdultConfirm ? { confirmAdult18 } : {}),
         });
       }
     } catch {
@@ -198,7 +208,10 @@ export function EventTicketButton({
       <div className="event-ticket-action">
         <form className="form-stack event-ticket-action__form" onSubmit={handleFormSubmit}>
           <p className="table-sub" style={{ marginBottom: '0.25rem' }}>
-            Invitation #{ticketNumber} — guest details (required)
+            {holderFormLead ??
+              (isFreeEntry
+                ? `Invitation #${ticketNumber} — guest details (required)`
+                : `Ticket #${ticketNumber} — holder details (required)`)}
           </p>
           <div className="form-row">
             <label className="form-field">
@@ -264,7 +277,22 @@ export function EventTicketButton({
               </label>
             ) : null}
           </div>
-          <button type="submit" className="btn" disabled={disabled || loading}>
+          {requireAdultConfirm && !isFreeEntry ? (
+            <label className="form-check event-ticket-action__adult">
+              <input
+                type="checkbox"
+                checked={confirmAdult18}
+                onChange={(e) => setConfirmAdult18(e.target.checked)}
+                required
+              />
+              <span>I confirm I am 18 years or older (required for passport / non-Georgian ID)</span>
+            </label>
+          ) : null}
+          <button
+            type="submit"
+            className="btn"
+            disabled={disabled || loading || (requireAdultConfirm && !isFreeEntry && !confirmAdult18)}
+          >
             {loading ? '…' : buttonLabel}
           </button>
         </form>

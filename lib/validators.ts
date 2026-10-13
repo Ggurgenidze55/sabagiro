@@ -145,6 +145,7 @@ export const clubEventSchema = z.object({
   freeEntryAccess: z.enum(['ALL_VERIFIED', 'INVITED_ONLY']).optional(),
   artistTicketsEnabled: z.boolean().optional(),
   verifiedInvitesEnabled: z.boolean().optional(),
+  allowUnverifiedIdPurchase: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   published: z.boolean().optional(),
   sortOrder: z.coerce.number().int().optional(),
@@ -184,6 +185,7 @@ export const checkoutSchema = z.object({
     )
     .min(1),
   promoCode: z.string().trim().min(2).max(40).optional(),
+  confirmAdult18: z.boolean().optional(),
 });
 
 export const promoCodeAdminSchema = z.object({

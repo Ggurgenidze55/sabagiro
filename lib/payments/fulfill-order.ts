@@ -70,7 +70,7 @@ export async function fulfillPaidOrder(orderId: string): Promise<string[]> {
       let holderIdx = 0;
 
       for (let i = 0; i < item.quantity; i++) {
-        const usesBuyer = existingPurchased === 0 && i === 0;
+        const usesBuyer = existingPurchased === 0 && i === 0 && extraHolders.length === 0;
         const holder = usesBuyer ? undefined : extraHolders[holderIdx++];
         if (!usesBuyer && !holder) throw new Error('HOLDER_REQUIRED');
 

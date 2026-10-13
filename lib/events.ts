@@ -42,6 +42,7 @@ export function eventToProduct(event: ClubEvent): Product {
     isFreeEntry: event.isFreeEntry,
     freeEntryAccess: (event as ClubEvent & { freeEntryAccess?: 'ALL_VERIFIED' | 'INVITED_ONLY' })
       .freeEntryAccess ?? 'INVITED_ONLY',
+    allowUnverifiedIdPurchase: Boolean(event.allowUnverifiedIdPurchase),
   };
 }
 

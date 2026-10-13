@@ -23,6 +23,7 @@ import {
   remainingFreeTicketsForEvent,
   remainingPurchaseSlots,
 } from '@/lib/ticket-purchase-limit';
+import { canBuyPaidTicketsForEvent } from '@/lib/event-purchase-eligibility';
 import { canPurchaseTickets } from '@/lib/verification';
 import { isProfileCompleteForTicket } from '@/lib/user-ticket-holder';
 import {
@@ -90,6 +91,10 @@ export default async function EventPage({ params }: PageProps) {
   const existingFree =
     user && canAccessFree ? await countFreeTicketsForEvent(user.id, product.slug) : 0;
   const profileComplete = Boolean(user && isProfileCompleteForTicket(user));
+  const allowIdOnlyPurchase =
+    Boolean(product.allowUnverifiedIdPurchase) && !isFreeEntry && !pastEvent;
+  const verifiedPurchaser = Boolean(user && canPurchaseTickets(user));
+  const canPaidCheckout = Boolean(user && canBuyPaidTicketsForEvent(user, product));
   const allowsGuestFreeTickets = canAccessFree && perEventFreeLimit > 1;
   const canInstantFreeTicket =
     Boolean(user) &&
@@ -107,16 +112,32 @@ export default async function EventPage({ params }: PageProps) {
     existingFree > 0;
   const useInstantPaidCheckout =
     !canAccessFree &&
-    Boolean(user) &&
-    canPurchaseTickets(user!) &&
+    canPaidCheckout &&
+    verifiedPurchaser &&
     profileComplete &&
     !cannotBuyMore &&
     (product.ticketsRemaining ?? 0) > 0 &&
     extraHolderCount(1, existingPurchased) === 0;
+  const useIdOnlyPaidCheckout =
+    !canAccessFree &&
+    canPaidCheckout &&
+    !verifiedPurchaser &&
+    allowIdOnlyPurchase &&
+    !cannotBuyMore &&
+    (product.ticketsRemaining ?? 0) > 0 &&
+    existingPurchased === 0;
   const canGuestPaidTicket =
     !canAccessFree &&
-    Boolean(user) &&
-    canPurchaseTickets(user!) &&
+    canPaidCheckout &&
+    verifiedPurchaser &&
+    !cannotBuyMore &&
+    (product.ticketsRemaining ?? 0) > 0 &&
+    existingPurchased > 0;
+  const useIdOnlyGuestPaid =
+    !canAccessFree &&
+    canPaidCheckout &&
+    !verifiedPurchaser &&
+    allowIdOnlyPurchase &&
     !cannotBuyMore &&
     (product.ticketsRemaining ?? 0) > 0 &&
     existingPurchased > 0;
@@ -201,6 +222,11 @@ export default async function EventPage({ params }: PageProps) {
             <p className="notice-banner notice-banner--inline">
               {ONLINE_INVITATION_LABEL} — your account includes invitations for this event.
             </p>
+          ) : !pastEvent && user && !verifiedPurchaser && allowIdOnlyPurchase ? (
+            <p className="notice-banner notice-banner--inline">
+              This event allows checkout without account verification — enter ID/passport and confirm
+              18+ when buying.
+            </p>
           ) : !pastEvent ? (
             <TicketAccessNotice user={user} />
           ) : null}
@@ -281,14 +307,18 @@ export default async function EventPage({ params }: PageProps) {
             (canInstantFreeTicket ||
               canGuestFreeTicket ||
               useInstantPaidCheckout ||
-              canGuestPaidTicket) ? (
+              useIdOnlyPaidCheckout ||
+              canGuestPaidTicket ||
+              useIdOnlyGuestPaid) ? (
             <EventTicketCheckout
               slug={product.slug}
               isFreeEntry={isFreeEntry}
               canInstantFreeTicket={canInstantFreeTicket}
               canGuestFreeTicket={canGuestFreeTicket}
               useInstantPaidCheckout={useInstantPaidCheckout}
+              useIdOnlyPaidCheckout={useIdOnlyPaidCheckout}
               canGuestPaidTicket={canGuestPaidTicket}
+              useIdOnlyGuestPaid={useIdOnlyGuestPaid}
               existingFree={existingFree}
               existingPurchased={existingPurchased}
             />

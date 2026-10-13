@@ -27,6 +27,7 @@ type ClubEventRow = {
   isFreeEntry: boolean;
   freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
   artistTicketsEnabled: boolean;
+  allowUnverifiedIdPurchase: boolean;
   isFeatured: boolean;
   published: boolean;
   sortOrder: number;
@@ -63,10 +64,12 @@ const defaultFormBase = {
 const defaultForm: typeof defaultFormBase & {
   freeEntryAccess: 'ALL_VERIFIED' | 'INVITED_ONLY';
   artistTicketsEnabled: boolean;
+  allowUnverifiedIdPurchase: boolean;
 } = {
   ...defaultFormBase,
   freeEntryAccess: 'INVITED_ONLY',
   artistTicketsEnabled: false,
+  allowUnverifiedIdPurchase: false,
 };
 
 function tiersFromEvent(ev: ClubEventRow): TierFormRow[] {
@@ -194,6 +197,7 @@ export function AdminEventsPanel({
       isFreeEntry: ev.isFreeEntry,
       freeEntryAccess: ev.freeEntryAccess ?? 'INVITED_ONLY',
       artistTicketsEnabled: ev.artistTicketsEnabled ?? false,
+      allowUnverifiedIdPurchase: ev.allowUnverifiedIdPurchase ?? false,
       isFeatured: ev.isFeatured,
       published: ev.published,
       sortOrder: ev.sortOrder,
@@ -459,11 +463,22 @@ export function AdminEventsPanel({
                   isFreeEntry: e.target.checked,
                   priceGel: e.target.checked ? 0 : form.priceGel,
                   freeEntryAccess: e.target.checked ? form.freeEntryAccess : 'INVITED_ONLY',
+                  allowUnverifiedIdPurchase: e.target.checked ? false : form.allowUnverifiedIdPurchase,
                 })
               }
             />
             Free entry event (online invitation — no paid checkout)
           </label>
+          {!form.isFreeEntry ? (
+            <label className="form-check">
+              <input
+                type="checkbox"
+                checked={form.allowUnverifiedIdPurchase}
+                onChange={(e) => setForm({ ...form, allowUnverifiedIdPurchase: e.target.checked })}
+              />
+              Allow ticket purchase without account verification (ID/passport + 18+ at checkout)
+            </label>
+          ) : null}
           {form.isFreeEntry ? (
             <fieldset className="form-stack" style={{ marginTop: '0.75rem' }}>
               <legend className="table-sub" style={{ marginBottom: '0.5rem' }}>

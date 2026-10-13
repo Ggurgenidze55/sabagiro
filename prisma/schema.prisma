@@ -192,6 +192,7 @@ model ClubEvent {
   freeEntryAccess  FreeEntryAccess   @default(INVITED_ONLY)
   artistTicketsEnabled Boolean       @default(false)
   verifiedInvitesEnabled Boolean     @default(false)
+  allowUnverifiedIdPurchase Boolean @default(false)
   isFeatured       Boolean           @default(false)
   published   Boolean           @default(true)
   sortOrder   Int               @default(0)

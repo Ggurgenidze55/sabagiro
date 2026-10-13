@@ -108,6 +108,13 @@ export async function PATCH(request: Request, { params }: Params) {
           ...(body.verifiedInvitesEnabled !== undefined
             ? { verifiedInvitesEnabled: body.verifiedInvitesEnabled }
             : {}),
+          ...(body.allowUnverifiedIdPurchase !== undefined || body.isFreeEntry !== undefined
+            ? {
+                allowUnverifiedIdPurchase: isFreeEntry
+                  ? false
+                  : (body.allowUnverifiedIdPurchase ?? existing.allowUnverifiedIdPurchase),
+              }
+            : {}),
           ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
           ...(body.published !== undefined ? { published: body.published } : {}),
           ...(body.sortOrder !== undefined ? { sortOrder: body.sortOrder } : {}),

@@ -3296,6 +3296,19 @@ body.nav-lock {
   max-width: 22rem;
 }
 
+.event-ticket-action__adult {
+  text-transform: none;
+  letter-spacing: 0.06em;
+  font-size: var(--text-xs);
+  line-height: 1.5;
+  align-items: flex-start;
+}
+
+.event-ticket-action__adult span {
+  text-transform: none;
+  letter-spacing: 0.06em;
+}
+
 .admin-promo__section + .admin-promo__section {
   margin-top: 2.5rem;
 }

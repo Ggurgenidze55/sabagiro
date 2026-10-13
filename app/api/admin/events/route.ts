@@ -66,6 +66,9 @@ export async function POST(request: Request) {
           : 'INVITED_ONLY',
         artistTicketsEnabled: body.artistTicketsEnabled ?? false,
         verifiedInvitesEnabled: body.verifiedInvitesEnabled ?? false,
+        allowUnverifiedIdPurchase: body.isFreeEntry
+          ? false
+          : (body.allowUnverifiedIdPurchase ?? false),
         isFeatured: body.isFeatured ?? false,
         published: body.published ?? true,
         sortOrder: body.sortOrder ?? 0,

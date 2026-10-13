@@ -7,39 +7,38 @@ import { EventTicketButton } from '@/components/EventTicketButton';
 type EventTicketCheckoutProps = {
   slug: string;
   isFreeEntry: boolean;
-  disabled?: boolean;
   canInstantFreeTicket?: boolean;
   canGuestFreeTicket?: boolean;
   useInstantPaidCheckout?: boolean;
+  useIdOnlyPaidCheckout?: boolean;
   canGuestPaidTicket?: boolean;
+  useIdOnlyGuestPaid?: boolean;
   existingFree?: number;
   existingPurchased?: number;
-  ticketsRemaining?: number;
 };
 
 export function EventTicketCheckout(props: EventTicketCheckoutProps) {
   const {
     slug,
     isFreeEntry,
-    disabled,
     canInstantFreeTicket,
     canGuestFreeTicket,
     useInstantPaidCheckout,
+    useIdOnlyPaidCheckout,
     canGuestPaidTicket,
+    useIdOnlyGuestPaid,
     existingFree = 0,
     existingPurchased = 0,
   } = props;
 
   const [promoCode, setPromoCode] = useState<string | null>(null);
-  const showPromo = !isFreeEntry && (useInstantPaidCheckout || canGuestPaidTicket);
-
-  function onPromoApplied(code: string | null) {
-    setPromoCode(code);
-  }
+  const showPromo =
+    !isFreeEntry &&
+    (useInstantPaidCheckout || useIdOnlyPaidCheckout || canGuestPaidTicket || useIdOnlyGuestPaid);
 
   return (
     <div className="event-ticket-checkout">
-      {showPromo ? <EventPromoCodeField eventSlug={slug} onApplied={onPromoApplied} /> : null}
+      {showPromo ? <EventPromoCodeField eventSlug={slug} onApplied={(code) => setPromoCode(code)} /> : null}
       {canInstantFreeTicket ? (
         <EventTicketButton slug={slug} isFreeEntry promoCode={promoCode} />
       ) : canGuestFreeTicket ? (
@@ -52,6 +51,17 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
         />
       ) : useInstantPaidCheckout ? (
         <EventTicketButton slug={slug} isFreeEntry={false} label="Buy ticket" promoCode={promoCode} />
+      ) : useIdOnlyPaidCheckout ? (
+        <EventTicketButton
+          slug={slug}
+          isFreeEntry={false}
+          needsHolderForm
+          ticketNumber={1}
+          label="Buy ticket"
+          promoCode={promoCode}
+          requireAdultConfirm
+          holderFormLead="Ticket holder — ID/passport and 18+ required (no account verification for this event)"
+        />
       ) : canGuestPaidTicket ? (
         <EventTicketButton
           slug={slug}
@@ -59,6 +69,16 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           needsHolderForm
           ticketNumber={existingPurchased + 1}
           promoCode={promoCode}
+        />
+      ) : useIdOnlyGuestPaid ? (
+        <EventTicketButton
+          slug={slug}
+          isFreeEntry={false}
+          needsHolderForm
+          ticketNumber={existingPurchased + 1}
+          promoCode={promoCode}
+          requireAdultConfirm
+          holderFormLead="Guest ticket — ID/passport and 18+ required"
         />
       ) : null}
     </div>
