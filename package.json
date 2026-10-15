@@ -21,6 +21,8 @@
     "seed:admin": "dotenv -e .env.local -e .env -- tsx scripts/seed-admin.mjs",
     "seed:appstore-review": "dotenv -e .env.local -e .env -- tsx scripts/seed-appstore-review-user.mjs",
     "seed:events": "dotenv -e .env.local -e .env -- tsx scripts/seed-events.mjs",
+    "seed:checkout-test": "dotenv -e .env.local -e .env -- tsx scripts/seed-checkout-test-event.mjs",
+    "test:checkout-e2e": "dotenv -e .env.local -e .env -- tsx scripts/e2e-checkout-flow.mjs",
     "setup:db": "npm run db:push && npm run seed:events"
   },
   "dependencies": {

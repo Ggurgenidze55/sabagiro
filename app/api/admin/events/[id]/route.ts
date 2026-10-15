@@ -142,6 +142,16 @@ export async function PATCH(request: Request, { params }: Params) {
 export async function DELETE(_request: Request, { params }: Params) {
   try {
     await requireEventEditor();
+    const existing = await prisma.clubEvent.findUnique({
+      where: { id: params.id },
+      select: { slug: true },
+    });
+    if (existing?.slug) {
+      const { upsertEventStatistics } = await import('@/lib/event-statistics');
+      await upsertEventStatistics(existing.slug, { finalize: true }).catch((err) => {
+        console.error('[admin/events] statistics snapshot before delete failed', err);
+      });
+    }
     await prisma.clubEvent.delete({ where: { id: params.id } });
     regenerateHomepageEventsSnapshot().catch((err) => {
       console.error('[admin/events] homepage snapshot regen failed', err);

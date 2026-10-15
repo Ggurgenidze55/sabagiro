@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { requireUser } from '@/lib/auth';
+import { getSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import {
   completePaymentFailed,
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const session = await requireUser();
+    const session = await getSessionUser();
     const { orderId, action } = bodySchema.parse(await request.json());
 
     const order = await prisma.order.findUnique({
@@ -27,9 +27,16 @@ export async function POST(request: Request) {
       include: { payments: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
 
-    if (!order || order.userId !== session.id) {
+    if (!order) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
+
+    if (session) {
+      if (order.userId !== session.id) {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      }
+    }
+    // Guest checkout (no session): test simulator only — same as Flitt redirect without login.
 
     const payment = order.payments[0];
     if (!payment || payment.provider !== 'TEST') {

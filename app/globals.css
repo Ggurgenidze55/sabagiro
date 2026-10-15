@@ -3288,6 +3288,32 @@ body.nav-lock {
   color: #ff6688;
 }
 
+.event-promo-field__total {
+  margin: 0.5rem 0 0;
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  color: var(--concrete-light);
+}
+
+.event-promo-field__total-label {
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  color: rgba(232, 224, 216, 0.55);
+}
+
+.event-promo-field__total strong {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--acid);
+  font-weight: 400;
+}
+
+.event-promo-field__total-was {
+  font-size: var(--text-xs);
+  color: rgba(232, 224, 216, 0.45);
+}
+
 .event-ticket-checkout {
   display: flex;
   flex-direction: column;
@@ -3309,12 +3335,81 @@ body.nav-lock {
   letter-spacing: 0.06em;
 }
 
+.event-ticket-action__adult strong,
+.event-ticket-action__form .form-field strong {
+  font-weight: 700;
+  color: var(--acid);
+}
+
+.event-ticket-action__id-notice {
+  margin: 0 0 0.85rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(249, 193, 8, 0.4);
+  background: rgba(249, 193, 8, 0.1);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: var(--concrete-light);
+}
+
+.event-ticket-action__id-notice strong {
+  font-weight: 700;
+  color: var(--acid);
+}
+
+.event-page__id-notice strong {
+  font-weight: 700;
+  color: var(--acid);
+}
+
 .admin-promo__section + .admin-promo__section {
   margin-top: 2.5rem;
 }
 
+.admin-promo__create-form {
+  max-width: 36rem;
+}
+
+.admin-promo__create-row {
+  grid-template-columns: minmax(6rem, 8rem) minmax(0, 1fr);
+  align-items: end;
+}
+
+.admin-promo__field-code input {
+  max-width: 16rem;
+}
+
+.admin-promo__field-discount .int-input,
+.admin-promo__field-discount input {
+  max-width: 6rem;
+}
+
+.admin-promo__list-lead {
+  margin: 0.35rem 0 1rem;
+}
+
 .admin-promo-stats {
   margin-top: 2.5rem;
+}
+
+.admin-invite-breakdown {
+  margin-top: 2rem;
+}
+
+.admin-invite-breakdown__dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem 1.25rem;
+}
+
+.admin-statistics-list a {
+  color: var(--acid);
+  text-decoration: none;
+}
+
+.admin-statistics-list a:hover {
+  text-decoration: underline;
 }
 
 .admin-promo-stats__table-wrap {
@@ -3727,20 +3822,12 @@ body.nav-lock {
     max-width: none;
   }
 
-  .event-promo-field__row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.55rem;
-  }
-
   .event-promo-field__row input {
-    width: 100%;
     min-height: 44px;
     font-size: 16px;
   }
 
   .event-promo-field__row .btn {
-    width: 100%;
     min-height: 44px;
     font-size: var(--text-sm);
     letter-spacing: 0.16em;

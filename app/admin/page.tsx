@@ -58,6 +58,9 @@ export default async function AdminOverviewPage() {
         <Link href="/admin/tickets" className="btn btn--ghost">
           All tickets
         </Link>
+        <Link href="/admin/statistics" className="btn btn--ghost">
+          Statistics
+        </Link>
         <Link href="/admin/promo-codes" className="btn btn--ghost">
           Promo codes
         </Link>

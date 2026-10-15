@@ -3,7 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ticketSuccessUrl } from '@/lib/ticket-success-url';
-import { PERSONAL_ID_HTML_PATTERN, PERSONAL_ID_LABEL, PERSONAL_ID_MAX, PERSONAL_ID_MIN } from '@/lib/personal-id';
+import { PERSONAL_ID_HTML_PATTERN, PERSONAL_ID_MAX, PERSONAL_ID_MIN } from '@/lib/personal-id';
+
+function PaidTicketIdNotice() {
+  return (
+    <p className="event-ticket-action__id-notice" role="note">
+      <strong>Bring valid ID or passport to the door — mandatory.</strong> The document must match
+      the number you enter below. <strong>No ID = no entry.</strong> Under 18 is not admitted;{' '}
+      <strong>tickets are not refunded</strong> if entry is refused.
+    </p>
+  );
+}
 
 type HolderDraft = {
   firstName: string;
@@ -227,6 +237,7 @@ export function EventTicketButton({
     return (
       <div className="event-ticket-action">
         <form className="form-stack event-ticket-action__form" onSubmit={handleFormSubmit}>
+          {!isFreeEntry ? <PaidTicketIdNotice /> : null}
           <p className="table-sub" style={{ marginBottom: '0.25rem' }}>
             {holderFormLead ??
               (isFreeEntry
@@ -260,7 +271,9 @@ export function EventTicketButton({
             </label>
             {!isFreeEntry ? (
               <label className="form-field">
-                <span>{PERSONAL_ID_LABEL}</span>
+                <span>
+                  ID or passport number — <strong>required at the door</strong>
+                </span>
                 <input
                   value={holder.personalId}
                   onChange={(e) => updateHolderField('personalId', e.target.value)}
@@ -319,7 +332,10 @@ export function EventTicketButton({
                 onChange={(e) => setConfirmAdult18(e.target.checked)}
                 required
               />
-              <span>I confirm I am 18 years or older (required for passport / non-Georgian ID)</span>
+              <span>
+                I confirm I am <strong>18 years or older</strong> (required for passport /
+                non-Georgian ID)
+              </span>
             </label>
           ) : null}
           {(requireIdAtDoorConfirm || guestCheckout) && !isFreeEntry ? (
@@ -331,8 +347,9 @@ export function EventTicketButton({
                 required
               />
               <span>
-                I will bring the same ID or passport to the door. Entry is 18+ only — without valid
-                ID or if under 18, entry is refused and the ticket is not refunded.
+                I will bring the <strong>same ID or passport</strong> to the door.{' '}
+                <strong>18+ only.</strong> Without valid ID or if under 18, entry is refused and the
+                ticket is <strong>not refunded</strong>.
               </span>
             </label>
           ) : null}
@@ -356,6 +373,7 @@ export function EventTicketButton({
 
   return (
     <div className="event-ticket-action">
+      {!isFreeEntry ? <PaidTicketIdNotice /> : null}
       <button
         type="button"
         className="btn"

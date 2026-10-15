@@ -5,6 +5,7 @@ import {
   endOfEventDayMs,
   TICKET_RETENTION_DAYS_AFTER_EVENT,
 } from '@/lib/ticket-qr-access';
+import { refreshActiveEventStatisticsSnapshots, snapshotStatisticsForSlugs } from '@/lib/event-statistics';
 
 const PURGE_STATUSES: TicketStatus[] = ['VALID', 'USED'];
 const BATCH_SIZE = 500;
@@ -27,6 +28,8 @@ function ticketPastRetention(
 
 /** Delete VALID + USED tickets once event date + retention has passed (Tbilisi). */
 export async function purgeExpiredTickets(now = Date.now()) {
+  await refreshActiveEventStatisticsSnapshots();
+
   const prefilterCutoff = addTbilisiDays(
     tbilisiDateKey(new Date(now)),
     -(TICKET_RETENTION_DAYS_AFTER_EVENT + 1),
@@ -66,6 +69,13 @@ export async function purgeExpiredTickets(now = Date.now()) {
       .map((t) => t.id);
 
     if (idsToDelete.length) {
+      const purgeSlugs = [
+        ...new Set(
+          batch.filter((t) => idsToDelete.includes(t.id)).map((t) => t.productSlug),
+        ),
+      ];
+      await snapshotStatisticsForSlugs(purgeSlugs, true);
+
       const wr = await prisma.walletPassRegistration.deleteMany({
         where: { ticketId: { in: idsToDelete } },
       });

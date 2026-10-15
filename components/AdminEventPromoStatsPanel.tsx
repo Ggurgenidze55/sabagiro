@@ -7,8 +7,8 @@ export function AdminEventPromoStatsPanel({ rows }: { rows: EventPromoStatRow[] 
     <section className="admin-ticket-stats admin-promo-stats" aria-label="Promo code statistics">
       <h2 className="admin-section-title">Promo codes</h2>
       <p className="admin-ticket-stats__lead">
-        Paid checkouts that used a promo code for this event · Tickets = quantity sold · Revenue =
-        amount charged (after discount)
+        All promo codes for this event · Uses = successful payments (DB counter) · Orders / tickets
+        = paid checkouts for this night · Revenue = ₾ charged on event line items (after discount)
       </p>
 
       {rows.length === 0 ? (
@@ -20,6 +20,7 @@ export function AdminEventPromoStatsPanel({ rows }: { rows: EventPromoStatRow[] 
               <tr>
                 <th scope="col">Code</th>
                 <th scope="col">Off</th>
+                <th scope="col">Uses</th>
                 <th scope="col">Tickets sold</th>
                 <th scope="col">Orders</th>
                 <th scope="col">Discount (₾)</th>
@@ -34,6 +35,9 @@ export function AdminEventPromoStatsPanel({ rows }: { rows: EventPromoStatRow[] 
                     {!row.active ? <span className="table-sub"> · off</span> : null}
                   </td>
                   <td>{row.percentOff}%</td>
+                  <td>
+                    {row.maxUses != null ? `${row.usedCount} / ${row.maxUses}` : row.usedCount}
+                  </td>
                   <td className="admin-ticket-stats__accent">{row.ticketsSold}</td>
                   <td>{row.ordersCount}</td>
                   <td>{row.discountGel}</td>

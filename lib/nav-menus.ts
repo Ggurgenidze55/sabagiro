@@ -23,6 +23,7 @@ export const ADMIN_MENU_ITEMS: NavDropdownItem[] = [
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/generate', label: 'Send invitations' },
   { href: '/admin/tickets', label: 'All tickets' },
+  { href: '/admin/statistics', label: 'Statistics' },
   { href: '/admin/promo-codes', label: 'Promo codes' },
 ];
 
@@ -31,7 +32,11 @@ export function getStaffMenuItems(role: Role): NavDropdownItem[] {
   const items: NavDropdownItem[] = [];
 
   if (canCreateEvents(role) || canEditEvents(role)) {
-    items.push({ href: '/admin/events', label: 'Manage events' });
+    items.push(
+      { href: '/admin/events', label: 'Manage events' },
+      { href: '/admin/statistics', label: 'Statistics' },
+      { href: '/admin/promo-codes', label: 'Promo codes' },
+    );
   }
   if (canManageUsers(role)) {
     items.push({ href: '/admin/users', label: 'Users' });
@@ -43,7 +48,6 @@ export function getStaffMenuItems(role: Role): NavDropdownItem[] {
     items.push(
       { href: '/admin/generate', label: 'Send invitations' },
       { href: '/admin/tickets', label: 'All tickets' },
-      { href: '/admin/promo-codes', label: 'Promo codes' },
     );
   }
 

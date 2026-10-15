@@ -229,10 +229,23 @@ export default async function EventPage({ params }: PageProps) {
               {ONLINE_INVITATION_LABEL} — your account includes invitations for this event.
             </p>
           ) : !pastEvent && allowIdOnlyPurchase && (!user || !verifiedPurchaser) ? (
-            <p className="notice-banner notice-banner--inline">
-              {user
-                ? 'This event allows checkout without account verification — enter ID/passport, age, and confirm 18+ when buying.'
-                : 'This event allows buying a ticket without registration — enter your details below (18+ and valid ID at the door required).'}
+            <p className="notice-banner notice-banner--inline event-page__id-notice">
+              {user ? (
+                <>
+                  Checkout without account verification — enter your ID/passport and age below.{' '}
+                  <strong>Valid ID or passport is mandatory at the door (same document).</strong>
+                </>
+              ) : (
+                <>
+                  Buy without registration — fill in your details below.{' '}
+                  <strong>Valid ID or passport is mandatory at the door (same document). 18+ only.</strong>
+                </>
+              )}
+            </p>
+          ) : !pastEvent && !isFreeEntry && user && verifiedPurchaser ? (
+            <p className="notice-banner notice-banner--inline event-page__id-notice">
+              <strong>Bring valid ID or passport to the door</strong> — it must match the ticket
+              holder. 18+ only.
             </p>
           ) : !pastEvent ? (
             <TicketAccessNotice user={user} />
@@ -320,6 +333,7 @@ export default async function EventPage({ params }: PageProps) {
               guestIdOnlyCheckout) ? (
             <EventTicketCheckout
               slug={product.slug}
+              unitPriceGel={product.priceGel ?? 0}
               isFreeEntry={isFreeEntry}
               canInstantFreeTicket={canInstantFreeTicket}
               canGuestFreeTicket={canGuestFreeTicket}

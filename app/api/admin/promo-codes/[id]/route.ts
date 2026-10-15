@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireAdmin } from '@/lib/auth';
+import { requireEventsAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { normalizePromoCodeInput } from '@/lib/promo-codes';
 import { formatValidationError, promoCodeAdminSchema } from '@/lib/validators';
@@ -8,7 +8,7 @@ type RouteContext = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
   try {
-    await requireAdmin();
+    await requireEventsAdmin();
     const body = promoCodeAdminSchema.partial().parse(await request.json());
     const existing = await prisma.promoCode.findUnique({ where: { id: params.id } });
     if (!existing) {
@@ -66,7 +66,7 @@ export async function PATCH(request: Request, { params }: RouteContext) {
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
   try {
-    await requireAdmin();
+    await requireEventsAdmin();
     await prisma.promoCode.delete({ where: { id: params.id } });
     return NextResponse.json({ ok: true });
   } catch (e) {

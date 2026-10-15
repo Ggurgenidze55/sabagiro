@@ -1,22 +1,30 @@
 'use client';
 
 import { useState } from 'react';
+import { discountedUnitPriceGel } from '@/lib/promo-price';
 
 type EventPromoCodeFieldProps = {
   eventSlug: string;
+  /** Current tier ticket price (₾) — used to preview total after discount */
+  unitPriceGel: number;
   onApplied: (code: string | null, percentOff: number | null) => void;
 };
 
-export function EventPromoCodeField({ eventSlug, onApplied }: EventPromoCodeFieldProps) {
+export function EventPromoCodeField({ eventSlug, unitPriceGel, onApplied }: EventPromoCodeFieldProps) {
   const [draft, setDraft] = useState('');
   const [status, setStatus] = useState<'idle' | 'checking' | 'ok' | 'err'>('idle');
   const [message, setMessage] = useState('');
   const [appliedCode, setAppliedCode] = useState<string | null>(null);
+  const [percentOff, setPercentOff] = useState<number | null>(null);
+
+  const finalPriceGel =
+    appliedCode && percentOff != null ? discountedUnitPriceGel(unitPriceGel, percentOff) : null;
 
   async function apply() {
     const code = draft.trim();
     if (!code) {
       setAppliedCode(null);
+      setPercentOff(null);
       onApplied(null, null);
       setStatus('idle');
       setMessage('');
@@ -36,12 +44,14 @@ export function EventPromoCodeField({ eventSlug, onApplied }: EventPromoCodeFiel
         setStatus('err');
         setMessage(data.error || 'Invalid promo code');
         setAppliedCode(null);
+        setPercentOff(null);
         onApplied(null, null);
         return;
       }
       setStatus('ok');
       setAppliedCode(data.code);
-      setMessage(`${data.percentOff}% off this event`);
+      setPercentOff(data.percentOff);
+      setMessage(`${data.percentOff}% off applied`);
       onApplied(data.code, data.percentOff);
     } catch {
       setStatus('err');
@@ -53,6 +63,7 @@ export function EventPromoCodeField({ eventSlug, onApplied }: EventPromoCodeFiel
   function clear() {
     setDraft('');
     setAppliedCode(null);
+    setPercentOff(null);
     setStatus('idle');
     setMessage('');
     onApplied(null, null);
@@ -91,6 +102,15 @@ export function EventPromoCodeField({ eventSlug, onApplied }: EventPromoCodeFiel
       {message ? (
         <p className={`event-promo-field__hint${status === 'err' ? ' event-promo-field__hint--err' : ''}`}>
           {message}
+        </p>
+      ) : null}
+      {finalPriceGel != null && unitPriceGel > 0 ? (
+        <p className="event-promo-field__total" aria-live="polite">
+          <span className="event-promo-field__total-label">You pay</span>{' '}
+          <strong>{finalPriceGel} ₾</strong>
+          {finalPriceGel < unitPriceGel ? (
+            <span className="event-promo-field__total-was"> (was {unitPriceGel} ₾)</span>
+          ) : null}
         </p>
       ) : null}
     </div>

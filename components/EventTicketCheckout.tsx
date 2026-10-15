@@ -6,6 +6,7 @@ import { EventTicketButton } from '@/components/EventTicketButton';
 
 type EventTicketCheckoutProps = {
   slug: string;
+  unitPriceGel: number;
   isFreeEntry: boolean;
   canInstantFreeTicket?: boolean;
   canGuestFreeTicket?: boolean;
@@ -21,6 +22,7 @@ type EventTicketCheckoutProps = {
 export function EventTicketCheckout(props: EventTicketCheckoutProps) {
   const {
     slug,
+    unitPriceGel,
     isFreeEntry,
     canInstantFreeTicket,
     canGuestFreeTicket,
@@ -44,7 +46,13 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
 
   return (
     <div className="event-ticket-checkout">
-      {showPromo ? <EventPromoCodeField eventSlug={slug} onApplied={(code) => setPromoCode(code)} /> : null}
+      {showPromo ? (
+        <EventPromoCodeField
+          eventSlug={slug}
+          unitPriceGel={unitPriceGel}
+          onApplied={(code) => setPromoCode(code)}
+        />
+      ) : null}
       {canInstantFreeTicket ? (
         <EventTicketButton slug={slug} isFreeEntry promoCode={promoCode} />
       ) : canGuestFreeTicket ? (
@@ -69,7 +77,7 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           requireIdAtDoorConfirm
           requireHolderAge
           guestCheckout
-          holderFormLead="Buy without an account — enter your details (18+ and ID at the door required)"
+          holderFormLead="Buy without an account — enter holder details (must match your ID)"
         />
       ) : useIdOnlyPaidCheckout ? (
         <EventTicketButton
@@ -82,7 +90,7 @@ export function EventTicketCheckout(props: EventTicketCheckoutProps) {
           requireAdultConfirm
           requireIdAtDoorConfirm
           requireHolderAge
-          holderFormLead="Ticket holder — ID/passport and 18+ required (no account verification for this event)"
+          holderFormLead="Ticket holder — details must match the ID you bring to the door"
         />
       ) : canGuestPaidTicket ? (
         <EventTicketButton

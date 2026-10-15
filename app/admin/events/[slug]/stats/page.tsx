@@ -70,6 +70,9 @@ export default async function AdminEventStatsPage({ params }: PageProps) {
         {hasTickets ? <AdminTicketStatsPanel stats={stats} title="This event only" /> : null}
         {hasPromoSection ? <AdminEventPromoStatsPanel rows={promoStats} /> : null}
         <div className="cart-actions" style={{ marginTop: '1.5rem' }}>
+          <Link href={`/admin/statistics/${encodeURIComponent(slug)}`} className="btn btn--ghost">
+            Saved statistics
+          </Link>
           <Link href={`/events/${encodeURIComponent(slug)}`} className="btn btn--ghost">
             Public event page
           </Link>

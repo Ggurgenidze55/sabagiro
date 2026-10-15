@@ -19,7 +19,7 @@ export type AdminTicketStats = {
   combined: TicketKindStats;
 };
 
-function emptyKindStats(): TicketKindStats {
+export function emptyKindStats(): TicketKindStats {
   return { total: 0, used: 0, unused: 0, cancelled: 0 };
 }
 

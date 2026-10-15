@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { AdminPromoCodesPanel } from '@/components/AdminPromoCodesPanel';
 import { getSessionUser } from '@/lib/auth';
-import { canUseFullAdminTools, staffDeniedRedirectPath } from '@/lib/staff-roles';
+import { canViewEventsAdmin, staffDeniedRedirectPath } from '@/lib/staff-roles';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,7 @@ export const metadata = { title: 'Promo codes — Admin' };
 
 export default async function AdminPromoCodesPage() {
   const user = await getSessionUser();
-  if (!user || !canUseFullAdminTools(user.role)) redirect(staffDeniedRedirectPath(user?.role));
+  if (!user || !canViewEventsAdmin(user.role)) redirect(staffDeniedRedirectPath(user?.role));
 
   return (
     <div className="centered-page">

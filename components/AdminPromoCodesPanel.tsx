@@ -42,22 +42,25 @@ export function AdminPromoCodesPanel() {
       ]);
       const evData = await evRes.json().catch(() => ({}));
       const promoData = await promoRes.json().catch(() => ({}));
-      if (!evRes.ok) {
-        setError(evData.error || 'Could not load events');
-        return;
-      }
-      if (!promoRes.ok) {
+
+      if (promoRes.ok) {
+        setRows(promoData.promoCodes ?? []);
+      } else {
+        setRows([]);
         setError(promoData.error || 'Could not load promo codes');
-        return;
       }
-      setEvents(
-        (evData.events ?? []).map((e: { slug: string; title: string; published: boolean }) => ({
-          slug: e.slug,
-          title: e.title,
-          published: e.published,
-        })),
-      );
-      setRows(promoData.promoCodes ?? []);
+
+      if (evRes.ok) {
+        setEvents(
+          (evData.events ?? []).map((e: { slug: string; title: string; published: boolean }) => ({
+            slug: e.slug,
+            title: e.title,
+            published: e.published,
+          })),
+        );
+      } else if (promoRes.ok) {
+        setError((prev) => prev || evData.error || 'Could not load events for dropdown');
+      }
     } catch {
       setError('Network error');
     }
@@ -138,8 +141,8 @@ export function AdminPromoCodesPanel() {
 
       <section className="admin-promo__section">
         <h2 className="section-title">New promo code</h2>
-        <form className="form-stack" onSubmit={createPromo}>
-          <label className="form-field">
+        <form className="form-stack admin-promo__create-form" onSubmit={createPromo}>
+          <label className="form-field admin-promo__field-code">
             <span>Code</span>
             <input
               value={form.code}
@@ -148,8 +151,8 @@ export function AdminPromoCodesPanel() {
               placeholder="SUMMER20"
             />
           </label>
-          <div className="form-row">
-            <label className="form-field">
+          <div className="form-row admin-promo__create-row">
+            <label className="form-field admin-promo__field-discount">
               <span>Discount %</span>
               <IntInput
                 value={form.percentOff}
@@ -158,7 +161,7 @@ export function AdminPromoCodesPanel() {
                 max={99}
               />
             </label>
-            <label className="form-field">
+            <label className="form-field admin-promo__field-event">
               <span>Event</span>
               <select
                 value={form.eventSlug}
@@ -208,8 +211,12 @@ export function AdminPromoCodesPanel() {
       </section>
 
       <section className="admin-promo__section">
-        <h2 className="section-title">All promo codes</h2>
+        <h2 className="section-title">All promo codes ({rows.length})</h2>
+        <p className="table-sub admin-promo__list-lead">
+          Full list for every event — per-event sales breakdown is on each event&apos;s Stats page.
+        </p>
         <ResponsiveTable
+          empty={<p className="cart-empty">No promo codes yet.</p>}
           columns={[
             { id: 'code', header: 'Code', mobileSummary: true },
             { id: 'event', header: 'Event', mobileSummary: true },
