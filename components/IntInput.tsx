@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 type IntInputProps = {
   value: number;
   onChange: (value: number) => void;
@@ -10,7 +12,12 @@ type IntInputProps = {
   className?: string;
 };
 
-/** Integer field without leading-zero quirks of type="number" (0 + 6 → 06). */
+function formatDisplay(value: number, min?: number): string {
+  if (value === 0 && (min === undefined || min <= 0)) return '';
+  return String(value);
+}
+
+/** Integer text field — allows clearing while typing; clamps on blur. */
 export function IntInput({
   value,
   onChange,
@@ -20,20 +27,48 @@ export function IntInput({
   required,
   className,
 }: IntInputProps) {
-  const showEmpty = value === 0 && (min === undefined || min <= 0);
+  const [focused, setFocused] = useState(false);
+  const [draft, setDraft] = useState(() => formatDisplay(value, min));
+
+  useEffect(() => {
+    if (!focused) {
+      setDraft(formatDisplay(value, min));
+    }
+  }, [value, min, focused]);
+
+  function handleFocus() {
+    setFocused(true);
+    setDraft(formatDisplay(value, min));
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const digits = e.target.value.replace(/\D/g, '');
-    if (digits === '') {
-      onChange(min !== undefined && min > 0 ? min : 0);
-      return;
-    }
+    setDraft(digits);
+    if (digits === '') return;
     let num = parseInt(digits, 10);
     if (Number.isNaN(num)) return;
-    if (min !== undefined) num = Math.max(min, num);
     if (max !== undefined) num = Math.min(max, num);
     onChange(num);
   }
+
+  function handleBlur() {
+    setFocused(false);
+    const digits = draft.replace(/\D/g, '');
+    if (digits === '') {
+      const fallback = min !== undefined && min > 0 ? min : 0;
+      onChange(fallback);
+      setDraft(formatDisplay(fallback, min));
+      return;
+    }
+    let num = parseInt(digits, 10);
+    if (Number.isNaN(num)) num = min !== undefined && min > 0 ? min : 0;
+    if (min !== undefined) num = Math.max(min, num);
+    if (max !== undefined) num = Math.min(max, num);
+    onChange(num);
+    setDraft(formatDisplay(num, min));
+  }
+
+  const showEmpty = !focused && value === 0 && (min === undefined || min <= 0);
 
   return (
     <input
@@ -41,10 +76,12 @@ export function IntInput({
       inputMode="numeric"
       pattern="[0-9]*"
       className={className}
-      value={showEmpty ? '' : String(value)}
+      value={focused ? draft : showEmpty ? '' : String(value)}
+      onFocus={handleFocus}
       onChange={handleChange}
+      onBlur={handleBlur}
       disabled={disabled}
-      required={required && !showEmpty}
+      required={required && !showEmpty && draft !== ''}
     />
   );
 }

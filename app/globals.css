@@ -3247,25 +3247,40 @@ body.nav-lock {
 }
 
 .event-promo-field__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
   text-transform: none;
   letter-spacing: 0.1em;
 }
 
-.event-promo-field__label > span {
+.event-promo-field__label-text {
   text-transform: none;
   letter-spacing: 0.12em;
   font-size: var(--text-xs);
+  color: rgba(232, 224, 216, 0.75);
 }
 
 .event-promo-field__row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
   align-items: stretch;
+  width: 100%;
 }
 
-.event-promo-field__row input {
-  flex: 1;
+.event-promo-field__input {
+  width: 100%;
   min-width: 0;
+  padding: 0.65rem 0.75rem;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(176, 168, 154, 0.3);
+  color: var(--concrete-light);
+  font-family: var(--font-mono, var(--font-mono-fallback));
+  font-size: var(--text-md);
+  text-transform: none;
+  color-scheme: dark;
 }
 
 .event-promo-field__row .btn {
@@ -3813,6 +3828,11 @@ body.nav-lock {
     width: 100%;
   }
 
+  .event-page__actions > .event-ticket-checkout {
+    width: 100%;
+    order: -1;
+  }
+
   .event-ticket-checkout {
     width: 100%;
     max-width: none;
@@ -3820,15 +3840,17 @@ body.nav-lock {
 
   .event-promo-field {
     max-width: none;
+    width: 100%;
   }
 
-  .event-promo-field__row input {
+  .event-promo-field__input {
     min-height: 44px;
     font-size: 16px;
   }
 
   .event-promo-field__row .btn {
     min-height: 44px;
+    min-width: 5.25rem;
     font-size: var(--text-sm);
     letter-spacing: 0.16em;
   }

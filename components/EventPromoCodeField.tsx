@@ -71,10 +71,11 @@ export function EventPromoCodeField({ eventSlug, unitPriceGel, onApplied }: Even
 
   return (
     <div className="event-promo-field">
-      <label className="form-field event-promo-field__label">
-        <span>Promo code</span>
+      <div className="event-promo-field__label">
+        <span className="event-promo-field__label-text">Promo code</span>
         <div className="event-promo-field__row">
           <input
+            className="event-promo-field__input"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Enter code"
@@ -98,7 +99,7 @@ export function EventPromoCodeField({ eventSlug, unitPriceGel, onApplied }: Even
             </button>
           )}
         </div>
-      </label>
+      </div>
       {message ? (
         <p className={`event-promo-field__hint${status === 'err' ? ' event-promo-field__hint--err' : ''}`}>
           {message}

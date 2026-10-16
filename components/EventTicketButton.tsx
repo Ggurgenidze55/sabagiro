@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ticketSuccessUrl } from '@/lib/ticket-success-url';
+import { DigitsInput } from '@/components/DigitsInput';
 import { PERSONAL_ID_HTML_PATTERN, PERSONAL_ID_MAX, PERSONAL_ID_MIN } from '@/lib/personal-id';
 
 function PaidTicketIdNotice() {
@@ -312,13 +313,12 @@ export function EventTicketButton({
             {!isFreeEntry && requireHolderAge ? (
               <label className="form-field">
                 <span>Age</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
+                <DigitsInput
+                  value={holder.age}
+                  onChange={(age) => updateHolderField('age', age)}
                   min={18}
                   max={120}
-                  value={holder.age}
-                  onChange={(e) => updateHolderField('age', e.target.value)}
+                  maxLength={3}
                   required
                 />
               </label>
