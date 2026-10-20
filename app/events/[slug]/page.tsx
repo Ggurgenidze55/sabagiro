@@ -141,12 +141,22 @@ export default async function EventPage({ params }: PageProps) {
     !cannotBuyMore &&
     (product.ticketsRemaining ?? 0) > 0 &&
     existingPurchased > 0;
+  // ID-only guest form is a fallback whenever no account checkout path is active.
+  // Do not require !user — a sticky guest session that already owns a ticket used
+  // to hide the form entirely (price visible, nothing to fill in).
+  const hasAccountPaidOrFreeCheckout =
+    canInstantFreeTicket ||
+    canGuestFreeTicket ||
+    useInstantPaidCheckout ||
+    useIdOnlyPaidCheckout ||
+    canGuestPaidTicket ||
+    useIdOnlyGuestPaid;
   const guestIdOnlyCheckout =
-    !user &&
     allowIdOnlyPurchase &&
     !isFreeEntry &&
     !pastEvent &&
-    (product.ticketsRemaining ?? 0) > 0;
+    (product.ticketsRemaining ?? 0) > 0 &&
+    !hasAccountPaidOrFreeCheckout;
   const freeEventNotice = isFreeEntry ? getFreeTicketEventNotice(user, eventMeta) : null;
   const quotaNotice = getFreeTicketQuotaNotice(user, eventMeta, freeTicketsRemaining);
   const aboutText = getEventPublicDescription({
@@ -275,14 +285,14 @@ export default async function EventPage({ params }: PageProps) {
             </p>
           ) : null}
 
-          {!pastEvent &&
-          !canAccessFree &&
-          user &&
-          canPurchaseTickets(user) &&
-          cannotBuyMore &&
-          showLimitDetails ? (
+          {!pastEvent && !canAccessFree && user && cannotBuyMore ? (
             <p className="notice-banner notice-banner--inline">
-              Purchase limit reached for this event ({purchaseLimit}).
+              {showLimitDetails
+                ? `Purchase limit reached for this event (${purchaseLimit}).`
+                : 'This account already has a paid ticket for this event.'}
+              {allowIdOnlyPurchase ? (
+                <> Use the form below to buy for another person with their ID/email.</>
+              ) : null}
               <Link href="/account" className="btn btn--ghost event-page__notice-btn">
                 My tickets
               </Link>
