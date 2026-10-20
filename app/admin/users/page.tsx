@@ -20,6 +20,7 @@ export default async function AdminUsersPage() {
 
   const [users, artists] = await Promise.all([
     prisma.user.findMany({
+      where: { guestCheckoutOnly: false },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: { select: { tickets: true } },

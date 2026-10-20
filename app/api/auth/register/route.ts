@@ -8,26 +8,33 @@ import { registerSchema } from '@/lib/validators';
 export async function POST(request: Request) {
   try {
     const body = registerSchema.parse(await request.json());
-    const exists = await prisma.user.findUnique({ where: { email: body.email } });
-    if (exists) {
+    const email = body.email.trim().toLowerCase();
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists && !exists.guestCheckoutOnly) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
 
-    const user = await prisma.user.create({
-      data: {
-        email: body.email,
-        phone: body.phone,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        personalId: body.personalId,
-        facebookUrl: body.facebookUrl ?? '',
-        instagramUrl: body.instagramUrl ?? '',
-        linkedinUrl: body.linkedinUrl ?? '',
-        passwordHash: await hashPassword(body.password),
-        role: 'USER',
-        verificationStatus: 'PENDING',
-      },
-    });
+    const registerData = {
+      email,
+      phone: body.phone,
+      firstName: body.firstName,
+      lastName: body.lastName,
+      personalId: body.personalId,
+      facebookUrl: body.facebookUrl ?? '',
+      instagramUrl: body.instagramUrl ?? '',
+      linkedinUrl: body.linkedinUrl ?? '',
+      passwordHash: await hashPassword(body.password),
+      role: 'USER' as const,
+      verificationStatus: 'PENDING' as const,
+      guestCheckoutOnly: false,
+    };
+
+    const user = exists
+      ? await prisma.user.update({
+          where: { id: exists.id },
+          data: registerData,
+        })
+      : await prisma.user.create({ data: registerData });
 
     const emailResult = await sendWelcomeRegistrationEmail({
       to: user.email,

@@ -62,6 +62,9 @@ function mapApiError(data: { error?: string; code?: string }): string {
   if (data.code === 'ALREADY_OWNED' || data.code === 'TICKET_LIMIT') {
     return data.error || 'Ticket limit reached for this event.';
   }
+  if (data.code === 'GUEST_EMAIL_HAS_ACCOUNT') {
+    return data.error || 'Log in with your account to buy tickets.';
+  }
   if (data.code === 'INVALID_PROMO') {
     return data.error || 'Promo code is not valid for this event.';
   }

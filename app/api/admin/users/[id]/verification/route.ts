@@ -23,6 +23,9 @@ export async function PATCH(request: Request, { params }: Params) {
     const { status } = bodySchema.parse(await request.json());
 
     const previous = await prisma.user.findUniqueOrThrow({ where: { id: params.id } });
+    if (previous.guestCheckoutOnly) {
+      return NextResponse.json({ error: 'Not a registered member account' }, { status: 400 });
+    }
     if (!canUserManagerActOnTarget(actor.role, previous.role)) {
       return NextResponse.json({ error: 'Cannot change verification for this account' }, { status: 403 });
     }

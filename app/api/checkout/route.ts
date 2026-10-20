@@ -196,6 +196,15 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+    if (message === 'GUEST_EMAIL_HAS_ACCOUNT') {
+      return NextResponse.json(
+        {
+          error: 'This email has a Sabagiro account — log in to buy tickets.',
+          code: 'GUEST_EMAIL_HAS_ACCOUNT',
+        },
+        { status: 409 },
+      );
+    }
     if (message === 'FLITT_NO_REDIRECT') {
       return NextResponse.json(
         { error: 'Payment provider could not start checkout. Try again later.' },
