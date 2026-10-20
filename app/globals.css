@@ -3242,14 +3242,14 @@ body.nav-lock {
 
 .event-promo-field {
   width: 100%;
-  max-width: 22rem;
-  margin-bottom: 0.75rem;
+  max-width: 28rem;
+  margin-bottom: 1rem;
 }
 
 .event-promo-field__label {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.45rem;
   width: 100%;
   text-transform: none;
   letter-spacing: 0.1em;
@@ -3257,15 +3257,15 @@ body.nav-lock {
 
 .event-promo-field__label-text {
   text-transform: none;
-  letter-spacing: 0.12em;
-  font-size: var(--text-xs);
-  color: rgba(232, 224, 216, 0.75);
+  letter-spacing: 0.14em;
+  font-size: var(--text-sm);
+  color: rgba(232, 224, 216, 0.85);
 }
 
 .event-promo-field__row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.5rem;
+  gap: 0.65rem;
   align-items: stretch;
   width: 100%;
 }
@@ -3273,28 +3273,42 @@ body.nav-lock {
 .event-promo-field__input {
   width: 100%;
   min-width: 0;
-  padding: 0.65rem 0.75rem;
+  min-height: 3.1rem;
+  padding: 0.85rem 1rem;
   background: rgba(10, 10, 10, 0.9);
-  border: 1px solid rgba(176, 168, 154, 0.3);
+  border: 1px solid rgba(176, 168, 154, 0.45);
   color: var(--concrete-light);
   font-family: var(--font-mono, var(--font-mono-fallback));
-  font-size: var(--text-md);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
   text-transform: none;
   color-scheme: dark;
 }
 
+.event-promo-field__input:focus {
+  outline: none;
+  border-color: rgba(249, 193, 8, 0.65);
+  box-shadow: 0 0 0 1px rgba(249, 193, 8, 0.25);
+}
+
+.event-promo-field__input::placeholder {
+  color: rgba(232, 224, 216, 0.4);
+  letter-spacing: 0.06em;
+}
+
 .event-promo-field__row .btn {
   flex-shrink: 0;
-  padding: 0.65rem 0.85rem;
-  letter-spacing: 0.14em;
-  font-size: var(--text-xs);
-  min-height: 2.65rem;
+  padding: 0.85rem 1.15rem;
+  letter-spacing: 0.16em;
+  font-size: var(--text-sm);
+  min-height: 3.1rem;
+  min-width: 6rem;
   white-space: nowrap;
 }
 
 .event-promo-field__hint {
-  margin: 0.35rem 0 0;
-  font-size: var(--text-xs);
+  margin: 0.45rem 0 0;
+  font-size: var(--text-sm);
   letter-spacing: 0.1em;
   color: var(--acid);
 }
@@ -3304,7 +3318,7 @@ body.nav-lock {
 }
 
 .event-promo-field__total {
-  margin: 0.5rem 0 0;
+  margin: 0.65rem 0 0;
   font-size: var(--text-sm);
   letter-spacing: 0.1em;
   color: var(--concrete-light);
@@ -3319,14 +3333,14 @@ body.nav-lock {
 
 .event-promo-field__total strong {
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   color: var(--acid);
   font-weight: 400;
 }
 
 .event-promo-field__total-was {
-  font-size: var(--text-xs);
-  color: rgba(232, 224, 216, 0.45);
+  font-size: var(--text-sm);
+  color: rgba(232, 224, 216, 0.5);
 }
 
 .event-ticket-checkout {
@@ -3334,7 +3348,7 @@ body.nav-lock {
   flex-direction: column;
   align-items: stretch;
   width: 100%;
-  max-width: 22rem;
+  max-width: 28rem;
 }
 
 .event-ticket-action__adult {
@@ -3841,39 +3855,24 @@ body.nav-lock {
   .event-promo-field {
     max-width: none;
     width: 100%;
-    margin-bottom: 1rem;
-  }
-
-  .event-promo-field__label-text {
-    font-size: var(--text-sm);
-    letter-spacing: 0.14em;
-    margin-bottom: 0.15rem;
   }
 
   .event-promo-field__row {
     grid-template-columns: 1fr;
-    gap: 0.6rem;
+    gap: 0.65rem;
   }
 
   .event-promo-field__input {
     min-height: 3.35rem;
     font-size: 1.125rem;
-    padding: 0.9rem 1rem;
-    letter-spacing: 0.08em;
-    border-width: 1px;
   }
 
   .event-promo-field__row .btn {
     width: 100%;
-    min-height: 3rem;
     min-width: 0;
+    min-height: 3.1rem;
     font-size: var(--text-md);
     letter-spacing: 0.18em;
-    padding: 0.85rem 1rem;
-  }
-
-  .event-promo-field__total strong {
-    font-size: 1.5rem;
   }
 
   .event-ticket-checkout .event-ticket-action > .btn,
