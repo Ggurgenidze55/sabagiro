@@ -188,6 +188,8 @@ export const checkoutSchema = z.object({
   promoCode: z.string().trim().min(2).max(40).optional(),
   confirmAdult18: z.boolean().optional(),
   confirmIdAtDoor: z.boolean().optional(),
+  /** Guest ID-only checkout — bind order to holder email, ignore sticky session. */
+  guestCheckout: z.boolean().optional(),
 });
 
 export const promoCodeAdminSchema = z.object({

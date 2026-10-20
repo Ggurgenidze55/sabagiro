@@ -225,6 +225,7 @@ export function EventTicketButton({
           ...(promoCode ? { promoCode } : {}),
           ...(requireAdultConfirm || guestCheckout ? { confirmAdult18 } : {}),
           ...(requireIdAtDoorConfirm || guestCheckout ? { confirmIdAtDoor } : {}),
+          ...(guestCheckout ? { guestCheckout: true } : {}),
         });
       }
     } catch {

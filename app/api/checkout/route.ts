@@ -16,30 +16,67 @@ import { checkoutSchema } from '@/lib/validators';
 
 export async function POST(request: Request) {
   let purchaseLimit = 1;
-  let showLimitDetails = false;
 
   try {
     const parsed = checkoutSchema.parse(await request.json());
-    const { items, promoCode, confirmAdult18, confirmIdAtDoor } = parsed;
+    const { items, promoCode, confirmAdult18, confirmIdAtDoor, guestCheckout } = parsed;
 
     const session = await getSessionUser();
     let user;
     let forceIdOnlyCheckout = false;
 
-    if (session) {
+    const slug = items[0]?.slug;
+    const holder = items[0]?.holders?.[0];
+    const eventRow = slug
+      ? await prisma.clubEvent.findFirst({
+          where: { slug },
+          select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
+        })
+      : null;
+    const idOnlyEvent = eventAllowsUnverifiedIdPurchase(eventRow);
+
+    // Guest ID-only form must bind the order to the holder email — not a leftover
+    // session from a previous guest attempt (same browser, different email).
+    if (guestCheckout || (!session && idOnlyEvent && holder)) {
+      if (items.length !== 1 || items[0]!.qty !== 1) {
+        return NextResponse.json(
+          { error: 'Guest checkout supports one ticket at a time.', code: 'GUEST_CHECKOUT_INVALID' },
+          { status: 400 },
+        );
+      }
+      if (!idOnlyEvent) {
+        return NextResponse.json(
+          {
+            error: 'Log in or register to buy tickets for this event.',
+            code: 'LOGIN_REQUIRED',
+          },
+          { status: 401 },
+        );
+      }
+      if (!holder) {
+        return NextResponse.json(
+          { error: 'Enter ticket holder details.', code: 'HOLDER_REQUIRED' },
+          { status: 400 },
+        );
+      }
+      if (!confirmAdult18 || !confirmIdAtDoor) {
+        return NextResponse.json(
+          {
+            error: 'Confirm age 18+ and that you will bring ID to the door.',
+            code: 'ID_POLICY_REQUIRED',
+          },
+          { status: 400 },
+        );
+      }
+      user = await findOrCreateUserForGuestCheckout(holder);
+      forceIdOnlyCheckout = true;
+      purchaseLimit = getTicketLimitPerEvent(user);
+    } else if (session) {
       user = await prisma.user.findUniqueOrThrow({ where: { id: session.id } });
       purchaseLimit = getTicketLimitPerEvent(user);
-      showLimitDetails = user.freeTicketsEnabled;
 
       if (!canPurchaseTickets(user)) {
-        const slug = items[0]?.slug;
-        const eventRow = slug
-          ? await prisma.clubEvent.findFirst({
-              where: { slug },
-              select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
-            })
-          : null;
-        if (!eventAllowsUnverifiedIdPurchase(eventRow)) {
+        if (!idOnlyEvent) {
           return NextResponse.json(
             {
               error:
@@ -59,54 +96,28 @@ export async function POST(request: Request) {
             { status: 400 },
           );
         }
+        forceIdOnlyCheckout = hasHolderDetails;
       }
     } else {
-      if (items.length !== 1 || items[0]!.qty !== 1) {
-        return NextResponse.json(
-          { error: 'Guest checkout supports one ticket at a time.', code: 'GUEST_CHECKOUT_INVALID' },
-          { status: 400 },
-        );
-      }
-      const slug = items[0]!.slug;
-      const eventRow = await prisma.clubEvent.findFirst({
-        where: { slug },
-        select: { allowUnverifiedIdPurchase: true, isFreeEntry: true },
-      });
-      if (!eventAllowsUnverifiedIdPurchase(eventRow)) {
-        return NextResponse.json(
-          {
-            error: 'Log in or register to buy tickets for this event.',
-            code: 'LOGIN_REQUIRED',
-          },
-          { status: 401 },
-        );
-      }
-      const holder = items[0]!.holders?.[0];
-      if (!holder) {
-        return NextResponse.json(
-          { error: 'Enter ticket holder details.', code: 'HOLDER_REQUIRED' },
-          { status: 400 },
-        );
-      }
-      if (!confirmAdult18 || !confirmIdAtDoor) {
-        return NextResponse.json(
-          {
-            error: 'Confirm age 18+ and that you will bring ID to the door.',
-            code: 'ID_POLICY_REQUIRED',
-          },
-          { status: 400 },
-        );
-      }
-      user = await findOrCreateUserForGuestCheckout(holder);
-      forceIdOnlyCheckout = true;
-      // So /payment/return can poll order status and ticket-success works after Flitt.
-      await setSessionCookie(toSessionUser(user));
+      return NextResponse.json(
+        {
+          error: 'Log in or register to buy tickets for this event.',
+          code: 'LOGIN_REQUIRED',
+        },
+        { status: 401 },
+      );
     }
 
     const order = await createPendingOrder(user, items, promoCode, confirmAdult18, {
       forceIdOnlyCheckout,
     });
     const payment = await startPaymentForOrder(order);
+
+    // Set session after the order is created so a failed limit check does not
+    // stick the browser to an account that already owns a ticket.
+    if (forceIdOnlyCheckout || guestCheckout) {
+      await setSessionCookie(toSessionUser(user));
+    }
 
     return NextResponse.json({
       ok: true,
@@ -178,7 +189,10 @@ export async function POST(request: Request) {
     }
     if (message === 'PROMO_ZERO_TOTAL') {
       return NextResponse.json(
-        { error: 'Discount would make the total zero — use a lower percentage.', code: 'PROMO_ZERO_TOTAL' },
+        {
+          error: 'Discount would make the total zero — use a lower percentage.',
+          code: 'PROMO_ZERO_TOTAL',
+        },
         { status: 400 },
       );
     }
@@ -193,12 +207,8 @@ export async function POST(request: Request) {
         {
           error:
             message === 'ALREADY_OWNED'
-              ? showLimitDetails
-                ? ticketAlreadyOwnedMessage(purchaseLimit)
-                : 'Ticket purchase is currently unavailable. Please contact support.'
-              : showLimitDetails
-                ? ticketLimitMessage(purchaseLimit)
-                : 'Ticket quantity could not be processed. Please contact support.',
+              ? ticketAlreadyOwnedMessage(purchaseLimit)
+              : ticketLimitMessage(purchaseLimit),
           code: message,
         },
         { status: message === 'ALREADY_OWNED' ? 409 : 400 },
