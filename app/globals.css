@@ -3841,18 +3841,39 @@ body.nav-lock {
   .event-promo-field {
     max-width: none;
     width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .event-promo-field__label-text {
+    font-size: var(--text-sm);
+    letter-spacing: 0.14em;
+    margin-bottom: 0.15rem;
+  }
+
+  .event-promo-field__row {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
   }
 
   .event-promo-field__input {
-    min-height: 44px;
-    font-size: 16px;
+    min-height: 3.35rem;
+    font-size: 1.125rem;
+    padding: 0.9rem 1rem;
+    letter-spacing: 0.08em;
+    border-width: 1px;
   }
 
   .event-promo-field__row .btn {
-    min-height: 44px;
-    min-width: 5.25rem;
-    font-size: var(--text-sm);
-    letter-spacing: 0.16em;
+    width: 100%;
+    min-height: 3rem;
+    min-width: 0;
+    font-size: var(--text-md);
+    letter-spacing: 0.18em;
+    padding: 0.85rem 1rem;
+  }
+
+  .event-promo-field__total strong {
+    font-size: 1.5rem;
   }
 
   .event-ticket-checkout .event-ticket-action > .btn,
