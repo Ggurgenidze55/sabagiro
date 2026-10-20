@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getSessionUser } from '@/lib/auth';
+import { getSessionUser, setSessionCookie, toSessionUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { findOrCreateUserForGuestCheckout } from '@/lib/guest-checkout-user';
 import { createPendingOrder } from '@/lib/payments/create-order';
@@ -99,6 +99,8 @@ export async function POST(request: Request) {
       }
       user = await findOrCreateUserForGuestCheckout(holder);
       forceIdOnlyCheckout = true;
+      // So /payment/return can poll order status and ticket-success works after Flitt.
+      await setSessionCookie(toSessionUser(user));
     }
 
     const order = await createPendingOrder(user, items, promoCode, confirmAdult18, {

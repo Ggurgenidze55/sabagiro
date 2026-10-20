@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server';
+import { handleFlittCallback } from '@/lib/payments/complete-payment';
 import { buildPaymentReturnUrl } from '@/lib/payments/config';
 import { siteUrl } from '@/lib/site-url';
-import { flittStatusToOutcome, parseFlittPayload } from '@/lib/payments/flitt/callback';
+import {
+  flittStatusToOutcome,
+  parseFlittPayload,
+  verifyFlittCallback,
+} from '@/lib/payments/flitt/callback';
 
 export const runtime = 'nodejs';
 
-/** Flitt POST to response_url — redirect browser to polling page. */
+/** Flitt POST to response_url — fulfill when possible, then redirect to polling page. */
 export async function POST(request: Request) {
   const url = new URL(request.url);
   const orderIdFromQuery = url.searchParams.get('orderId') ?? '';
@@ -22,6 +27,18 @@ export async function POST(request: Request) {
 
   const orderId = String(payload.order_id || orderIdFromQuery || '');
   const returnUrl = new URL(orderId ? buildPaymentReturnUrl(orderId) : siteUrl('/payment/return'));
+
+  // Browser return often carries the same signed fields as the server callback —
+  // fulfill here so tickets are issued even if the webhook is delayed or the
+  // customer has no session yet (guest checkout).
+  const verified = verifyFlittCallback({ payload });
+  if (verified.valid) {
+    try {
+      await handleFlittCallback(payload);
+    } catch {
+      // Still redirect — /payment/return will sync via status API.
+    }
+  }
 
   const outcome = flittStatusToOutcome(String(payload.order_status || ''));
   if (outcome === 'failed') {

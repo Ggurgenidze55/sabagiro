@@ -4,11 +4,12 @@ Sabagiro uses [Flitt](https://docs.flitt.com/) hosted checkout (`POST /api/check
 
 ## Flow
 
-1. Cart → `POST /api/checkout` → pending order
+1. Cart / event → `POST /api/checkout` → pending order (guest checkout also sets a session cookie)
 2. Server calls Flitt → `checkout_url`
 3. Customer pays on Flitt page
-4. Flitt → `POST /api/webhooks/flitt` (server callback)
-5. Flitt → `POST /api/payment/flitt-return` → redirect → `/payment/return?orderId=…`
+4. Flitt → `POST /api/webhooks/flitt` (server callback) **and/or**
+5. Flitt → `POST /api/payment/flitt-return` (browser return — also fulfills when signature is valid) → `/payment/return?orderId=…`
+6. Return page polls `GET /api/payment/status?orderId=…` (no login required) until `PAID` / failed
 
 ## Vercel env (Production)
 
