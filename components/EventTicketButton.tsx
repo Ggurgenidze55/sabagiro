@@ -333,8 +333,7 @@ export function EventTicketButton({
                 required
               />
               <span>
-                I confirm I am <strong>18 years or older</strong> (required for passport /
-                non-Georgian ID)
+                I confirm I am <strong>18 years or older</strong>
               </span>
             </label>
           ) : null}
