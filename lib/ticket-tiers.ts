@@ -12,10 +12,12 @@ export type TierAvailability = {
   remaining: number;
 };
 
+/** Paid tier capacity — invitations / admin comps do not consume checkout tiers. */
 export async function countSoldTicketsForEvent(eventSlug: string) {
   return prisma.ticket.count({
     where: {
       productSlug: eventSlug,
+      source: 'PURCHASE',
       status: { in: [...ACTIVE_TICKET_STATUSES] },
     },
   });
