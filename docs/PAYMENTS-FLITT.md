@@ -50,6 +50,17 @@ Test cards: see [Flitt testing](https://docs.flitt.com/api/testing/).
 
 Prices in Sabagiro are whole GEL (e.g. `45`). Flitt API uses **minor units** (tetri): `45 GEL → 4500`.
 
+## Refunds
+
+Flitt refunds are done in the Flitt merchant portal (they do **not** auto-cancel Sabagiro tickets).
+
+After you refund in Flitt:
+
+1. Open **Admin → Tickets**
+2. Find the ticket → **Cancel / refund**
+3. Status becomes `CANCELLED` — door QR / wallet will not admit entry
+4. That purchase slot is freed (buyer can purchase again if needed)
+
 ## Removed
 
 TBC TPay integration removed. Old `Payment.provider = TBC` rows remain in DB for history.

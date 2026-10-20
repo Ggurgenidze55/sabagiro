@@ -33,8 +33,8 @@ export default async function AdminTicketsPage() {
         {totalCount > tickets.length
           ? ` · showing newest ${tickets.length} (contact dev to raise limit)`
           : ''}
-        . Tickets 4+ days after event are auto-deleted. Event totals:{' '}
-        <Link href="/admin/events">Events → Stats</Link>.
+        . After a Flitt refund, cancel the ticket here so door QR is void. Tickets 4+ days after
+        event are auto-deleted. Event totals: <Link href="/admin/events">Events → Stats</Link>.
       </p>
       <SoldTicketsTable
         totalCount={totalCount}
